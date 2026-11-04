@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 5 — Claude for Coding, Technical Work & Claude Code</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f4f6f9;--surface:#fff;--border:#dde3eb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#7b52e8;--purple-lt:#f0ecfd;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --orange:#f97316;--orange-lt:#fff3ec;--orange-dk:#c2580a;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);--shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#0d1117 0%,#1c1f2e 50%,#c2580a 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(249,115,22,.2)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fed7aa;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#fed7aa;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#fdba74;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--orange),var(--teal))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--orange-lt);color:var(--orange)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:22px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#0d1117;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#161b22;border-bottom:1px solid #30363d}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#fdba74}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#e6edf3;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* CODE BLOCK */
+.code-block{background:#0d1117;border:1px solid #30363d;border-radius:var(--radius);overflow:hidden;margin:12px 0}
+.cb-head{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#161b22;border-bottom:1px solid #30363d}
+.cb-lang{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--orange)}
+.code-block pre{font-family:var(--font-mono);font-size:12px;line-height:1.6;padding:12px 14px;color:#e6edf3;white-space:pre-wrap;word-break:break-word;margin:0;overflow-x:auto}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--orange);border-bottom-color:var(--orange)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--orange-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--orange);color:var(--orange-dk)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+.acc-body ul{padding-left:16px;margin:6px 0}
+.acc-body li{padding:2px 0;font-size:13px}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-warn{background:var(--amber-lt);border-color:#f5d07a}.c-warn .bd strong{color:var(--amber)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+.c-orange{background:var(--orange-lt);border-color:#fdba74}.c-orange .bd strong{color:var(--orange-dk)}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+
+/* STEP FLOW */
+.step-flow{display:flex;flex-direction:column;gap:0;margin:14px 0}
+.step-item{display:flex;gap:0;align-items:stretch}
+.step-connector{display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0}
+.step-num{min-width:28px;height:28px;background:var(--orange);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.step-line{width:2px;flex:1;background:var(--border);min-height:12px}
+.step-item:last-child .step-line{display:none}
+.step-content{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin:0 0 8px 6px;flex:1}
+.step-content h5{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.step-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* CARD GRID */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;box-shadow:var(--shadow)}
+.info-card .cicon{font-size:24px;margin-bottom:7px}
+.info-card h5{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.info-card p{font-size:12px;margin:0;color:var(--ink-muted)}
+
+/* EXERCISE CARDS */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-write  {background:linear-gradient(135deg,var(--orange-lt),#fff8f2);border-color:#fdba74}
+.ex-debug  {background:linear-gradient(135deg,var(--red-lt),#fff5f5);border-color:#f0aaaa}
+.ex-refactor{background:linear-gradient(135deg,var(--purple-lt),#f5f2ff);border-color:#c4b2f5}
+.ex-cc     {background:linear-gradient(135deg,var(--teal-lt),#e8f9fc);border-color:#67d5eb}
+.ex-mcp    {background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border-color:#9fe8cc}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--orange)}
+.ex-debug   .ex-label{color:var(--red)}
+.ex-refactor .ex-label{color:var(--purple)}
+.ex-cc      .ex-label{color:var(--teal)}
+.ex-mcp     .ex-label{color:var(--green)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--orange)}
+.ex-debug   .ex-steps li::before{color:var(--red)}
+.ex-refactor .ex-steps li::before{color:var(--purple)}
+.ex-cc      .ex-steps li::before{color:var(--teal)}
+.ex-mcp     .ex-steps li::before{color:var(--green)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--orange);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:var(--orange-dk)}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #fdba74;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--orange-lt),#fff8f2);border:2px solid #fdba74;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--orange-dk);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--orange)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f8f9fc}
+.tbl tr:hover td{background:var(--orange-lt)}
+
+/* HIGHLIGHT */
+.hl-box{background:var(--orange-lt);border-left:4px solid var(--orange);border-radius:var(--radius-sm);padding:14px 16px;margin:12px 0}
+.hl-box p{margin:0;font-size:14px}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--orange)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--orange);background:var(--orange-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--orange)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--orange);color:#fff}.nav-next:hover{background:var(--orange-dk)}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#fff3ec;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--orange-dk)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px}
+.tag-d{background:var(--orange-lt);color:var(--orange-dk)}
+.tag-cc{background:var(--teal-lt);color:var(--teal)}
+.tag-mcp{background:var(--purple-lt);color:var(--purple)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 3 · Module 5 of 9 · Session 1</div>
+    <h1>Claude for Coding, Technical Work & Claude Code 💻</h1>
+    <p class="tagline">Write faster, debug smarter, refactor confidently — and meet Claude Code, the AI that works inside your real codebase.</p>
+    <div class="header-chips">
+      <span>7 Topics</span>
+      <span>5 Exercises</span>
+      <span>🤖 Claude Code Demo</span>
+      <span>🔌 MCP Introduction</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#writing">Writing</a>
+  <a href="#explaining">Explaining</a>
+  <a href="#debugging">Debugging</a>
+  <a href="#refactoring">Refactoring</a>
+  <a href="#api-design">API & Design</a>
+  <a href="#claude-code">Claude Code</a>
+  <a href="#mcp">MCP</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">✍️</span>Write production-quality functions, classes, APIs using structured prompts</div>
+    <div class="obj-item"><span class="ic">🔍</span>Explain any codebase in plain English — regardless of language or age</div>
+    <div class="obj-item"><span class="ic">🐛</span>Debug with root-cause reasoning — not just "fix this line"</div>
+    <div class="obj-item"><span class="ic">🔧</span>Refactor messy code and auto-generate comprehensive test suites</div>
+    <div class="obj-item"><span class="ic">🤖</span>Install and use Claude Code as an autonomous terminal-based coding agent</div>
+    <div class="obj-item"><span class="ic">🔌</span>Understand MCP and how it connects Claude to your real development tools</div>
+  </div>
+
+  <div class="two-col" style="margin-top:18px">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Without Claude</div>
+      <ul class="col-body">
+        <li>Write from scratch + Google constantly</li>
+        <li>Debug by trial and error for hours</li>
+        <li>Read legacy code line by line</li>
+        <li>Manual test writing takes all afternoon</li>
+        <li>Multi-file refactors take days</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ With Claude</div>
+      <ul class="col-body">
+        <li>Production-quality code from one prompt</li>
+        <li>Root cause identified in minutes</li>
+        <li>Architecture explained in 5 minutes</li>
+        <li>80%+ test coverage generated in 15 min</li>
+        <li>Claude Code handles multi-file refactors</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 1: WRITING CODE -->
+<section id="writing">
+  <div class="sec-label">Topic 1 of 7</div>
+  <h2>✍️ Writing Code with Claude</h2>
+  <p>Vague prompts produce vague code. Specific, contextual prompts with a clear contract produce code you can ship.</p>
+
+  <div class="diff-wrap">
+    <div class="diff-line diff-del">❌ "Write a function to validate payments"</div>
+    <div class="diff-line diff-add">✅ Language + version + input/output contract + edge cases + error handling + style + codebase context</div>
+  </div>
+
+  <div class="tab-wrap" id="write-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('write-tabs',0)">☕ Java / Spring Boot</button>
+      <button class="tab-btn" onclick="switchTab('write-tabs',1)">🐍 Python</button>
+      <button class="tab-btn" onclick="switchTab('write-tabs',2)">🌐 REST Controller</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Strong Code Writing Prompt — Java</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior Java developer with Spring Boot 3 expertise.
+
+Context: Payment notification service — called when a Stripe webhook arrives.
+
+Method: processPaymentNotification
+Input: String rawPayload (raw JSON from Stripe)
+Output: ProcessedPayment record
+Logic:
+- Parse: event type, amount, currency, customerId, timestamp
+- Missing or unparseable field: throw PaymentProcessingException with a descriptive message
+- Log each step using SLF4J @Slf4j (info on success, error on failure)
+- No external service calls — pure parsing and mapping only
+
+Style: Clean, single responsibility, meaningful names.
+Include: full method + PaymentProcessingException class + Javadoc.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Strong Code Writing Prompt — Python</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior Python developer who writes clean, production-ready code.
+
+Context: Fintech data team. Runs as a daily AWS Lambda cron job.
+
+Requirements:
+- Read CSV from S3 (bucket and key from env vars)
+- Parse: transaction_id, amount (float), currency, timestamp (ISO 8601), status
+- Skip rows where status != "completed" — log skipped count
+- Convert amounts to INR using a hardcoded exchange rate dict
+- Write cleaned data to S3 key with prefix "processed/"
+- Handle: malformed rows (log/skip), S3 errors (raise), missing env vars (raise)
+
+Style: type hints throughout, functions not blob, PEP 8, no global state.
+Include unit test stubs for the 3 most critical functions using pytest.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>REST Controller Generation Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior Spring Boot 3 developer.
+
+Generate a REST controller for a User Management service.
+Part of a microservices platform — called by API Gateway, not by clients directly.
+
+Endpoints:
+1. GET /users/{id} — fetch by ID, 404 if not found
+2. POST /users — validate email + required fields, return 201 + Location header
+3. PUT /users/{id} — full update, 404 if not found
+4. DELETE /users/{id} — soft delete (set deletedAt), return 204
+
+Requirements: @Valid, RFC 7807 error format, UserDto record, UserNotFoundException.
+No service/repo layer yet — controller only with TODO stubs.
+Style: Clean. Javadoc on all public methods.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-write">
+    <div class="ex-label">✍️ Exercise 1 — Write a Real Function</div>
+    <h4>Product Filter & Sort Method</h4>
+    <p><strong>Scenario:</strong> Write a Java method: takes <code>List&lt;Product&gt;</code> (id, price, category, stockCount), returns only in-stock products in a given category sorted by price ascending. Throw <code>IllegalArgumentException</code> if category is null or blank.</p>
+    <ul class="ex-steps">
+      <li>Write the full structured prompt including all constraint details</li>
+      <li>Review: are all edge cases handled? Is naming clear? Does it use BigDecimal for price?</li>
+      <li>Follow up: "Add JUnit 5 tests for null category and empty result cases"</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Get production-quality code with correct edge cases from one structured prompt</li>
+      <li>Follow-up for tests saves 60–90 minutes of manual writing per class</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 2: EXPLAINING -->
+<section id="explaining">
+  <div class="sec-label">Topic 2 of 7</div>
+  <h2>🔍 Explaining & Understanding Code</h2>
+  <p>Joined a new team? Senior dev left? Legacy codebase with no docs? Claude is the fastest way to get oriented without reading every line.</p>
+
+  <div class="tab-wrap" id="explain-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('explain-tabs',0)">📖 Plain English</button>
+      <button class="tab-btn" onclick="switchTab('explain-tabs',1)">🏗 Architecture</button>
+      <button class="tab-btn" onclick="switchTab('explain-tabs',2)">📚 Auto-Docs</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Code Explanation Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior developer explaining code to a new team member.
+
+For the code below:
+1. HIGH-LEVEL PURPOSE (2–3 sentences, no jargon)
+2. INPUT AND OUTPUT (types, valid ranges)
+3. KEY LOGIC (most important steps in order)
+4. DEPENDENCIES (what external things does this need?)
+5. EDGE CASES (what inputs could cause unexpected behaviour?)
+6. CODE SMELLS (anything wrong, risky, or non-standard)
+
+[PASTE CODE HERE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Architecture Understanding Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I'll paste key files one by one. Acknowledge each.
+When I say "analyse now", give me:
+
+1. ARCHITECTURE PATTERN (layered, hexagonal, event-driven, etc.)
+2. DATA FLOW (request → processing → response)
+3. KEY COMPONENTS (most important classes and their responsibilities)
+4. INTEGRATION POINTS (external connections)
+5. WHERE TO MAKE CHANGES for [my specific new feature]
+
+Ready — pasting now.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Auto-Documentation Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Generate documentation for the code below.
+
+Include:
+1. CLASS OVERVIEW (purpose, when to use, when NOT to use)
+2. JAVADOC / DOCSTRINGS for every public method
+3. USAGE EXAMPLES (2 real-world calling patterns)
+4. KNOWN LIMITATIONS
+
+Output: Markdown, ready to paste into README or wiki.
+
+[PASTE CODE HERE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 3: DEBUGGING -->
+<section id="debugging">
+  <div class="sec-label">Topic 3 of 7</div>
+  <h2>🐛 Debugging with Claude</h2>
+
+  <div class="callout c-orange">
+    <div class="ic">🔑</div>
+    <div class="bd">
+      <strong>The Debugging Formula</strong>
+      <p>Full stack trace + Relevant code + Expected vs actual behaviour + What you've already tried = Root cause analysis, not just a patch</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="debug-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('debug-tabs',0)">🔥 Exception</button>
+      <button class="tab-btn" onclick="switchTab('debug-tabs',1)">🤔 Logic Bug</button>
+      <button class="tab-btn" onclick="switchTab('debug-tabs',2)">⚡ Performance</button>
+      <button class="tab-btn" onclick="switchTab('debug-tabs',3)">🧪 Test Failures</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Exception Debug Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Full stack trace: [PASTE]
+Relevant code: [PASTE]
+What it should do: [describe]
+What actually happens: [describe]
+When it happens: always / intermittently / specific inputs
+What I've tried: [list attempts]
+Environment: Java 17 / Spring Boot 3 / PostgreSQL
+
+Give me:
+1. ROOT CAUSE (why, not just where)
+2. Plain English explanation before showing code
+3. Corrected code
+4. Unit test that would have caught this before production</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Logic Bug Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Code runs without error but produces wrong results.
+
+Code: [PASTE]
+Input: [exact description]
+Expected: [what should happen]
+Actual: [what actually happens]
+
+Walk through step-by-step with my specific inputs.
+Show the value of all key variables at each step.
+Identify exactly where the logic diverges.
+Suggest the MINIMAL fix — don't rewrite everything.
+What test would have caught this?</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Performance Debug Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Current: [e.g. 8 seconds for 1,000 records]
+Target: [e.g. under 500ms]
+Data scale: [how many records, how often called]
+Code: [PASTE]
+
+1. Top 3 bottlenecks in order of likely impact
+2. WHY each is slow (not just what)
+3. Concrete fix + estimated improvement
+4. Any N+1 queries, unnecessary iterations, or missing indexes
+5. Is there a fundamentally better algorithm?</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Test Failure Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Test: [PASTE]
+Implementation: [PASTE]
+Failure output: [PASTE]
+
+1. Why is the test failing?
+2. Is the bug in the test or the implementation?
+3. The minimal fix for whichever is wrong
+4. What additional tests am I missing?</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-debug">
+    <div class="ex-label">🐛 Exercise 2 — Find the Root Cause</div>
+    <h4>Debug This Case-Sensitivity Bug</h4>
+    <div class="code-block">
+      <div class="cb-head"><span class="cb-lang">Java — OrderService.java</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>public BigDecimal calculateDiscount(List&lt;OrderItem&gt; items, String promoCode) {
+    BigDecimal total = items.stream()
+        .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    if (promoCode != null) {
+        if (promoCode.equals("SAVE10"))
+            return total.multiply(BigDecimal.valueOf(0.10));
+        else if (promoCode.equals("SAVE20"))
+            return total.multiply(BigDecimal.valueOf(0.20));
+    }
+    return BigDecimal.ZERO;
+}
+// Input: total = ₹1,300 | promoCode = "save10"
+// Expected: ₹130 discount  |  Actual: ₹0</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Use the Logic Bug prompt — walk Claude through the specific inputs</li>
+      <li>Ask: "What class of inputs would trigger this bug in production?"</li>
+      <li>Ask: "Give me the minimal fix AND the JUnit 5 test that catches it"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Bug + Fix + Test</button>
+    <div class="ans-box">
+      <p><strong>Bug:</strong> <code>promoCode.equals("SAVE10")</code> is case-sensitive. "save10" returns no match → BigDecimal.ZERO.</p>
+      <p><strong>Minimal fix:</strong> Change to <code>promoCode.equalsIgnoreCase("SAVE10")</code> — or better: normalise at entry with <code>promoCode.trim().toUpperCase()</code> before comparisons.</p>
+      <p><strong>Test that catches it:</strong> Pass "save10" and assert the discount equals ₹130.00.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Get root cause, not just a patch — by giving Claude the full context</li>
+      <li>Every debug session ends with the test that would have prevented the bug</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 4: REFACTORING -->
+<section id="refactoring">
+  <div class="sec-label">Topic 4 of 7</div>
+  <h2>🔧 Refactoring & Cleaning Code</h2>
+
+  <div class="callout c-warn">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>Critical Refactoring Rule</strong>
+      <p>Always tell Claude explicitly: <strong>"Preserve all existing behaviour — only improve structure."</strong> Without this, Claude may inadvertently change logic that other systems depend on.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="refactor-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('refactor-tabs',0)">🧹 General Refactor</button>
+      <button class="tab-btn" onclick="switchTab('refactor-tabs',1)">🧪 Generate Tests</button>
+      <button class="tab-btn" onclick="switchTab('refactor-tabs',2)">📐 SOLID Review</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Refactoring Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>PRESERVE all existing behaviour. IMPROVE structure only.
+If unsure whether a change alters behaviour — flag it before doing it.
+
+1. Identify code smells (magic numbers, God methods, deep nesting, unclear names)
+2. For each: explain the problem + show the refactored version
+3. Rename unclear variables/methods (show old → new)
+4. Extract methods over 20 lines into single-responsibility methods
+5. Replace raw loops with Streams where clarity improves
+
+Do NOT change:
+- Public method signatures
+- DB / external API calls (flag these instead)
+
+[PASTE CODE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Test Generation Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Framework: JUnit 5 + Mockito | Target: 80%+ branch coverage
+
+For each public method, test:
+- Happy path (standard valid input)
+- Edge cases (empty, zero, boundary)
+- Error paths (null input, invalid values, exceptions)
+- Side effects (Mockito.verify for mocked dependencies)
+
+Test naming: should_[expected]_when_[condition]
+Structure: group by method using @Nested
+Comment above each: "// Prevents: [what bug this catches]"
+
+[PASTE CODE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>SOLID Review Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Review for SOLID violations:
+S — Single Responsibility (one reason to change?)
+O — Open/Closed (add behaviour without modifying existing?)
+L — Liskov Substitution (subclasses substitutable for base?)
+I — Interface Segregation (interfaces too large?)
+D — Dependency Inversion (high-level depends on abstractions?)
+
+For each violation: quote it, explain the principle, show a fix.
+Rate overall: Well-designed / Has issues / Needs significant rework
+
+[PASTE CODE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-refactor">
+    <div class="ex-label">🔧 Exercise 3 — Spot the Smells First</div>
+    <h4>List Code Smells Before Running Claude — Then Compare</h4>
+    <div class="code-block">
+      <div class="cb-head"><span class="cb-lang">Java — ReportService.java (needs refactoring)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre>public String generateReport(List&lt;Transaction&gt; txns, String type, boolean inc) {
+    StringBuilder sb = new StringBuilder();
+    double total = 0;
+    int count = 0;
+    for (Transaction t : txns) {
+        if (t.getStatus().equals("COMPLETED")) {
+            if (type.equals("MONTHLY")) {
+                if (t.getDate().getMonth() == LocalDate.now().getMonth()) {
+                    total += t.getAmount(); count++;
+                    if (inc) { sb.append(t.getId()).append(",").append(t.getAmount()).append("\n"); }
+                }
+            } else if (type.equals("WEEKLY")) {
+                if (t.getDate().isAfter(LocalDate.now().minusDays(7))) {
+                    total += t.getAmount(); count++;
+                    if (inc) { sb.append(t.getId()).append(",").append(t.getAmount()).append("\n"); }
+                }
+            }
+        }
+    }
+    return "Total: " + total + ", Count: " + count + (inc ? "\n" + sb : "");
+}</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>List every code smell you can spot before prompting</li>
+      <li>Run the Refactoring prompt — compare your list to Claude's output</li>
+      <li>Follow up: "Generate JUnit 5 tests for the refactored version"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Full Smells List</button>
+    <div class="ans-box">
+      <p><strong>8 smells:</strong> (1) God method — filters, aggregates, AND formats. (2) Magic strings "COMPLETED", "MONTHLY", "WEEKLY" — use enums. (3) Deep nesting — 4 levels. (4) Unclear names: inc, sb, t, txns. (5) Duplicated logic — total/count/sb block repeated. (6) Wrong type — double for financial amounts (should be BigDecimal). (7) Hard-coded date logic — not injectable, untestable. (8) Return type mixes summary and detail.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 5: API & DESIGN -->
+<section id="api-design">
+  <div class="sec-label">Topic 5 of 7</div>
+  <h2>📋 API Contracts & System Design</h2>
+  <p>Design the interface before writing implementation. Catch structural problems in 5 minutes of review, not 5 days of rework.</p>
+
+  <div class="tab-wrap" id="api-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('api-tabs',0)">📄 API Contract</button>
+      <button class="tab-btn" onclick="switchTab('api-tabs',1)">🏗 System Design</button>
+      <button class="tab-btn" onclick="switchTab('api-tabs',2)">🔍 Design Review</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>API Contract Design Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Requirement: [what the API must do]
+Consumers: [who calls it — frontend, mobile, other services]
+Auth: [JWT / API key / OAuth]
+Constraints: [rate limits, pagination, versioning, idempotency]
+
+Design (NOT implementation):
+1. Resource naming and URL structure
+2. Each endpoint: method, URL, request/response (types + validation), HTTP status codes
+3. Consistent error format (RFC 7807 Problem Details)
+4. Pagination approach if needed
+5. One warning for a developer implementing this
+
+Output: OpenAPI-style pseudo-spec. No code.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>System Design Stub Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>System: [what needs to be built]
+Scale: [expected users, TPS, data volume]
+Tech preferences: [Java/Python, AWS/GCP, SQL/NoSQL]
+Constraints: [budget, timeline, existing integrations]
+
+Generate:
+1. HIGH-LEVEL ARCHITECTURE (key components and connections)
+2. CORE DATA MODEL (3–5 entities and relationships)
+3. KEY DESIGN DECISIONS (3 most important choices + reasoning)
+4. BUILD ORDER (recommended MVP sequence)
+5. TOP 3 RISKS (with mitigations)
+
+Be opinionated — recommend one approach per decision.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Design Review Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My design: [PASTE]
+
+Review for:
+1. CORRECTNESS — does it achieve the goal?
+2. SCALABILITY — what breaks first under 10× load?
+3. SECURITY — what attack vectors exist?
+4. MISSING EDGE CASES — what scenarios are unhandled?
+5. OVER-ENGINEERING — anything unnecessarily complex?
+
+For each issue: quote the specific part, explain the problem, suggest a fix.
+Rate: Ready / Needs minor revision / Needs significant rework</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 6: CLAUDE CODE -->
+<section id="claude-code">
+  <div class="sec-label">Topic 6 of 7</div>
+  <h2>🤖 Claude Code — The Agentic Coding Assistant</h2>
+
+  <div class="callout c-info">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>Critical Distinction</strong>
+      <p>Topics 1–5 used Claude in the <em>chat interface</em> — you paste code, Claude responds with text. Claude Code is fundamentally different: it runs in your <strong>terminal</strong>, reads your actual repository files, makes multi-file edits, and runs commands. It is an <strong>agent</strong>, not a chatbot.</p>
+    </div>
+  </div>
+
+  <h3>What Claude Code Is</h3>
+  <div class="card-grid">
+    <div class="info-card"><div class="cicon">🖥️</div><h5>Terminal-Based</h5><p>Runs from your command line inside your project. Integrates with your real dev environment and git workflow.</p></div>
+    <div class="info-card"><div class="cicon">📁</div><h5>Reads Your Files</h5><p>Navigates your repo, reads multiple files, understands context from the whole codebase — not just what you paste.</p></div>
+    <div class="info-card"><div class="cicon">✏️</div><h5>Edits Autonomously</h5><p>Makes multi-file changes, creates new files, runs commands — all while showing you each step before proceeding.</p></div>
+    <div class="info-card"><div class="cicon">🔁</div><h5>Multi-Step Reasoning</h5><p>Plans before acting, shows its reasoning, asks questions when uncertain. You can interrupt and redirect at any point.</p></div>
+  </div>
+
+  <h3>Installation</h3>
+  <div class="code-block">
+    <div class="cb-head"><span class="cb-lang">Terminal — Install &amp; Start</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre># Install globally (requires Node.js 18+)
+npm install -g @anthropic-ai/claude-code
+
+# Navigate to your project and start
+cd /path/to/your/project
+claude
+
+# Start simple — then escalate
+> Explain the structure of this project in 3 sentences.
+> Find the most complex method and explain why it's complex.
+> Refactor it — show me the plan BEFORE making any changes.</pre>
+  </div>
+
+  <h3>The Safety-First Workflow</h3>
+  <div class="step-flow">
+    <div class="step-item">
+      <div class="step-connector"><div class="step-num">1</div><div class="step-line"></div></div>
+      <div class="step-content"><h5>Give a High-Level Task</h5><p>State what you want in plain English. Include constraints: "don't change public interfaces", "preserve backward compatibility".</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-connector"><div class="step-num">2</div><div class="step-line"></div></div>
+      <div class="step-content"><h5>Read the Plan — Before Approving</h5><p>Claude Code shows its plan before touching files. Read every line. Correct anything that looks wrong before you approve.</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-connector"><div class="step-num">3</div><div class="step-line"></div></div>
+      <div class="step-content"><h5>Watch the Execution</h5><p>Every file read and change shown incrementally. You can interrupt at any point by pressing Escape.</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-connector"><div class="step-num">4</div><div class="step-line"></div></div>
+      <div class="step-content"><h5>Review with Git Diff</h5><p>Always run <code>git diff</code> before accepting. Read every changed line. If you don't understand a change — ask Claude Code to explain it.</p></div>
+    </div>
+    <div class="step-item">
+      <div class="step-connector"><div class="step-num">5</div><div class="step-line"></div></div>
+      <div class="step-content"><h5>Run Tests & Commit</h5><p>Run your full test suite. Feed any failures back to Claude Code for a fix. Never commit without passing tests.</p></div>
+    </div>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="ic">🔐</div>
+    <div class="bd">
+      <strong>The Golden Rule — Never Skip the Diff</strong>
+      <p>Claude Code is usually correct. It is not infallible. Every change is a proposal. <strong>Always read the git diff before accepting or committing.</strong> Never use Claude Code without version control.</p>
+    </div>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>Task</th><th>Time Saving</th></tr></thead>
+    <tbody>
+      <tr><td>Refactor a complex method</td><td>1–2 hrs → 10–15 min</td></tr>
+      <tr><td>Add tests to a class</td><td>2 hrs → 15–20 min</td></tr>
+      <tr><td>Migrate deprecated API (40 files)</td><td>3 days → 60–90 min</td></tr>
+      <tr><td>Explain an entire module</td><td>2–3 hrs → 5 min</td></tr>
+      <tr><td>Add consistent logging</td><td>1 hr → 10–15 min</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ex-card ex-cc">
+    <div class="ex-label">🤖 Exercise 4 — First Claude Code Session</div>
+    <h4>Explore Your Real Codebase With an AI Agent</h4>
+    <ul class="ex-steps">
+      <li>Run <code>claude</code> in any project directory</li>
+      <li>"Explain the overall structure of this project in 5 bullet points"</li>
+      <li>"Find the most complex method and explain why it's complex"</li>
+      <li>"Propose a refactoring plan — show the plan BEFORE making changes"</li>
+      <li>Review the plan carefully: is it accurate? Does it match your constraints?</li>
+      <li>After execution: run <code>git diff</code> — read every changed line</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Claude Code works on your entire repo — not just one pasted function</li>
+      <li>Multi-file refactors that took days now take under an hour with review</li>
+      <li>The workflow — plan → review → execute → diff → test — is non-negotiable</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TOPIC 7: MCP -->
+<section id="mcp">
+  <div class="sec-label">Topic 7 of 7</div>
+  <h2>🔌 MCP — Model Context Protocol</h2>
+  <p>MCP connects Claude to your real tools — GitHub, databases, file systems, Slack, internal APIs. Without MCP, Claude knows only what you paste. With MCP, Claude reaches into your actual environment.</p>
+
+  <div class="hl-box">
+    <p>🔌 <strong>The USB-C Analogy:</strong> USB-C is one standard port for power, data, and video. MCP is one standard protocol that connects Claude to GitHub, Postgres, Slack, Jira — or any internal tool you build a server for. One protocol, unlimited integrations.</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="info-card"><div class="cicon">🖥️</div><h5>MCP Server</h5><p>A small Node.js or Python process that wraps a tool's capabilities. Exposes them to Claude via a standard interface.</p></div>
+    <div class="info-card"><div class="cicon">🤖</div><h5>MCP Client (Claude)</h5><p>Claude Code or claude.ai discovers which tools are available and calls them when needed to complete your task.</p></div>
+    <div class="info-card"><div class="cicon">⛓️</div><h5>Tool Chaining</h5><p>Read a GitHub issue → find the related code → write a fix → open a PR. One prompt, multi-tool execution.</p></div>
+  </div>
+
+  <div class="tab-wrap" id="mcp-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('mcp-tabs',0)">🐙 GitHub MCP</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',1)">🗄 Database MCP</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',2)">📂 File System MCP</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span>GitHub MCP Prompts</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>> List all open issues labeled "bug". For each: summarise the
+  problem and suggest which file is most likely to need a change.
+
+> Read the most recently opened PR. Review it for code quality,
+  missing test coverage, and security concerns.
+  Format as a structured GitHub review comment.
+
+> For PR #142: write a plain-English summary suitable for a
+  non-technical product manager. What changed, why, what's the risk?</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>Database MCP Prompts</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>> Explain the payments database schema.
+  Most important tables? Key relationships?
+  Any unusual or risky design choices?
+
+> Write a SQL query: customers with 3+ orders in the last 30 days
+  but no order in the last 7 days.
+
+> The query in slow_queries.sql takes 8 seconds on production.
+  Look at the schema and explain why.
+  Suggest the index that would fix it.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span>File System MCP Prompts</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>> Read /var/log/app/error.log.
+  Find the 5 most common error patterns.
+  For each: frequency, a sample line, and the likely cause.
+
+> Read all .properties and .yml files under /config/.
+  Flag any settings that look misconfigured for production.
+
+> List all Java files under /src/main/java/.
+  For any file missing Javadoc on public methods,
+  generate the missing Javadoc.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">🔌 Exercise 5 — MCP Wishlist</div>
+    <h4>Design Your Ideal Integration</h4>
+    <ul class="ex-steps">
+      <li>List the 3 tools you spend the most time in during your development day</li>
+      <li>For each: write 2 questions you'd ask Claude if it had direct access to that tool</li>
+      <li>Which would save the most time — and what's the first thing you'd automate?</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 High-Value Integrations</button>
+    <div class="ans-box">
+      <p><strong>GitHub:</strong> Automated PR review, issue triage, release notes from commits.</p>
+      <p><strong>Jira / Linear:</strong> Sprint planning from meeting notes, ticket writing, velocity analysis.</p>
+      <p><strong>PostgreSQL:</strong> Query writing, schema explanation, slow query diagnosis.</p>
+      <p><strong>Slack:</strong> Thread summary, action item extraction, async standup generation.</p>
+      <p><strong>CI/CD:</strong> Build failure analysis, flaky test detection, pipeline bottleneck identification.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>MCP = Claude reaches into your tools, not just your clipboard</li>
+      <li>GitHub MCP turns Claude into a reviewer that can actually read the PR</li>
+      <li>Any internal API can become an MCP server — Claude then has native access</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 5 — Coding, Technical Work &amp; Claude Code</h4>
+    <div class="quiz-sub">7 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">✍️</span>Write production-quality code in any language using structured prompts with edge cases and style</div>
+    <div class="sum-item"><span class="ic">🔍</span>Explain any codebase — architecture, data flow, dependencies — in plain English within minutes</div>
+    <div class="sum-item"><span class="ic">🐛</span>Debug with root-cause reasoning by giving Claude the full context: error + code + expected vs actual</div>
+    <div class="sum-item"><span class="ic">🔧</span>Refactor messy code cleanly and generate comprehensive test suites for any class</div>
+    <div class="sum-item"><span class="ic">🤖</span>Use Claude Code with the safety-first plan → review → diff → test workflow</div>
+    <div class="sum-item"><span class="ic">🔌</span>Understand MCP and how connecting Claude to your tools transforms what AI can do for your team</div>
+  </div>
+
+  <div class="callout c-info" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 6</strong>
+      <p>System Design, Architecture &amp; MCP Deep Dive — high-level and low-level design with Claude, scalability analysis, and multi-tool MCP workflows chaining Claude Code with your real engineering systems.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 5 of 9 · Coding, Technical Work &amp; Claude Code</div>
+  <div class="nav-links">
+    <a href="module4_display.html" class="nav-link nav-prev">← Module 4</a>
+    <a href="module6_display.html" class="nav-link nav-next">Module 6 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(id,idx){const w=document.getElementById(id);w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));}
+function toggleAcc(hd){const b=hd.nextElementSibling,o=hd.classList.contains('open');document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});if(!o){hd.classList.add('open');b.style.display='block';}}
+function toggleAns(btn){const b=btn.nextElementSibling,o=b.style.display==='block';b.style.display=o?'none':'block';btn.textContent=o?'👁 See Answer':'🙈 Hide';}
+function copyPre(btn){const pre=btn.closest('.prompt-box')?.querySelector('pre');if(!pre)return;navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});}
+function copyCode(btn){const pre=btn.closest('.code-block')?.querySelector('pre');if(!pre)return;navigator.clipboard.writeText(pre.innerText||pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});}
+window.addEventListener('scroll',()=>{let curr='';document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));});
+
+// QUIZ — answer positions [2,0,3,1,3,2,0] — verified varied
+const qData=[
+  {q:"What makes a code-writing prompt produce production-quality output?",
+   opts:["Mentioning the language name","Adding 'make it clean' at the end","Specifying language version, input/output contract, error handling, style, and codebase context","Using all four RCTF components"],
+   answer:2,
+   fb:["❌ Language alone leaves Claude choosing error handling, naming conventions, and architecture patterns by default.","❌ Vague quality adjectives don't change the structural output.","✅ Every detail constrains the output. Version affects API choices. I/O defines the method signature. Error handling defines exception design. Context prevents the wrong pattern.","❌ RCTF is the general framework — for code specifically the key is the technical contract details in option C."]},
+  {q:"What is the most important information to include when debugging with Claude?",
+   opts:["The full stack trace, relevant code, expected vs actual behaviour, and what you've already tried","Only the error message","The entire codebase so Claude has full context","The line number and your proposed fix"],
+   answer:0,
+   fb:["✅ These four elements together enable root-cause reasoning. Without 'what you've tried', Claude may recommend approaches you've already ruled out. Without expected vs actual, Claude doesn't know what success looks like.","❌ The error message alone gives only the symptom. Without code, Claude can't identify where logic diverges. Without context, fixes may not be safe.","❌ Full codebases are too large. Paste the precise relevant code — the method that throws and its immediate callers.","❌ Telling Claude your fix bypasses root-cause analysis. Claude may just confirm your possibly-incorrect assumption."]},
+  {q:"When refactoring code with Claude, which instruction is most critical?",
+   opts:["'Use the latest language features wherever possible'","'Make it shorter and more concise'","'Rewrite from scratch to follow best practices completely'","'Preserve all existing behaviour — only improve structure, not what the code does'"],
+   answer:3,
+   fb:["❌ New language features may not be appropriate for your toolchain or target JVM — and can subtly change behaviour.","❌ Concise code isn't always better. Clarity and testability matter more than brevity. Over-conciseness can introduce bugs.","❌ Rewriting from scratch risks changing behaviour that other systems depend on — and loses the intent of the original code.","✅ Refactoring means improving structure without changing what the code does. This prevents Claude from 'improving' logic that breaks callers depending on current behaviour."]},
+  {q:"What is the fundamental difference between Claude in chat and Claude Code?",
+   opts:["Claude Code is significantly more accurate","Claude Code runs in your terminal, reads and edits your actual files autonomously — an agent that acts on your real codebase, not just a chatbot responding to pasted text","Claude Code only supports Python","Claude Code requires a separate API key"],
+   answer:1,
+   fb:["❌ Accuracy is similar — the difference is scope, autonomy, and what it can access.","✅ This is the critical distinction. Chat Claude processes text you paste and returns text. Claude Code navigates your actual repo, reads real files, makes multi-file edits, and runs commands — same AI, completely different operational mode.","❌ Claude Code works with any language present in your repository.","❌ Claude Code uses your standard Anthropic account — no separate API key needed for standard use."]},
+  {q:"What is the golden rule of using Claude Code safely?",
+   opts:["Run Claude Code only on branches, never on main","Let Claude Code complete silently before reviewing","Ask Claude Code to explain each change verbally before writing to any file","Always read the full git diff and understand every changed line before accepting or committing"],
+   answer:3,
+   fb:["❌ Branches reduce risk but don't replace review — wrong changes on a branch still get merged.","❌ Running silently loses the ability to catch problems mid-execution. You should be watching and can interrupt.","❌ Verbal explanations can miss details. The diff is the ground truth showing exactly what changed.","✅ The diff is the single source of truth. Read every line. If you don't understand a change, ask Claude Code to explain it. Never commit without reading the diff."]},
+  {q:"What is MCP (Model Context Protocol) and what does it enable?",
+   opts:["A method for fine-tuning Claude on your codebase","A security framework controlling Claude's access","A standard protocol that lets Claude connect to external tools like GitHub, databases, Slack, and internal APIs","A faster version of the Claude API"],
+   answer:2,
+   fb:["❌ MCP is about real-time connectivity, not training or fine-tuning.","❌ MCP is a connectivity protocol — security controls are separate concerns per MCP server.","✅ MCP is the USB-C for AI integrations — one standard protocol connecting Claude to any tool with an MCP server. Without MCP, Claude only knows what you paste. With MCP, Claude reaches into real tools and acts on what it finds.","❌ MCP is not related to API performance — it is about tool connectivity and context."]},
+  {q:"Which is the best use case for the GitHub MCP server?",
+   opts:["Reviewing an open PR, identifying missing tests, and posting a structured review comment — without you pasting any code","Replacing your CI/CD pipeline","Permanently storing your codebase in Claude's memory","Writing new features from scratch based on issue descriptions"],
+   answer:0,
+   fb:["✅ This is a genuine high-value MCP workflow: read the issue for context, read the PR for changes, synthesise a structured review, post it. The MCP provides context Claude needs without manual copy-paste.","❌ MCP integrations complement CI/CD but don't replace pipeline infrastructure.","❌ Claude doesn't permanently store anything between sessions. MCP provides on-demand read access.","❌ Writing from scratch is best in the chat interface with a code-writing prompt. GitHub MCP shines when existing context is the input."]}
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Excellent!':_quizCorrect>=4?'👍 Good!':'📚 Review and retry!'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="reveal-btn" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="reveal-btn" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>

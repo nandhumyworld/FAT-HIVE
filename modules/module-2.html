@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 2 — Claude for Everyday Professional Work</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f5f7fa;--surface:#fff;--border:#dde3eb;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;--accent-dk:#0f4ecc;
+  --purple:#7b52e8;--purple-lt:#f0ecfd;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --rose:#e03e6b;--rose-lt:#fde8ef;
+  --orange:#e8630a;--orange-lt:#fff3ec;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#0a1628 0%,#1a3050 55%,#0e7c6b 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.04)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(14,124,107,.25)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#b8e8df;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#9dd4cc;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#7abfb8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),var(--accent))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--green-lt);color:var(--green)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#0a1628;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#112238;border-bottom:1px solid #1e3450}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#6bb5ff}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#cce4ff;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--green-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--green);color:var(--green)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+.acc-body ul{padding-left:18px;margin:6px 0}
+.acc-body li{padding:3px 0;font-size:13px}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-warn{background:var(--amber-lt);border-color:#f5d07a}.c-warn .bd strong{color:var(--amber)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+.c-err{background:var(--red-lt);border-color:#f0aaaa}.c-err .bd strong{color:var(--red)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-email  {background:linear-gradient(135deg,var(--accent-lt),#eef4ff);border-color:#a8c4f8}
+.ex-meeting{background:linear-gradient(135deg,var(--teal-lt),#e8f6fb);border-color:#67d5eb}
+.ex-rewrite{background:linear-gradient(135deg,var(--rose-lt),#fff0f5);border-color:#f0a8bc}
+.ex-report {background:linear-gradient(135deg,var(--amber-lt),#fffaf0);border-color:#f5d07a}
+.ex-ppt    {background:linear-gradient(135deg,var(--purple-lt),#f5f0ff);border-color:#c4b2f5}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ex-email  .ex-label{color:var(--accent)}
+.ex-meeting .ex-label{color:var(--teal)}
+.ex-rewrite .ex-label{color:var(--rose)}
+.ex-report  .ex-label{color:var(--amber)}
+.ex-ppt     .ex-label{color:var(--purple)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--green)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--green);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:#0a9060}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #9fe8cc;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border:2px solid var(--green);border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--green)}
+
+/* TIME SAVE */
+.time-save{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#62e8a4;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;margin:8px 0}
+.ts-old{color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:400}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f9fafc}
+.tbl tr:hover td{background:var(--green-lt)}
+
+/* TEMPLATE LIBRARY */
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0}
+.tpl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.tpl-card:hover{border-color:var(--green);box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.tpl-card h5{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.tpl-card p{font-size:12px;color:var(--ink-muted);margin:0}
+.tpl-badge{font-size:10px;background:var(--green-lt);color:var(--green);padding:2px 7px;border-radius:8px;font-weight:700;margin-left:5px}
+
+/* WORKSPACE */
+.workspace{background:#0a1628;border-radius:var(--radius);overflow:hidden;margin:14px 0;box-shadow:var(--shadow-md)}
+.ws-head{background:#112238;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.ws-head h4{color:#fff;font-size:13px;font-weight:700}
+.ws-head span{font-size:11px;color:#62e8a4}
+.ws-body{padding:16px}
+.ws-textarea{width:100%;min-height:80px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:10px 12px;color:#cce4ff;font-family:var(--font-mono);font-size:12.5px;resize:vertical;margin-bottom:10px}
+.ws-textarea:focus{outline:1px solid #6bb5ff}
+.ws-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ws-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;padding:7px 16px;border-radius:14px;cursor:pointer;font-size:12px;font-weight:600;transition:background .15s;font-family:var(--font-body)}
+.ws-btn:hover{background:rgba(255,255,255,.2)}
+.ws-btn.run{background:var(--green);border-color:var(--green)}
+.ws-btn.run:hover{background:#0a9060}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--green)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--green);background:var(--green-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--green)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--green);color:#fff}.nav-next:hover{background:#0a9060}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#eef2f8;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent-dk)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#0a9060}
+.btn-ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--ink-soft)}.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 1 · Module 2 of 9</div>
+    <h1>Claude for Everyday Professional Work</h1>
+    <p class="tagline">Turn Claude into your daily work companion — emails, meetings, reports, and more.</p>
+    <div class="header-chips">
+      <span>⏱ 90 min</span>
+      <span>✉️ 5 Topics</span>
+      <span>🏋️ 5 Exercises</span>
+      <span>💼 Work-Ready Prompts</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:22%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#emails">Emails</a>
+  <a href="#meetings">Meetings</a>
+  <a href="#rewriting">Rewriting</a>
+  <a href="#reports">Reports</a>
+  <a href="#presentations">Presentations</a>
+  <a href="#templates">Templates</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">✉️</span>Draft any professional email in under 5 minutes</div>
+    <div class="obj-item"><span class="ic">📋</span>Turn messy meeting notes into clean summaries in under 3 minutes</div>
+    <div class="obj-item"><span class="ic">✏️</span>Rewrite any poorly-toned message in 60 seconds</div>
+    <div class="obj-item"><span class="ic">📊</span>Transform bullet notes into professional reports</div>
+    <div class="obj-item"><span class="ic">🖥️</span>Build a presentation outline + speaker notes in 15 minutes</div>
+    <div class="obj-item"><span class="ic">📚</span>Build a personal prompt library for your most frequent tasks</div>
+  </div>
+
+  <div class="two-col" style="margin-top:18px">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Without Claude</div>
+      <ul class="col-body">
+        <li>20 min drafting one difficult email</li>
+        <li>45 min turning notes into action plan</li>
+        <li>2 hrs writing a status report</li>
+        <li>30 min preparing a presentation outline</li>
+        <li>~3.5 hrs on writing tasks alone</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ With Claude</div>
+      <ul class="col-body">
+        <li>3 min draft + 5 min review &amp; send</li>
+        <li>5 min paste + 3 min review output</li>
+        <li>10 min notes + 10 min review report</li>
+        <li>5 min outline + one quick refine</li>
+        <li>~40 min total — 3 hours saved</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- EMAILS -->
+<section id="emails">
+  <div class="sec-label">Topic 1 of 5</div>
+  <h2>✉️ Writing Professional Emails</h2>
+
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Universal Email Template</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Act as a professional business writer.
+
+Situation: [Who you are, who you're writing to, the relationship]
+Purpose: [What this email must achieve]
+Key points: [The 2–4 main things the email must say]
+Tone: [Formal / Friendly-professional / Firm / Empathetic]
+Constraints: [Word limit, phrases to avoid, deadlines]
+
+Write with a subject line. Concise and purposeful.</pre>
+  </div>
+
+  <div class="tab-wrap" id="email-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('email-tabs',0)">📩 Request</button>
+      <button class="tab-btn" onclick="switchTab('email-tabs',1)">😬 Bad News</button>
+      <button class="tab-btn" onclick="switchTab('email-tabs',2)">🔁 Follow-Up</button>
+      <button class="tab-btn" onclick="switchTab('email-tabs',3)">🙏 Saying No</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Write an email asking my manager for a day off"</div>
+          <div class="diff-line diff-add">✅ Role + specific date + coverage arranged + tone = ready to send</div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Request Email Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a professional employee writing to their manager.
+
+Situation: I need March 21st off (family commitment). Good relationship with manager Ravi. No critical deadlines that day. Colleague arranged to cover urgent matters.
+
+Purpose: Request the day off without over-explaining.
+
+Key points: Specific date, coverage confirmed, available by phone for urgent matters.
+
+Tone: Professional but relaxed.
+
+Subject line + email. Under 120 words.</pre>
+        </div>
+        <div class="time-save">⏱ <span class="ts-old">18 min drafting</span> → 3 min with Claude</div>
+      </div>
+
+      <div class="tab-panel">
+        <div class="callout c-warn">
+          <div class="ic">⚠️</div>
+          <div class="bd"><strong>3 Bad News Mistakes</strong><p>1. Burying the news in 3 paragraphs &nbsp;·&nbsp; 2. Over-apologising &nbsp;·&nbsp; 3. No clear next step</p></div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Bad News Email Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior PM experienced in client communications.
+
+Situation: Software launch delayed 3 weeks — April 1st to April 22nd. Client: Apex Retail. Delay cause: critical security issues found in QA. Strong client relationship.
+
+Purpose: Inform, maintain trust, give a clear next step.
+
+Key points: Lead with the new date directly. Brief honest reason (protecting their data). What we're doing. Offer a call this week.
+
+Tone: Direct, empathetic, confident — not defensive.
+
+Subject line + 3 short paragraphs + CTA. Under 180 words.</pre>
+        </div>
+        <div class="time-save">⏱ <span class="ts-old">30 min agonising</span> → 5 min with Claude</div>
+      </div>
+
+      <div class="tab-panel">
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Just following up on my previous email…" (easy to ignore)</div>
+          <div class="diff-line diff-add">✅ Lead with value, reference the specific ask, create mild urgency</div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Follow-Up Email Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a professional business communicator.
+
+Situation: Sent a proposal to Northstar Analytics 10 days ago. Strong interest shown in meeting, no reply yet. Deal worth ₹8L. Need a response.
+
+Purpose: Get a reply — yes, no, or let's discuss.
+
+Key points: Reference original proposal briefly. Add new value (relevant case study). Mild urgency (finalising Q2 slots this week). Give 3 easy reply options.
+
+Tone: Confident, helpful. Zero desperation.
+
+Short — subject + 3 sentences + bullet options. Under 100 words.</pre>
+        </div>
+      </div>
+
+      <div class="tab-panel">
+        <div class="callout c-info">
+          <div class="ic">🧠</div>
+          <div class="bd"><strong>The "No with a Bridge" Structure</strong><p>Acknowledge → Decline clearly → Brief reason → Offer an alternative path</p></div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Polite Decline Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a professional communicator skilled in tactful messaging.
+
+Situation: Former colleague asked me to be a reference. I can't give them a strong one — mediocre work together. Don't want to damage the relationship.
+
+Purpose: Decline clearly but kindly. Offer a face-saving alternative.
+
+Key points: Decline without being critical. Suggest who might be a better fit. Leave relationship intact.
+
+Tone: Warm, direct, non-judgmental.
+
+Subject + 2 short paragraphs. Under 120 words. No clichés.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-email">
+    <div class="ex-label">✉️ Exercise 1 — Email Makeover</div>
+    <h4>Sprint Update Email to Stakeholders</h4>
+    <p><strong>Scenario:</strong> You're a PM. Team completed 6/8 sprint features. Brief your director and 3 stakeholders before Monday's review.</p>
+    <ul class="ex-steps">
+      <li>Write a full RCTF prompt for this situation</li>
+      <li>Be honest about the shortfall — include the reason and recovery plan</li>
+      <li>Specify a format that's easy to skim in a 30-second read</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Answer</button>
+    <div class="ans-box">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-o">✅ Model Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a senior PM who communicates clearly with stakeholders under pressure.
+
+Situation: My team completed 6/8 sprint features. Missed: payment retry module (third-party API change, out of our control) and dashboard filter (design changed requirements mid-sprint). Briefing director Meera + 3 stakeholders before Monday review.
+
+Purpose: Honest update. Pre-empt tough questions. Show the team is in control.
+
+Tone: Honest, calm, forward-looking. Not defensive or over-apologetic.
+
+Format: Subject line. 4 sections with bold headers: Delivered / Not Completed / Recovery Plan / Next Steps. Under 220 words. Easy to scan.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Draft any email type (request, bad news, follow-up, decline) with one structured prompt</li>
+      <li>Never stare at a blank email window again</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MEETINGS -->
+<section id="meetings">
+  <div class="sec-label">Topic 2 of 5</div>
+  <h2>📋 Creating Meeting Summaries</h2>
+
+  <div class="tab-wrap" id="meeting-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('meeting-tabs',0)">📝 Quick Summary</button>
+      <button class="tab-btn" onclick="switchTab('meeting-tabs',1)">✅ Actions Only</button>
+      <button class="tab-btn" onclick="switchTab('meeting-tabs',2)">📊 Full Summary</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Use for: Short syncs, standups, informal check-ins</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Quick Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Summarise these meeting notes in 3–5 sentences.
+Cover: what was discussed, key decisions made, and what happens next.
+Keep it professional and factual.
+
+[PASTE YOUR NOTES HERE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Use for: Project meetings where outcomes matter most</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Action Items Only</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>From the meeting notes below, extract only action items.
+For each: Task | Owner (if mentioned) | Deadline (if mentioned).
+Format as a numbered list. Mark unclear owners as [TBC].
+Ignore discussion points with no clear action.
+
+[PASTE YOUR NOTES HERE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Use for: Client meetings, leadership reviews, cross-functional syncs</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Full Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a professional meeting facilitator.
+Meeting: [Type, attendees, date]
+
+From the notes below, create:
+1. Overview (2 sentences: purpose + outcome)
+2. Key Discussion Points (bullets — 1 sentence each)
+3. Decisions Made (numbered — confirmed decisions only)
+4. Action Items (table: Task | Owner | Deadline)
+5. Next Steps
+
+Skimmable, professional, factual.
+
+[PASTE YOUR NOTES HERE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-meeting">
+    <div class="ex-label">📋 Exercise 2 — Meeting Notes Transformation</div>
+    <h4>Turn These Raw Notes Into a Clean Summary</h4>
+    <div class="prompt-box">
+      <div class="pb-head"><span class="lbl-b">Raw Notes — Paste Into Claude</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>sprint review - thurs 14 march
+attendees: priya (pm), arjun, kavya (devs), meera (director), rajan (qa)
+
+6/8 features done. payments api delayed (vendor issue). dashboard - design changed requirements midway.
+meera asked about q2 roadmap - priya to send by friday
+arjun: auth module has tech debt - should address before new features. all agreed.
+kavya: testing env is slow - rajan to raise infra ticket
+next sprint planning monday 18th 10am
+meera wants weekly status updates - priya to set up</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Use the Full Summary prompt with these notes</li>
+      <li>Follow up: "Reformat the action items as a Slack message"</li>
+      <li>Follow up: "Write a 2-sentence update I can email to Meera"</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- REWRITING -->
+<section id="rewriting">
+  <div class="sec-label">Topic 3 of 5</div>
+  <h2>✏️ Rewriting Difficult Messages</h2>
+
+  <div class="callout c-tip">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>The Rewrite Technique</strong>
+      <p>Write your raw draft first — even if it's too blunt. Then ask Claude to rewrite it. Your draft has the real substance; Claude fixes the delivery.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">😤 Rewrite: You're Frustrated and It Shows <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="diff-wrap">
+        <div class="diff-line diff-del">❌ "I've asked THREE times and nothing has changed. This is unacceptable."</div>
+        <div class="diff-line diff-add">✅ "This is the third follow-up. Our team is blocked pending resolution. Can we align on a timeline by EOD today?"</div>
+      </div>
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Cool-Down Rewrite Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Rewrite the message below — same urgency and facts, but calm and professional.
+Remove emotional language. Make it assertive, not aggressive.
+Goal: get action and preserve the relationship.
+
+[PASTE YOUR DRAFT HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🤝 Rewrite: Giving Critical Feedback <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Constructive Feedback Rewrite</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Rewrite this feedback to be:
+- Clear and specific (don't sugarcoat the issue)
+- Constructive (about the work, not the person)
+- Motivating (end with a path forward)
+- Professional in tone
+
+Audience: [colleague / junior team member / vendor]
+
+[PASTE YOUR DRAFT HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🚨 Rewrite: Escalating Without Drama <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Escalation Email Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a professional escalating a problem to their manager.
+
+Situation: [Issue, who's involved, how long, business impact]
+
+Write an escalation email that:
+- States the problem factually (no blame, no drama)
+- Explains the business impact
+- States what you've already tried
+- Asks for a specific decision or intervention
+
+Tone: Calm, factual, solution-oriented.
+Format: Subject + 3 paragraphs + clear ask. Under 200 words.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🌐 Rewrite: Wrong Register for the Audience <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Register Adjustment Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Rewrite for this audience: [C-suite executive / international client / junior team member]
+
+For executives: More concise. Lead with the ask.
+For international clients: Simpler vocabulary. No idioms or jargon.
+For junior team members: Warm, encouraging, clear instructions.
+
+Keep all key information. Change only the delivery.
+
+[PASTE YOUR MESSAGE HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-rewrite">
+    <div class="ex-label">✏️ Exercise 3 — Fix These 3 Messages</div>
+    <h4>Identify the problem and rewrite each one</h4>
+    <ul class="ex-steps">
+      <li><strong>A:</strong> "This report is full of errors. I don't understand why this keeps happening." → Rewrite as constructive feedback</li>
+      <li><strong>B:</strong> "The deadline was yesterday. Where is the deliverable?" → Rewrite as a professional follow-up</li>
+      <li><strong>C:</strong> "I need you to stay late tonight to finish this." → Rewrite as a respectful request with context</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Rewrites</button>
+    <div class="ans-box">
+      <p><strong>A:</strong> "I noticed a few errors in the report before it went out. Let's connect for 10 minutes to review the QA step — I want to make sure you have everything you need before the next one goes to a client."</p>
+      <p><strong>B:</strong> "Hi [Name] — [deliverable] was due yesterday and I haven't received it. Could you let me know the status and expected completion time? I need it to proceed with [downstream task]."</p>
+      <p><strong>C:</strong> "I know it's short notice, but we have a client deadline first thing tomorrow and we're behind. Would you be available to stay a couple of hours tonight to push this over the line? I really appreciate it."</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- REPORTS -->
+<section id="reports">
+  <div class="sec-label">Topic 4 of 5</div>
+  <h2>📊 Preparing Reports Quickly</h2>
+
+  <div class="callout c-info">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>The Bullet Notes → Full Report Technique</strong>
+      <p>Jot bullet notes during the week (10 min). Use Claude to transform them into a polished report (30 sec). Review and adjust (10 min). Total: 20 min instead of 2 hours.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="report-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('report-tabs',0)">📅 Weekly Status</button>
+      <button class="tab-btn" onclick="switchTab('report-tabs',1)">🔍 Incident Report</button>
+      <button class="tab-btn" onclick="switchTab('report-tabs',2)">📈 Executive Summary</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Weekly Status Report</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior PM writing a weekly status report.
+Project: [Name and brief description]
+Week: [Date range]
+Audience: [Manager / Stakeholders / Client]
+
+From the notes below, write a report with:
+1. Summary (2 sentences — overall health + key headline)
+2. Completed This Week (bullets)
+3. In Progress (bullets with % where known)
+4. Blockers &amp; Risks (honest — what's stuck and why)
+5. Next Week's Focus (top 3)
+6. RAG Status: Red / Amber / Green — with one sentence justification
+
+Tone: Professional, factual. Written for a 60-second read.
+
+Notes:
+[PASTE YOUR BULLET NOTES]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Blameless Post-Mortem</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior engineer writing a blameless post-mortem.
+
+From the notes below, create a structured incident report:
+1. Incident Summary (what happened, when, duration, user impact)
+2. Timeline (key events in order — bullets with timestamps)
+3. Root Cause Analysis (specific and blameless)
+4. Contributing Factors
+5. Corrective Actions (tasks + owners + target dates)
+6. Lessons Learned
+
+Tone: Factual, analytical, non-blaming.
+
+Notes:
+[PASTE YOUR INCIDENT NOTES]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Executive Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a senior analyst writing an executive summary for C-suite.
+
+From the information below, write a summary that:
+- Opens with the most important conclusion or recommendation (not background)
+- Covers key findings in 3–5 bullets (data-backed where possible)
+- States the risk or opportunity clearly
+- Ends with a specific recommended action and timeline
+
+Tone: Direct, confident, no jargon. Under 200 words.
+
+Source:
+[PASTE DATA / NOTES / FINDINGS]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-report">
+    <div class="ex-label">📊 Exercise 4 — Status Report from Bullet Notes</div>
+    <h4>Generate a Full Report from These Notes</h4>
+    <div class="prompt-box">
+      <div class="pb-head"><span class="lbl-b">Sample Bullet Notes</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>Project: Customer Portal Redesign (client: Zenith Finance) | Week: 10–14 March
+
+Done: homepage redesign approved by client. User auth module coded + unit tested. API integration spec finalised with backend.
+
+In progress: Dashboard component (60% done, kavya). Mobile responsiveness pass (not started).
+
+Blockers: Waiting on client brand guidelines — 3rd reminder sent. Blocking button/colour work. Performance issues on staging — rajan investigating.
+
+Next week: Complete dashboard. Begin mobile pass. Client demo Thursday 20th March.
+
+Overall: on track but brand guidelines delay could push demo if not received by Tuesday.</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Use the Weekly Status Report prompt with these notes</li>
+      <li>Check: what RAG status does Claude assign? Is it accurate?</li>
+      <li>Iterate: "Make the Blockers section more urgent — this could cascade"</li>
+      <li>Bonus: "Rewrite for the client — remove internal names, make it more polished"</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PRESENTATIONS -->
+<section id="presentations">
+  <div class="sec-label">Topic 5 of 5</div>
+  <h2>🖥️ Presentation Ideas &amp; Outlines</h2>
+
+  <div class="tab-wrap" id="ppt-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('ppt-tabs',0)">📐 Slide Outline</button>
+      <button class="tab-btn" onclick="switchTab('ppt-tabs',1)">🎤 Opening Hook</button>
+      <button class="tab-btn" onclick="switchTab('ppt-tabs',2)">🗒️ Speaker Notes</button>
+      <button class="tab-btn" onclick="switchTab('ppt-tabs',3)">💬 Q&amp;A Prep</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Presentation Outline</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as an experienced presentation coach.
+
+Topic: [What the presentation is about]
+Audience: [Who they are, what they care about]
+Duration: [Minutes including Q&amp;A]
+Purpose: [Inform / Persuade / Train / Sell]
+Key message: [The one thing they must walk away believing]
+Constraints: [Things to include, avoid, sensitivities]
+
+Create a slide-by-slide outline for [N] slides:
+- Slide title
+- 3 bullet points of content
+- Suggested visual
+- One key takeaway
+
+Include: an opening line and a closing statement.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">5 Opening Hooks</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Generate 5 opening hooks for a presentation on [topic] to [audience].
+
+One hook each using:
+1. A surprising statistic
+2. A provocative question that challenges their assumption
+3. A brief relatable scenario (30 seconds)
+4. A bold prediction
+5. A visual or interactive opener
+
+For each: opening line + 2 sentences bridging to the main topic.
+The audience should feel [curious / concerned / motivated] after the opening.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Speaker Notes</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Write speaker notes for this slide.
+
+Slide title: [Title]
+Bullet points: [List them]
+My speaking time for this slide: [e.g. 2 minutes]
+
+Notes must:
+- Sound natural when spoken — NOT like written text being read
+- Expand on bullets with "why" and context
+- Include a transition sentence to the next slide
+- Flag one spot to pause for audience reaction
+
+Write talking points and prompts — NOT a word-for-word script.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Q&amp;A Preparation</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I'm presenting on [topic] to [audience].
+
+Generate the 8 most likely challenging questions — including the ones I'd prefer not to answer.
+
+For each question:
+1. Why they're likely to ask it
+2. A confident, honest model answer (2–4 sentences)
+3. One thing to avoid saying in response
+
+Focus on questions that challenge my assumptions, data, or recommendations.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-ppt">
+    <div class="ex-label">🖥️ Exercise 5 — Build a Presentation in 10 Minutes</div>
+    <h4>Pitch a New Code Review Tool to Leadership</h4>
+    <p><strong>Scenario:</strong> Pitch adopting GitHub Copilot for PRs to your VP of Engineering + CPO. 10 minutes. They're technical but skeptical about cost and adoption time.</p>
+    <ul class="ex-steps">
+      <li>Use the Slide Outline prompt — fill in all fields for this scenario, ask for 8 slides</li>
+      <li>Follow up: "Generate 3 opening hooks for this presentation"</li>
+      <li>Follow up: "What are the 5 hardest questions this audience will ask?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Prompt</button>
+    <div class="ans-box">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-o">✅ Model Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a presentation coach specialising in technical pitches to senior leadership.
+
+Topic: Adopting GitHub Copilot for Pull Request reviews across the engineering team
+Audience: VP Engineering + CPO — both technical, both cost-conscious, skeptical of adoption overhead
+Duration: 10 min (8 presenting, 2 Q&amp;A)
+Purpose: Persuade — get approval for a 30-day pilot
+Key message: A 30-day pilot costs less than 2 days of developer time and could save 4–6 hrs/developer/week in review overhead
+Constraints: Be honest about the learning curve. Don't mention competitors by name.
+
+Create an 8-slide outline with slide title, 3 content bullets, suggested visual, and one key takeaway per slide.
+Include an opening line that challenges an assumption and a closing that makes the ask obvious.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Build a complete presentation outline for any topic in under 10 minutes</li>
+      <li>Generate opening hooks, speaker notes, and Q&A prep with dedicated prompts</li>
+      <li>Refine each section independently without rebuilding from scratch</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TEMPLATE LIBRARY -->
+<section id="templates">
+  <div class="sec-label">Your Prompt Toolkit</div>
+  <h2>Quick-Start Template Library</h2>
+  <p>Click any card to load a ready-to-personalise prompt. Replace the bracketed fields with your real details.</p>
+
+  <div class="tpl-grid">
+    <div class="tpl-card" onclick="loadTpl('email_request')"><h5>✉️ Email: Request <span class="tpl-badge">Email</span></h5><p>Request approval, time off, or information professionally</p></div>
+    <div class="tpl-card" onclick="loadTpl('email_badnews')"><h5>📣 Email: Bad News <span class="tpl-badge">Email</span></h5><p>Delay or problem notification — direct and trust-preserving</p></div>
+    <div class="tpl-card" onclick="loadTpl('meeting_full')"><h5>📋 Meeting Summary <span class="tpl-badge">Meeting</span></h5><p>Raw notes → structured summary with action items</p></div>
+    <div class="tpl-card" onclick="loadTpl('rewrite_cooldown')"><h5>✏️ Rewrite: Cool Down <span class="tpl-badge">Rewrite</span></h5><p>Same message, professional tone — remove the heat</p></div>
+    <div class="tpl-card" onclick="loadTpl('report_weekly')"><h5>📊 Weekly Status Report <span class="tpl-badge">Report</span></h5><p>Bullet notes → polished status report with RAG</p></div>
+    <div class="tpl-card" onclick="loadTpl('ppt_outline')"><h5>🖥️ Presentation Outline <span class="tpl-badge">Presentation</span></h5><p>Full slide outline with visuals and key takeaways</p></div>
+  </div>
+
+  <div class="workspace">
+    <div class="ws-head">
+      <h4 id="wsTitle">📋 Click a template above to load it here</h4>
+      <span>Personalise then copy to Claude</span>
+    </div>
+    <div class="ws-body">
+      <textarea class="ws-textarea" id="wsPrompt" placeholder="Click any template card above to load a prompt here…" rows="7"></textarea>
+      <div class="ws-actions">
+        <button class="ws-btn run" onclick="copyWs()">📋 Copy to Clipboard</button>
+        <button class="ws-btn" onclick="clearWs()">🗑 Clear</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 2 — Everyday Professional Work</h4>
+    <div class="quiz-sub">6 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">✉️</span>Draft any email type — request, bad news, follow-up, decline — in under 5 minutes</div>
+    <div class="sum-item"><span class="ic">📋</span>Transform messy meeting notes into clean summaries with action items in 3 minutes</div>
+    <div class="sum-item"><span class="ic">✏️</span>Rewrite any poorly-toned message in 60 seconds with the cool-down technique</div>
+    <div class="sum-item"><span class="ic">📊</span>Convert bullet notes into professional reports — status, post-mortem, executive summary</div>
+    <div class="sum-item"><span class="ic">🖥️</span>Build a presentation outline, hooks, speaker notes, and Q&A prep in 15 minutes</div>
+    <div class="sum-item"><span class="ic">📚</span>Use the template library as a personal prompt toolkit for daily work</div>
+  </div>
+
+  <div class="callout c-purple" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 3</strong>
+      <p>Document Intelligence — summarising PDFs, extracting key information, comparing documents, improving resumes, and understanding contracts in plain English.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 2 of 9 · Everyday Professional Work</div>
+  <div class="nav-links">
+    <a href="module1_display.html" class="nav-link nav-prev">← Module 1</a>
+    <a href="module3_display.html" class="nav-link nav-next">Module 3 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Model Answer':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const tpls={
+  email_request:`Act as a professional business writer.
+
+Situation: I am a [your role] writing to [recipient name and role]. Our relationship is [professional / close working / new contact].
+Purpose: I need to request [what you need — be specific].
+Key points:
+- [Main ask — be direct]
+- [Context or reason — brief]
+- [Any deadline or urgency]
+Tone: [Formal / Professional / Friendly-professional].
+Constraints: Under [word count] words. No clichés.
+
+Write with a subject line.`,
+  email_badnews:`Act as a senior professional experienced in stakeholder communications.
+
+Situation: I need to inform [recipient] about [the news]. The relationship is [strong / neutral]. The news: [describe — what happened, impact, reason].
+Purpose: Communicate honestly, maintain trust, show we are in control.
+Key points: Lead with the key fact. Brief honest reason. What we are doing. Specific next step.
+Tone: Direct, empathetic, confident. Not defensive.
+
+Subject line + 3 short paragraphs + CTA. Under 200 words.`,
+  meeting_full:`Act as a professional meeting facilitator.
+Meeting: [Type, attendees, date]
+
+From the notes below:
+1. Overview (2 sentences: purpose + outcome)
+2. Key Discussion Points (bullets — 1 sentence each)
+3. Decisions Made (numbered — confirmed only)
+4. Action Items (table: Task | Owner | Deadline)
+5. Next Steps
+
+Skimmable, professional, factual.
+
+Notes:
+[PASTE YOUR MEETING NOTES HERE]`,
+  rewrite_cooldown:`Rewrite the message below — same urgency and facts, calm and professional tone.
+Remove emotional language. Make it assertive, not aggressive.
+Goal: get action and preserve the relationship.
+
+[PASTE YOUR DRAFT MESSAGE HERE]`,
+  report_weekly:`Act as a senior PM writing a weekly status report.
+Project: [Name and brief description]
+Week: [Date range] | Audience: [Manager / Stakeholders / Client]
+
+From the notes below:
+1. Summary (2 sentences — health + key headline)
+2. Completed This Week (bullets)
+3. In Progress (bullets with % where known)
+4. Blockers & Risks (honest)
+5. Next Week's Focus (top 3)
+6. RAG Status: Red / Amber / Green + 1-sentence justification
+
+Tone: Professional, 60-second read.
+
+Notes:
+[PASTE YOUR BULLET NOTES]`,
+  ppt_outline:`Act as an experienced presentation coach.
+
+Topic: [What the presentation is about]
+Audience: [Who they are, what they care about]
+Duration: [Minutes including Q&A]
+Purpose: [Inform / Persuade / Train / Sell]
+Key message: [The one thing they must walk away believing]
+Constraints: [Things to include, avoid, sensitivities]
+
+Create a slide-by-slide outline for [N] slides:
+- Slide title
+- 3 content bullets
+- Suggested visual
+- One key takeaway
+
+Include: an opening line and a closing statement.`
+};
+function loadTpl(id){
+  const t=tpls[id];if(!t)return;
+  document.getElementById('wsPrompt').value=t;
+  const titles={'email_request':'✉️ Email: Request','email_badnews':'📣 Email: Bad News','meeting_full':'📋 Meeting Summary','rewrite_cooldown':'✏️ Rewrite: Cool Down','report_weekly':'📊 Weekly Status Report','ppt_outline':'🖥️ Presentation Outline'};
+  document.getElementById('wsTitle').textContent=titles[id]||'Template Loaded';
+  document.getElementById('wsPrompt').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function copyWs(){
+  const t=document.getElementById('wsPrompt').value;
+  if(!t.trim())return;
+  navigator.clipboard.writeText(t).then(()=>{const btn=event.target;const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+function clearWs(){document.getElementById('wsPrompt').value='';document.getElementById('wsTitle').textContent='📋 Click a template above to load it here';}
+
+const qData=[
+  {q:"You need to tell a client their delivery is delayed 2 weeks. What makes your email prompt most effective?",opts:["Ask Claude to be vague about the reason","Lead with the new date, brief honest reason, and offer a clear next step","Write a long apology to show you care","Ask Claude to make it sound like it's not your fault"],answer:1,fb:["❌ Vague bad news destroys trust — clients fill gaps with worst-case assumptions.","✅ Lead with the fact, give a brief honest reason, show what you're doing, give a next step. This is the structure that maintains trust.","❌ Over-apologising signals loss of control. Clients want a solution.","❌ Blame-shifting is transparent and permanently damages relationships."]},
+  {q:"You paste meeting notes into Claude and the summary uses internal jargon. Best follow-up?",opts:["Start a new conversation and re-paste the notes","'Rewrite this for an external client audience — remove internal jargon'","'Write it again but better'","'Fix the jargon'"],answer:1,fb:["❌ Never restart — you lose the context. Iterate instead.","✅ Specific, targeted iteration. You name the new audience. Claude adapts completely.","❌ 'Better' is meaningless without direction.","❌ 'Fix the jargon' doesn't tell Claude who the new audience is."]},
+  {q:"Which rewriting technique is most effective for an emotional draft?",opts:["Tell Claude the emotion you felt","Write your raw draft first, then ask Claude to rewrite it professionally","Ask Claude to write something polite from scratch","Delete and start fresh with Claude"],answer:1,fb:["❌ Your emotion is context, but the raw draft has the actual content — that's what matters.","✅ Your draft has all the substance — facts, urgency, the real ask. Claude's job is to fix the delivery. This produces the most accurate professional version.","❌ Starting fresh risks losing the specific points that made your draft accurate.","❌ Same problem — you lose the substance of what you actually needed to say."]},
+  {q:"What is the 'Bullet Notes → Full Report' technique?",opts:["Writing bullet points directly in the report instead of paragraphs","Jotting quick notes throughout the work period and using Claude to transform them into a polished report","Using Claude to summarise a long report into bullets","Asking Claude to automatically create reports from calendar events"],answer:1,fb:["❌ That's a formatting choice, not a workflow.","✅ Low-effort capture throughout the week + Claude transformation at report time. Converts 2 hours of writing into 20 minutes.","❌ That's the reverse — breaking down, not building up.","❌ Claude doesn't have calendar access in a standard setup."]},
+  {q:"You ask Claude for a presentation outline without filling in the audience field. What happens?",opts:["Claude asks you a clarifying question","Claude produces a generic outline not tailored to any specific audience","Claude refuses to proceed","Claude picks the most common audience type and it's probably right"],answer:1,fb:["❌ Claude doesn't ask follow-up questions unless you've set it up to do that.","✅ Without knowing who the audience is, Claude defaults to a general presentation structure. The vocabulary, depth, and framing will be generic — not optimised for your real listeners.","❌ Claude will still produce something — it just won't be the most useful output.","❌ Claude guesses, but the most common guess is rarely the right one for a specific professional pitch."]},
+  {q:"What's the 'No with a Bridge' structure for politely declining requests?",opts:["Acknowledge, give a long explanation, then apologise","Acknowledge → Decline clearly → Brief reason → Offer an alternative path","Say no immediately with no further explanation","Agree to help but delay the start date"],answer:1,fb:["❌ Long explanations and apologies make the decline harder to hear and don't help the person.","✅ This four-part structure gives the person a clear answer while leaving the relationship intact. The 'bridge' (alternative) turns a closed door into a useful redirect.","❌ Abrupt declines damage relationships unnecessarily.","❌ Agreeing when you can't deliver creates a bigger problem later."]}
+];
+let _quizCorrect = 0;
+
+function quizRender(idx) {
+  const bodyEl = document.getElementById('qzBody');
+  qData.forEach((_,i) => {
+    const d = document.getElementById('qd'+i);
+    if (d) d.className = 'q-dot' + (i < idx ? ' done' : i === idx ? ' curr' : '');
+  });
+  if (idx >= qData.length) {
+    bodyEl.innerHTML = `<div class="q-final">
+      <div class="q-big">${_quizCorrect}/${qData.length}</div>
+      <p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect >= 5 ? '🎉 Excellent!' : _quizCorrect >= 3 ? '👍 Good!' : '📚 Review and retry!'}</p>
+      <p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p>
+      <button class="btn btn-green" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button>
+    </div>`;
+    qData.forEach((_,i) => { const d = document.getElementById('qd'+i); if (d) d.className = 'q-dot done'; });
+    return;
+  }
+  const q = qData[idx];
+  bodyEl.innerHTML = `
+    <div class="q-text">${idx + 1}. ${q.q}</div>
+    <div class="q-opts">${q.opts.map((o, i) => `<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div>
+    <div class="q-fb" id="qfb${idx}"></div>
+    <div class="q-nav">
+      <span class="q-score">Score: ${_quizCorrect}/${idx}</span>
+      <button class="btn btn-green" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx + 1})">Next →</button>
+    </div>`;
+}
+
+function ansQ(qi, oi) {
+  const qr = qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o => o.onclick = null);
+  const opts = document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi === qr.answer ? 'correct' : 'wrong');
+  if (oi !== qr.answer) opts[qr.answer].classList.add('correct');
+  const fb = document.getElementById('qfb' + qi);
+  fb.className = `q-fb show ${oi === qr.answer ? 'fb-ok' : 'fb-no'}`;
+  fb.textContent = qr.fb[oi];
+  if (oi === qr.answer) _quizCorrect++;
+  document.getElementById('qnxt').style.display = 'inline-flex';
+}
+
+function initQuiz() {
+  const dotsEl = document.getElementById('qzDots');
+  dotsEl.innerHTML = qData.map((_,i) => `<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect = 0;
+  quizRender(0);
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+</body>
+</html>

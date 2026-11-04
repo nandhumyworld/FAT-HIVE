@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1F7A5C"/>
+      <stop offset="100%" stop-color="#062018"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF3B8"/>
+      <stop offset="40%" stop-color="#F4CB52"/>
+      <stop offset="70%" stop-color="#E8B73A"/>
+      <stop offset="100%" stop-color="#A07418"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Hexagonal badge background (flat-top, side 240) -->
+  <polygon points="496,256 376,463.85 136,463.85 16,256 136,48.15 376,48.15"
+    fill="url(#bg)"/>
+
+  <!-- Outer gold border on hex -->
+  <polygon points="496,256 376,463.85 136,463.85 16,256 136,48.15 376,48.15"
+    fill="none" stroke="url(#goldGrad)" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Inner accent hex border -->
+  <polygon points="488,256 372,456.93 140,456.93 24,256 140,55.07 372,55.07"
+    fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.5" stroke-linejoin="round"/>
+
+  <!-- Complete honeycomb interior: 37 pointy-top cells (s=37), perfect hex-of-hexes -->
+  <g stroke="url(#goldGrad)" stroke-width="2.2" fill="none"
+     stroke-linejoin="round" opacity="0.5">
+    <polygon points="63.75,219 95.79,237.5 95.79,274.5 63.75,293 31.71,274.5 31.71,237.5"/>
+    <polygon points="95.79,274.5 127.83,293 127.83,330 95.79,348.5 63.75,330 63.75,293"/>
+    <polygon points="127.83,330 159.87,348.5 159.87,385.5 127.83,404 95.79,385.5 95.79,348.5"/>
+    <polygon points="159.87,385.5 191.91,404 191.91,441 159.87,459.5 127.83,441 127.83,404"/>
+    <polygon points="95.79,163.5 127.83,182 127.83,219 95.79,237.5 63.75,219 63.75,182"/>
+    <polygon points="127.83,219 159.87,237.5 159.87,274.5 127.83,293 95.79,274.5 95.79,237.5"/>
+    <polygon points="159.87,274.5 191.91,293 191.91,330 159.87,348.5 127.83,330 127.83,293"/>
+    <polygon points="191.92,330 223.96,348.5 223.96,385.5 191.92,404 159.88,385.5 159.88,348.5"/>
+    <polygon points="223.96,385.5 256,404 256,441 223.96,459.5 191.92,441 191.92,404"/>
+    <polygon points="127.83,108 159.87,126.5 159.87,163.5 127.83,182 95.79,163.5 95.79,126.5"/>
+    <polygon points="159.87,163.5 191.91,182 191.91,219 159.87,237.5 127.83,219 127.83,182"/>
+    <polygon points="191.92,219 223.96,237.5 223.96,274.5 191.92,293 159.88,274.5 159.88,237.5"/>
+    <polygon points="223.96,274.5 256,293 256,330 223.96,348.5 191.92,330 191.92,293"/>
+    <polygon points="256,330 288.04,348.5 288.04,385.5 256,404 223.96,385.5 223.96,348.5"/>
+    <polygon points="288.04,385.5 320.08,404 320.08,441 288.04,459.5 256,441 256,404"/>
+    <polygon points="159.87,52.5 191.91,71 191.91,108 159.87,126.5 127.83,108 127.83,71"/>
+    <polygon points="191.92,108 223.96,126.5 223.96,163.5 191.92,182 159.88,163.5 159.88,126.5"/>
+    <polygon points="223.96,163.5 256,182 256,219 223.96,237.5 191.92,219 191.92,182"/>
+    <polygon points="256,219 288.04,237.5 288.04,274.5 256,293 223.96,274.5 223.96,237.5"/>
+    <polygon points="288.04,274.5 320.08,293 320.08,330 288.04,348.5 256,330 256,293"/>
+    <polygon points="320.09,330 352.13,348.5 352.13,385.5 320.09,404 288.05,385.5 288.05,348.5"/>
+    <polygon points="352.13,385.5 384.17,404 384.17,441 352.13,459.5 320.09,441 320.09,404"/>
+    <polygon points="223.96,52.5 256,71 256,108 223.96,126.5 191.92,108 191.92,71"/>
+    <polygon points="256,108 288.04,126.5 288.04,163.5 256,182 223.96,163.5 223.96,126.5"/>
+    <polygon points="288.04,163.5 320.08,182 320.08,219 288.04,237.5 256,219 256,182"/>
+    <polygon points="320.09,219 352.13,237.5 352.13,274.5 320.09,293 288.05,274.5 288.05,237.5"/>
+    <polygon points="352.13,274.5 384.17,293 384.17,330 352.13,348.5 320.09,330 320.09,293"/>
+    <polygon points="384.17,330 416.21,348.5 416.21,385.5 384.17,404 352.13,385.5 352.13,348.5"/>
+    <polygon points="288.04,52.5 320.08,71 320.08,108 288.04,126.5 256,108 256,71"/>
+    <polygon points="320.09,108 352.13,126.5 352.13,163.5 320.09,182 288.05,163.5 288.05,126.5"/>
+    <polygon points="352.13,163.5 384.17,182 384.17,219 352.13,237.5 320.09,219 320.09,182"/>
+    <polygon points="384.17,219 416.21,237.5 416.21,274.5 384.17,293 352.13,274.5 352.13,237.5"/>
+    <polygon points="416.21,274.5 448.25,293 448.25,330 416.21,348.5 384.17,330 384.17,293"/>
+    <polygon points="352.13,52.5 384.17,71 384.17,108 352.13,126.5 320.09,108 320.09,71"/>
+    <polygon points="384.17,108 416.21,126.5 416.21,163.5 384.17,182 352.13,163.5 352.13,126.5"/>
+    <polygon points="416.21,163.5 448.25,182 448.25,219 416.21,237.5 384.17,219 384.17,182"/>
+    <polygon points="448.26,219 480.30,237.5 480.30,274.5 448.26,293 416.22,274.5 416.22,237.5"/>
+  </g>
+
+  <!-- F · A · T  with square periods between (acronym style) -->
+  <g filter="url(#glow)">
+    <text x="112" y="315"
+      font-family="Arial, sans-serif" font-weight="900"
+      font-size="150"
+      fill="url(#goldGrad)" text-anchor="middle">F</text>
+    <rect x="177" y="301" width="14" height="14" fill="url(#goldGrad)"/>
+    <text x="256" y="315"
+      font-family="Arial, sans-serif" font-weight="900"
+      font-size="150"
+      fill="url(#goldGrad)" text-anchor="middle">A</text>
+    <rect x="321" y="301" width="14" height="14" fill="url(#goldGrad)"/>
+    <text x="400" y="315"
+      font-family="Arial, sans-serif" font-weight="900"
+      font-size="150"
+      fill="url(#goldGrad)" text-anchor="middle">T</text>
+  </g>
+</svg>

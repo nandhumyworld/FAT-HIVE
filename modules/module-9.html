@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 9 — Safe Usage, Limitations & Responsible AI</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f6f5fa;--surface:#fff;--border:#dddaeb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#6c3fd4;--purple-dk:#4e2aa0;--purple-lt:#f0ebfc;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --indigo:#3730a3;--indigo-lt:#eef2ff;
+  --violet:#7c3aed;--violet-lt:#f5f3ff;
+  --orange:#c05621;--orange-lt:#fff3e0;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#0a1628 0%,#1a3a2e 45%,#0fad74 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(15,173,116,.2)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#a8f0d4;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#a8f0d4;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#7adab8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),var(--teal))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--green-lt);color:var(--green)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-warn .col-head{background:var(--amber);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+.col-warn .col-body li::before{content:'⚠ ';color:var(--amber)}
+
+/* PROMPT BOX */
+.prompt-box{background:#0d0820;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#0a1a10;border-bottom:1px solid #0fad74}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#a8f0d4}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}.lbl-w{color:#ffc77d}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#c8fce4;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--green-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--green);color:var(--green)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-green{background:var(--green-lt);border-color:#9fe8cc}.c-green .bd strong{color:var(--green)}
+.c-warn{background:var(--amber-lt);border-color:#f0c060}.c-warn .bd strong{color:var(--amber)}
+.c-red{background:var(--red-lt);border-color:#f0aaaa}.c-red .bd strong{color:var(--red)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+.c-teal{background:var(--teal-lt);border-color:#67d5eb}.c-teal .bd strong{color:var(--teal)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+.diff-ctx{background:#f8f7fc;border-left:3px solid var(--border);color:var(--ink-muted)}
+
+/* FRAMEWORK CARD */
+.fw-card{background:var(--surface);border:2px solid #9fe8cc;border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.fw-head{background:linear-gradient(90deg,#0a3020,var(--green));padding:10px 16px;display:flex;align-items:center;gap:8px}
+.fw-head span{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fw-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.fw-step:last-child{border-bottom:none}
+.fw-num{min-width:24px;height:24px;background:var(--green);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.fw-num-red{background:var(--red)}
+.fw-num-amber{background:var(--amber)}
+.fw-content h5{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.fw-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-safe   {background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border-color:#9fe8cc}
+.ex-hall   {background:linear-gradient(135deg,var(--amber-lt),#fffcf0);border-color:#f0c060}
+.ex-priv   {background:linear-gradient(135deg,var(--red-lt),#fff8f8);border-color:#f0aaaa}
+.ex-code   {background:linear-gradient(135deg,var(--teal-lt),#e8f6fb);border-color:#67d5eb}
+.ex-mcp    {background:linear-gradient(135deg,var(--indigo-lt),#eef2ff);border-color:#a5b4fc}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--green)}
+.ex-hall .ex-label{color:var(--amber)}
+.ex-priv .ex-label{color:var(--red)}
+.ex-code .ex-label{color:var(--teal)}
+.ex-mcp  .ex-label{color:var(--indigo)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--green)}
+.ex-hall .ex-steps li::before{color:var(--amber)}
+.ex-priv .ex-steps li::before{color:var(--red)}
+.ex-code .ex-steps li::before{color:var(--teal)}
+.ex-mcp  .ex-steps li::before{color:var(--indigo)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--green);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:#0a8a5a}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #9fe8cc;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border:2px solid #9fe8cc;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'✅ ';color:var(--green)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f8f7fc}
+.tbl tr:hover td{background:var(--green-lt)}
+
+/* RISK BADGE */
+.risk{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.04em}
+.risk-high{background:var(--red-lt);color:var(--red);border:1px solid #f0aaaa}
+.risk-med{background:var(--amber-lt);color:var(--amber);border:1px solid #f0c060}
+.risk-low{background:var(--green-lt);color:var(--green);border:1px solid #9fe8cc}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--green)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--green);background:var(--green-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--green)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--green);color:#fff}.nav-next:hover{background:#0a8a5a}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#e6f8f2;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--green)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#0a8a5a}
+
+
+
+/* POLICY CARD */
+.policy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0}
+.policy-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.policy-card .p-icon{font-size:22px;margin-bottom:8px}
+.policy-card h5{font-size:13px;font-weight:700;margin-bottom:6px}
+.policy-card p{font-size:12.5px;color:var(--ink-soft);margin:0}
+
+/* SAFETY METER */
+.safety-checks{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.safety-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px}
+.safety-row .s-icon{font-size:16px;flex-shrink:0}
+.safety-row .s-label{flex:1;font-size:13px;font-weight:600}
+.safety-row .s-status{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.s-do{background:var(--green-lt);color:var(--green);border:1px solid #9fe8cc}
+.s-dont{background:var(--red-lt);color:var(--red);border:1px solid #f0aaaa}
+.s-verify{background:var(--amber-lt);color:var(--amber);border:1px solid #f0c060}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 2 · Module 9 of 9 — Final Module</div>
+    <h1>Safe Usage, Limitations &amp; Responsible AI in Professional Contexts</h1>
+    <p class="tagline">Trust AI confidently — by knowing exactly when not to.</p>
+    <div class="header-chips">
+      <span>🛡️ 11 Topics</span>
+      <span>⚠️ Critical for Real-World Usage</span>
+      <span>🏁 Course Finale</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#failures">Failures &amp; Limits</a>
+  <a href="#hallucination">Hallucination</a>
+  <a href="#verification">Verification</a>
+  <a href="#sensitive">Sensitive Data</a>
+  <a href="#human-review">Human Review</a>
+  <a href="#code-safety">Code Safety</a>
+  <a href="#mcp-safety">MCP Safety</a>
+  <a href="#cowork-safety">Cowork Safety</a>
+  <a href="#privacy">Privacy</a>
+  <a href="#policy">AI Policy</a>
+  <a href="#habits">Daily Habits</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">🎯</span>Know when to trust AI output versus when to independently verify</div>
+    <div class="obj-item"><span class="ic">🔍</span>Spot hallucination signals and apply fact-verification habits</div>
+    <div class="obj-item"><span class="ic">🛡️</span>Apply safe professional usage habits and data privacy rules</div>
+    <div class="obj-item"><span class="ic">💻</span>Review Claude Code agentic file changes before accepting</div>
+    <div class="obj-item"><span class="ic">🔌</span>Manage MCP permission hygiene and scope tool access safely</div>
+    <div class="obj-item"><span class="ic">🖥️</span>Limit Cowork scope and avoid unintended desktop automation</div>
+    <div class="obj-item"><span class="ic">📋</span>Comply with organisational AI policies confidently</div>
+    <div class="obj-item"><span class="ic">✅</span>Build human review checkpoints into every AI workflow</div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- WHERE CLAUDE CAN FAIL -->
+<section id="failures">
+  <div class="sec-label">Topic 1 of 11</div>
+  <h2>⚡ Where Claude Can Fail — Confidence vs Accuracy</h2>
+
+  <p>Claude can sound confident while being wrong. Understanding <em>where</em> it fails is the first step to using it safely.</p>
+
+  <div class="callout c-warn">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>The Core Mismatch</strong>
+      <p>Claude's confidence in its response is <em>not</em> a reliable indicator of its accuracy. It can express high certainty about incorrect facts, made-up citations, and outdated information.</p>
+    </div>
+  </div>
+
+  <h3>Known Failure Zones</h3>
+  <table class="tbl">
+    <thead><tr><th>Failure Type</th><th>What Happens</th><th>Risk Level</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Hallucination</strong></td><td>Plausible but fabricated facts, names, or citations</td><td><span class="risk risk-high">HIGH</span></td></tr>
+      <tr><td><strong>Knowledge Cutoff</strong></td><td>Outdated information presented as current</td><td><span class="risk risk-high">HIGH</span></td></tr>
+      <tr><td><strong>Confidently Wrong Numbers</strong></td><td>Statistics, percentages, dates stated with false precision</td><td><span class="risk risk-high">HIGH</span></td></tr>
+      <tr><td><strong>Sycophancy</strong></td><td>Agreeing with user assumptions rather than correcting them</td><td><span class="risk risk-med">MEDIUM</span></td></tr>
+      <tr><td><strong>Oversimplification</strong></td><td>Nuanced topics flattened into neat answers</td><td><span class="risk risk-med">MEDIUM</span></td></tr>
+      <tr><td><strong>Context Drift</strong></td><td>Losing important constraints in long conversations</td><td><span class="risk risk-med">MEDIUM</span></td></tr>
+      <tr><td><strong>Prompt Following vs Thinking</strong></td><td>Doing exactly what was asked even if it's the wrong thing</td><td><span class="risk risk-low">LOW–MED</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ High-Risk Scenarios</div>
+      <ul class="col-body">
+        <li>Citing a specific study or statistic</li>
+        <li>Naming a law, regulation, or policy</li>
+        <li>Describing a real person's statement or position</li>
+        <li>Providing recent market data or news</li>
+        <li>Giving medical, legal, or financial specifics</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Lower-Risk Scenarios</div>
+      <ul class="col-body">
+        <li>Generating structure, frameworks, and templates</li>
+        <li>Brainstorming ideas (verify before committing)</li>
+        <li>Explaining well-established concepts</li>
+        <li>Reformatting or summarising your own content</li>
+        <li>Drafting first versions for human review</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- HALLUCINATION -->
+<section id="hallucination">
+  <div class="sec-label">Topic 2 of 11</div>
+  <h2>🌀 Hallucination Awareness — Why It Happens &amp; How to Spot It</h2>
+
+  <p>Hallucination is not a bug Claude will eventually fix — it is a fundamental characteristic of how large language models work. Understanding why helps you predict when it will occur.</p>
+
+  <div class="tab-wrap" id="hall-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('hall-tabs',0)">🔬 Why It Happens</button>
+      <button class="tab-btn" onclick="switchTab('hall-tabs',1)">🕵️ How to Spot It</button>
+      <button class="tab-btn" onclick="switchTab('hall-tabs',2)">📋 Spot-Check Prompts</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px">Claude predicts the most plausible next token based on patterns in its training data — it does not "look things up" in a database of facts. When asked for something outside its reliable knowledge, it generates plausible-sounding text that <em>pattern-matches</em> to what an answer should look like.</p>
+        <div class="fw-card">
+          <div class="fw-head"><span>🔬 Conditions That Increase Hallucination Risk</span></div>
+          <div class="fw-step">
+            <div class="fw-num fw-num-red">1</div>
+            <div class="fw-content"><h5>Specific, verifiable facts</h5><p>Exact figures, dates, names, citations — things that have a correct answer Claude must retrieve, not generate</p></div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num fw-num-red">2</div>
+            <div class="fw-content"><h5>Obscure or niche domains</h5><p>Less training data = more "filling in" from pattern matching, increasing fabrication</p></div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num fw-num-amber">3</div>
+            <div class="fw-content"><h5>Events after knowledge cutoff</h5><p>Claude may extrapolate or fabricate recent developments it was never trained on</p></div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num fw-num-amber">4</div>
+            <div class="fw-content"><h5>Pressure to be helpful</h5><p>If you expect a specific answer, Claude may produce one — even if it shouldn't</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px">These signals don't confirm hallucination — but they should trigger your verification instinct:</p>
+        <div class="safety-checks">
+          <div class="safety-row"><span class="s-icon">📍</span><span class="s-label">Very specific statistics, percentages, or exact dates</span><span class="s-status s-verify">VERIFY</span></div>
+          <div class="safety-row"><span class="s-icon">📚</span><span class="s-label">Named studies, reports, papers, or publications</span><span class="s-status s-verify">VERIFY</span></div>
+          <div class="safety-row"><span class="s-icon">👤</span><span class="s-label">Attributed quotes from real people</span><span class="s-status s-verify">VERIFY</span></div>
+          <div class="safety-row"><span class="s-icon">⚖️</span><span class="s-label">Specific laws, clauses, or regulatory details</span><span class="s-status s-verify">VERIFY</span></div>
+          <div class="safety-row"><span class="s-icon">🗓️</span><span class="s-label">Recent events or announcements (post-training data)</span><span class="s-status s-dont">DO NOT RELY</span></div>
+          <div class="safety-row"><span class="s-icon">🧠</span><span class="s-label">Claude says "I'm not sure" — but then answers anyway</span><span class="s-status s-verify">VERIFY</span></div>
+          <div class="safety-row"><span class="s-icon">📝</span><span class="s-label">Creative structure and frameworks (not citing facts)</span><span class="s-status s-do">LOWER RISK</span></div>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">Use these prompts to surface uncertainty before trusting a response:</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-w">Confidence Check</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Before I use this — how confident are you in [specific claim]?
+What's the source or basis for that figure?
+If you're uncertain, tell me what you don't know rather than guessing.</pre>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-w">Verification Request</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>For each specific fact, statistic, or citation in your response:
+1. Flag it with [VERIFY] if you're not certain of its accuracy
+2. Tell me what search terms or sources I should use to confirm it
+3. Restate anything you're confident in without the [VERIFY] flag</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-hall">
+    <div class="ex-label">🕵️ Exercise 1 — Hallucination Hunt</div>
+    <h4>Deliberately Surface and Catch a Hallucination</h4>
+    <ul class="ex-steps">
+      <li>Ask Claude: <em>"What are 3 published studies on remote work productivity from 2022–2024? Cite the authors and journals."</em></li>
+      <li>Then ask: <em>"How confident are you in each citation? Mark any you're uncertain of with [UNVERIFIED]."</em></li>
+      <li>Search for one of the cited papers. Did it exist exactly as described?</li>
+      <li>Discuss: What changed in Claude's tone when pressed for confidence?</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- FACT VERIFICATION -->
+<section id="verification">
+  <div class="sec-label">Topic 3 of 11</div>
+  <h2>✅ Fact Verification Habits — When to Trust vs Verify</h2>
+
+  <p>The goal isn't to verify everything — that would eliminate all productivity gains. The goal is to verify the <em>right things</em> at the <em>right times</em>.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🔍 The Trust Spectrum — Know Where You Are</span></div>
+    <div class="fw-step">
+      <div class="fw-num" style="background:var(--green)">✓</div>
+      <div class="fw-content"><h5>Trust and Use (with awareness)</h5><p>Structure, frameworks, brainstormed ideas, rewrites of your own content, explanations of well-known concepts. Still do a logic/sense check.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num fw-num-amber">!</div>
+      <div class="fw-content"><h5>Spot-Check Recommended</h5><p>Technical procedures, code logic, process descriptions, industry practices. Verify the key steps that matter most.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num fw-num-red">✗</div>
+      <div class="fw-content"><h5>Always Independently Verify</h5><p>Statistics, citations, legal/regulatory specifics, medical details, financial figures, recent events. Never publish or act on these without primary source confirmation.</p></div>
+    </div>
+  </div>
+
+  <h3>The 3-Question Verification Decision</h3>
+  <div class="callout c-info">
+    <div class="ic">🤔</div>
+    <div class="bd">
+      <strong>Before using any AI-generated claim, ask yourself:</strong>
+      <p><strong>1. Stakes:</strong> What happens if this is wrong? Low stakes = lower verification bar. High stakes = verify always.<br>
+      <strong>2. Specificity:</strong> Is this a specific, verifiable fact — or a framework/structure? Facts need verification; structure needs a sense check.<br>
+      <strong>3. Recency:</strong> Does this depend on current information? If yes, Claude's training cutoff makes it unreliable without a live source.</p>
+    </div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Verification Triage Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Review your response above and categorise each claim as:
+[SAFE] — well-established concept, no single correct answer, or logic-based
+[CHECK] — specific enough that it could be wrong; I should sense-check it  
+[VERIFY] — specific fact, statistic, citation, or recent event — I must verify from a primary source
+
+For each [VERIFY] item, give me the best search query to confirm it.</pre>
+  </div>
+
+  <div class="ex-card ex-safe">
+    <div class="ex-label">✅ Exercise 2 — Triage a Claude Response</div>
+    <h4>Apply the Trust Spectrum to a Real Output</h4>
+    <ul class="ex-steps">
+      <li>Ask Claude to write a paragraph on a topic in your field (market trends, a technical concept, a regulatory area)</li>
+      <li>Run the Verification Triage Prompt on the output</li>
+      <li>For each [VERIFY] item — search for the primary source. Was Claude right?</li>
+      <li>Reflect: Did Claude correctly identify its own uncertain claims?</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SENSITIVE CONTENT -->
+<section id="sensitive">
+  <div class="sec-label">Topic 4 of 11</div>
+  <h2>🔒 Safe Handling of Sensitive &amp; Confidential Content</h2>
+
+  <p>Claude processes everything you share in the context of your conversation. Knowing what to share — and what to withhold — protects your organisation, your colleagues, and your clients.</p>
+
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Never Share with Claude</div>
+      <ul class="col-body">
+        <li>Customer or client personal data (PII)</li>
+        <li>Passwords, API keys, credentials</li>
+        <li>Unreleased financial results or forecasts</li>
+        <li>M&amp;A plans or commercially sensitive strategy</li>
+        <li>Patient health information (HIPAA-protected)</li>
+        <li>Attorney-client privileged communications</li>
+        <li>Employee personal or HR records</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Safe to Share (Generally)</div>
+      <ul class="col-body">
+        <li>Anonymised or fictional data for testing</li>
+        <li>Publicly available information</li>
+        <li>Your own ideas and drafts</li>
+        <li>General business context (non-sensitive)</li>
+        <li>Code that doesn't embed credentials</li>
+        <li>Documents already published externally</li>
+        <li>Generic role descriptions and job titles</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>The Anonymisation Technique</strong>
+      <p>Replace real names, companies, and identifying details with generic placeholders before sharing context with Claude. "Company X is planning to acquire Company Y" → "Acme Corp is planning to acquire Beta Ltd" tells Claude everything it needs without revealing the real parties.</p>
+    </div>
+  </div>
+
+  <h3>Sensitive Content Red Flags to Watch For</h3>
+  <div class="safety-checks">
+    <div class="safety-row"><span class="s-icon">📧</span><span class="s-label">Pasting an email chain with client names and project details</span><span class="s-status s-dont">ANONYMISE FIRST</span></div>
+    <div class="safety-row"><span class="s-icon">📊</span><span class="s-label">Sharing a spreadsheet with real customer records</span><span class="s-status s-dont">DO NOT SHARE</span></div>
+    <div class="safety-row"><span class="s-icon">💻</span><span class="s-label">Pasting code that contains hardcoded API keys or passwords</span><span class="s-status s-dont">REMOVE FIRST</span></div>
+    <div class="safety-row"><span class="s-icon">📋</span><span class="s-label">Asking Claude to review an HR complaint with real employee names</span><span class="s-status s-dont">ANONYMISE FIRST</span></div>
+    <div class="safety-row"><span class="s-icon">📝</span><span class="s-label">Sharing a contract template (without client details)</span><span class="s-status s-do">GENERALLY SAFE</span></div>
+    <div class="safety-row"><span class="s-icon">🗂️</span><span class="s-label">Describing a business challenge in general terms</span><span class="s-status s-do">GENERALLY SAFE</span></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- HUMAN REVIEW -->
+<section id="human-review">
+  <div class="sec-label">Topic 5 of 11</div>
+  <h2>👁️ Human Review Practices — Building Review Checkpoints</h2>
+
+  <p>AI can accelerate your work by a factor of 3–10x. But speed without review creates risk. The professionals who use AI best are those who <em>design</em> the review step — not those who skip it.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>📋 The AI Workflow Review Model</span></div>
+    <div class="fw-step">
+      <div class="fw-num">1</div>
+      <div class="fw-content"><h5>Generate</h5><p>Use Claude to produce a first draft, analysis, or structured output. Move fast here — this is where AI saves time.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">2</div>
+      <div class="fw-content"><h5>Scan for Risk Signals</h5><p>Specifically check: specific statistics, citations, legal/regulatory claims, recent events. These are highest-risk for hallucination.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">3</div>
+      <div class="fw-content"><h5>Verify the Critical Items</h5><p>Search primary sources for anything in your output that will be published, shared externally, or acted upon.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">4</div>
+      <div class="fw-content"><h5>Sense-Check the Logic</h5><p>Does the structure, argument, or recommendation actually make sense for your context? AI can produce logically coherent but contextually wrong output.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">5</div>
+      <div class="fw-content"><h5>Personalise and Own It</h5><p>Add your expertise, context, and voice. The final output should reflect your professional judgment — not just AI output with your name on it.</p></div>
+    </div>
+  </div>
+
+  <div class="callout c-teal">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>The "Whose Name Is On It?" Rule</strong>
+      <p>Before using any AI-generated output externally, ask: if this turned out to be wrong, whose credibility is at risk? If it's yours — the review standard needs to match what you'd apply to your own work.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CLAUDE CODE SAFETY -->
+<section id="code-safety">
+  <div class="sec-label">Topic 6 of 11</div>
+  <h2>💻 Claude Code Safety — Reviewing Agentic File Changes</h2>
+
+  <p>Claude Code can autonomously read, write, and modify files across your codebase. This is powerful — and requires a specific review mindset that differs from prompt-response interactions.</p>
+
+  <div class="callout c-red">
+    <div class="ic">🚨</div>
+    <div class="bd">
+      <strong>Agentic Actions Are Often Irreversible</strong>
+      <p>When Claude Code deletes a file, overwrites a configuration, or refactors across 30 files — it has already happened. Unlike a response you can ignore, agentic file changes are real. Git history, backups, and careful scoping are your safety net.</p>
+    </div>
+  </div>
+
+  <h3>Before You Start — Scope and Protect</h3>
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Risky Starting Positions</div>
+      <ul class="col-body">
+        <li>No version control / uncommitted changes</li>
+        <li>Running in production environment</li>
+        <li>Vague instructions: "Fix the codebase"</li>
+        <li>No review of what Claude plans to do first</li>
+        <li>Granting write access to unrelated directories</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Safe Starting Positions</div>
+      <ul class="col-body">
+        <li>Clean Git commit before every Claude Code session</li>
+        <li>Work in dev / staging — not production</li>
+        <li>Scope clearly: "Only modify files in /src/auth"</li>
+        <li>Ask Claude to summarise its plan before executing</li>
+        <li>Review diffs before accepting bulk changes</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>The Pre-Execution Prompt Habit</h3>
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Safe Claude Code Start</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Before you make any changes:
+1. Tell me which files you plan to modify
+2. Summarise what each change will do and why
+3. Flag any files you plan to DELETE
+4. Wait for my "go ahead" before executing
+
+Scope constraint: Only work within [specific directory or feature area].
+Do not modify [list any protected files or directories].</pre>
+  </div>
+
+  <h3>Reading the Diff — What to Look For</h3>
+  <div class="diff-wrap">
+    <div class="diff-line diff-ctx">// auth/service.ts — reviewing Claude Code changes</div>
+    <div class="diff-line diff-del">- const SESSION_TIMEOUT = 3600; // 1 hour</div>
+    <div class="diff-line diff-add">+ const SESSION_TIMEOUT = 86400; // 24 hours ← Did you intend this? Security implication.</div>
+    <div class="diff-line diff-ctx"> </div>
+    <div class="diff-line diff-del">- if (user.role === 'admin') { validateMFA(user); }</div>
+    <div class="diff-line diff-add">+ // MFA check removed for performance ← STOP. This is a security regression.</div>
+    <div class="diff-line diff-ctx"> </div>
+    <div class="diff-line diff-add">+ // TODO: update tests ← Claude often defers tests. Review immediately.</div>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="ic">🔍</div>
+    <div class="bd">
+      <strong>Specific Things to Check in Every Diff</strong>
+      <p>Security-related changes (auth, sessions, permissions) · Configuration changes in production files · Deleted or renamed files · Dependencies added to package.json · Comments that say "TODO" or "temporary" · Changes to more files than requested</p>
+    </div>
+  </div>
+
+  <div class="ex-card ex-code">
+    <div class="ex-label">💻 Exercise 3 — Safe Claude Code Session</div>
+    <h4>Practice the Pre-Execution Review Habit</h4>
+    <ul class="ex-steps">
+      <li>Open Claude Code on a test or personal project (not production)</li>
+      <li>Commit all current changes first: <code>git commit -am "checkpoint before AI session"</code></li>
+      <li>Give a scoped task: "Refactor the login function in auth.py — summarise your plan first, then wait."</li>
+      <li>Review the plan. Ask: does this match what you intended?</li>
+      <li>Accept the changes, then run <code>git diff HEAD~1</code> to review what actually changed</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MCP SAFETY -->
+<section id="mcp-safety">
+  <div class="sec-label">Topic 7 of 11</div>
+  <h2>🔌 MCP Safety — Permissions, Data Exposure &amp; Scoping</h2>
+
+  <p>MCP (Model Context Protocol) lets Claude connect to real external tools — calendars, CRMs, databases, file systems, email. This unlocks powerful automation but requires deliberate permission management.</p>
+
+  <div class="callout c-warn">
+    <div class="ic">🔌</div>
+    <div class="bd">
+      <strong>MCP Means Real Actions on Real Systems</strong>
+      <p>When Claude uses an MCP server to send an email, create a database record, or delete a file — that action is real and immediate. Unlike a suggestion you can ignore, MCP-triggered actions require your explicit intent and awareness before they execute.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="mcp-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('mcp-tabs',0)">🔑 Permission Hygiene</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',1)">👁️ Data Exposure Risks</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',2)">🎯 Scoping Tool Access</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">Apply the principle of least privilege — grant only what's needed for the specific task.</p>
+        <div class="safety-checks">
+          <div class="safety-row"><span class="s-icon">✅</span><span class="s-label">Grant read-only access when write access isn't needed</span><span class="s-status s-do">DO THIS</span></div>
+          <div class="safety-row"><span class="s-icon">✅</span><span class="s-label">Review what permissions each MCP server requests before connecting</span><span class="s-status s-do">DO THIS</span></div>
+          <div class="safety-row"><span class="s-icon">✅</span><span class="s-label">Revoke MCP access for tools you're no longer actively using</span><span class="s-status s-do">DO THIS</span></div>
+          <div class="safety-row"><span class="s-icon">⚠️</span><span class="s-label">Connecting MCP tools with broad access "just in case"</span><span class="s-status s-dont">AVOID</span></div>
+          <div class="safety-row"><span class="s-icon">⚠️</span><span class="s-label">Leaving admin-level MCP access enabled in casual conversations</span><span class="s-status s-dont">AVOID</span></div>
+          <div class="safety-row"><span class="s-icon">⚠️</span><span class="s-label">Assuming Claude won't use a tool you haven't explicitly asked it to use</span><span class="s-status s-verify">CHECK FIRST</span></div>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">When Claude accesses your tools via MCP, the data in those tools flows into its context window. Understand what it can see:</p>
+        <table class="tbl">
+          <thead><tr><th>MCP Tool</th><th>Data Claude Can Access</th><th>Risk to Consider</th></tr></thead>
+          <tbody>
+            <tr><td>Google Calendar</td><td>Event titles, attendees, times, descriptions</td><td>Attendee names, meeting subjects exposed</td></tr>
+            <tr><td>Gmail</td><td>Email content, senders, recipients, attachments</td><td>Confidential communications in context</td></tr>
+            <tr><td>Google Drive</td><td>File contents, metadata, sharing settings</td><td>Sensitive documents loaded into context</td></tr>
+            <tr><td>CRM (e.g. Salesforce)</td><td>Customer data, deals, communications</td><td>Client PII and commercial data exposure</td></tr>
+            <tr><td>Database tools</td><td>Query results, table structures</td><td>PII, financial, or production data leakage</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">Scope MCP access to the minimum needed for each session. Use explicit constraints in your prompts:</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Scoped MCP Task</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Using the [Tool Name] connection:
+- Only access data from [specific folder / project / date range]
+- Do not access or modify [specify what's off-limits]
+- Before taking any write action, tell me what you plan to do and wait for confirmation
+- If you're uncertain whether an action is in scope, ask me first</pre>
+        </div>
+        <div class="callout c-tip" style="margin-top:8px">
+          <div class="ic">💡</div>
+          <div class="bd">
+            <strong>Prompt-Level Guardrail</strong>
+            <p>Include "Before taking any write action, tell me and wait for my confirmation" in every MCP-enabled session. This single instruction prevents most unintended actions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">🔌 Exercise 4 — MCP Permission Audit</div>
+    <h4>Review Your Connected MCP Tools</h4>
+    <ul class="ex-steps">
+      <li>In Claude.ai settings, find your connected MCP apps/tools</li>
+      <li>For each connected tool: What write permissions does it have? Is that the minimum needed?</li>
+      <li>Identify any tools connected that you haven't used recently — consider revoking</li>
+      <li>Draft a "scoped MCP session" prompt for a tool you use regularly</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- COWORK SAFETY -->
+<section id="cowork-safety">
+  <div class="sec-label">Topic 8 of 11</div>
+  <h2>🖥️ Cowork Safety — Desktop Automation Scope Management</h2>
+
+  <p>Cowork is Claude's desktop automation agent — it can control your computer, move files, interact with applications, and execute sequences of actions autonomously. This power demands careful scoping.</p>
+
+  <div class="callout c-red">
+    <div class="ic">🖥️</div>
+    <div class="bd">
+      <strong>Desktop Automation = Physical Access to Your Machine</strong>
+      <p>Cowork can interact with any application visible on your screen, move or delete files, and execute multi-step workflows. A vague or overly broad instruction can trigger a cascade of unintended actions across your system.</p>
+    </div>
+  </div>
+
+  <h3>Scope Limiting Rules for Cowork</h3>
+  <div class="fw-card">
+    <div class="fw-head"><span>🖥️ Cowork Safety Checklist</span></div>
+    <div class="fw-step">
+      <div class="fw-num" style="background:var(--green)">1</div>
+      <div class="fw-content"><h5>State exactly which folders or applications are in scope</h5><p>"Only operate within the /Projects/ClientABC folder" prevents Cowork from wandering across your file system.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num" style="background:var(--green)">2</div>
+      <div class="fw-content"><h5>Explicitly list what Cowork must not touch</h5><p>"Do not access my Downloads folder, email client, or any application not mentioned" is a valid and important instruction.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num fw-num-amber">3</div>
+      <div class="fw-content"><h5>Use "pause before delete" as a standing rule</h5><p>Always include: "If any step involves deleting or moving files permanently, stop and confirm with me first."</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num fw-num-amber">4</div>
+      <div class="fw-content"><h5>Watch the screen during long automation runs</h5><p>Cowork benefits from human presence. Don't walk away during complex multi-step sequences — be ready to intervene.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num fw-num-red">5</div>
+      <div class="fw-content"><h5>Never run Cowork with elevated permissions by default</h5><p>Avoid running desktop automation as an administrator unless the specific task requires it. Limit blast radius.</p></div>
+    </div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Safe Cowork Session Start</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Task: [Specific automation task]
+
+Scope constraints:
+- Only operate within: [folder path or application name]
+- Do not access: [list off-limits areas]
+- Before any file deletion, move, or rename: stop and confirm with me
+- If you encounter an unexpected state or error: stop and report rather than improvising
+
+Confirm you understand these constraints before starting.</pre>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- DATA PRIVACY -->
+<section id="privacy">
+  <div class="sec-label">Topic 9 of 11</div>
+  <h2>🔐 Data Privacy — What NOT to Share in Professional Settings</h2>
+
+  <p>Data privacy in AI usage isn't just an IT concern — it's a professional responsibility. Sharing the wrong data with Claude can expose your organisation to regulatory, legal, and reputational risk.</p>
+
+  <div class="tab-wrap" id="priv-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('priv-tabs',0)">🚫 Data to Protect</button>
+      <button class="tab-btn" onclick="switchTab('priv-tabs',1)">🔄 Anonymisation Techniques</button>
+      <button class="tab-btn" onclick="switchTab('priv-tabs',2)">⚖️ Regulatory Context</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="policy-grid">
+          <div class="policy-card">
+            <div class="p-icon">👤</div>
+            <h5>Personal Data (PII)</h5>
+            <p>Names, addresses, emails, phone numbers, ID numbers — any information that identifies a real individual</p>
+          </div>
+          <div class="policy-card">
+            <div class="p-icon">🏥</div>
+            <h5>Health Information</h5>
+            <p>Medical records, diagnoses, treatment data — protected under HIPAA and equivalent regulations globally</p>
+          </div>
+          <div class="policy-card">
+            <div class="p-icon">💳</div>
+            <h5>Financial Data</h5>
+            <p>Account numbers, card details, transaction records — both personal and corporate</p>
+          </div>
+          <div class="policy-card">
+            <div class="p-icon">⚖️</div>
+            <h5>Legal Privileged Content</h5>
+            <p>Attorney-client communications, case strategy, litigation documents</p>
+          </div>
+          <div class="policy-card">
+            <div class="p-icon">🔑</div>
+            <h5>Credentials &amp; Secrets</h5>
+            <p>Passwords, API keys, tokens, private keys — never share these in any context</p>
+          </div>
+          <div class="policy-card">
+            <div class="p-icon">📈</div>
+            <h5>Inside Information</h5>
+            <p>Unreleased financials, M&amp;A activity, material non-public information (MNPI)</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px">You can share the <em>structure</em> of sensitive content while protecting the actual data — this gives Claude enough context to help without exposing real information:</p>
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Help me respond to Sarah Chen's complaint about Invoice #INV-2024-8823"</div>
+          <div class="diff-line diff-add">✅ "Help me respond to a client complaint about a billing error on a recent invoice"</div>
+          <div class="diff-line diff-ctx"> </div>
+          <div class="diff-line diff-del">❌ Pasting a spreadsheet with real customer names and order values</div>
+          <div class="diff-line diff-add">✅ Describing the structure: "I have columns: CustomerID, OrderDate, Amount, Status"</div>
+          <div class="diff-line diff-ctx"> </div>
+          <div class="diff-line diff-del">❌ "Our Q3 revenue was £4.2M, 23% below target — help me explain this to the board"</div>
+          <div class="diff-line diff-add">✅ "Our Q3 revenue was significantly below target — help me structure a board explanation"</div>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:10px">Different regulatory regimes apply depending on your sector and geography. Know which applies to you:</p>
+        <table class="tbl">
+          <thead><tr><th>Regulation</th><th>Applies To</th><th>AI Usage Implication</th></tr></thead>
+          <tbody>
+            <tr><td><strong>GDPR</strong></td><td>EU personal data of EU residents</td><td>Sharing EU PII with third-party AI tools requires appropriate legal basis</td></tr>
+            <tr><td><strong>HIPAA</strong></td><td>US healthcare organisations</td><td>Protected Health Information (PHI) cannot be shared with Claude without BAA in place</td></tr>
+            <tr><td><strong>CCPA</strong></td><td>California consumer data</td><td>Consumer data usage and sharing must comply with consent requirements</td></tr>
+            <tr><td><strong>SOC 2</strong></td><td>SaaS and cloud companies</td><td>Customer data handling must meet audit standards — verify AI tools in scope</td></tr>
+            <tr><td><strong>Financial Services</strong></td><td>FCA, SEC, MiFID regulated firms</td><td>MNPI, client data, and communication records subject to strict controls</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-priv">
+    <div class="ex-label">🔐 Exercise 5 — Privacy Review</div>
+    <h4>Identify and Fix Data Exposure in a Realistic Scenario</h4>
+    <ul class="ex-steps">
+      <li>Scenario: "I want Claude to help me analyse customer feedback from our Q3 NPS survey."</li>
+      <li>Identify: What data would you typically need to paste in? What's sensitive about it?</li>
+      <li>Rewrite: How would you provide enough context for Claude to help while protecting the data?</li>
+      <li>Discuss: Where does your organisation's current AI usage policy draw the line?</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ORGANISATIONAL AI POLICY -->
+<section id="policy">
+  <div class="sec-label">Topic 10 of 11</div>
+  <h2>🏢 Organisational AI Policies — Compliance &amp; Company Guidelines</h2>
+
+  <p>Most organisations are still developing their AI usage policies. Whether formal or informal, knowing how to navigate and contribute to these policies is now a professional skill.</p>
+
+  <div class="two-col">
+    <div class="col-box col-warn">
+      <div class="col-head">⚠️ If No Policy Exists Yet</div>
+      <ul class="col-body">
+        <li>Apply your data handling standards as if AI were any other third-party tool</li>
+        <li>Default to the most restrictive interpretation for sensitive data</li>
+        <li>Document your AI usage so it can be reviewed later</li>
+        <li>Raise the policy gap with your manager or IT team</li>
+        <li>Use this module as your baseline framework</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ If a Policy Exists</div>
+      <ul class="col-body">
+        <li>Know specifically which tools are approved for professional use</li>
+        <li>Understand data classification tiers (public, internal, confidential)</li>
+        <li>Know what requires approval before new AI tool adoption</li>
+        <li>Understand disclosure requirements for AI-assisted work</li>
+        <li>Know who to contact with questions or incidents</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Questions to Ask Your Organisation</h3>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">Which AI tools are approved for professional use? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Organisations typically maintain an approved tool list. Using unapproved AI tools — even well-known ones — may violate IT security policy and create data handling risks that the organisation hasn't assessed. When in doubt, ask IT or your manager before introducing a new AI tool to your workflow.</p>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">What data classification framework applies? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Most organisations classify data into tiers — typically Public, Internal, Confidential, and Restricted. AI tools should only be used with data at the classification level that's been assessed and approved. Confidential and Restricted data typically require either a specific enterprise agreement with the AI provider or are prohibited from AI tool use entirely.</p>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">Is AI-assisted work subject to disclosure requirements? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Some organisations (and some clients) require disclosure when AI has been used to produce deliverables. This is particularly common in legal, financial, consulting, and creative sectors. Know whether your organisation has a disclosure policy — and whether your clients have their own requirements that your organisation must honour.</p>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">Who owns AI-generated output? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>IP ownership of AI-generated content is an evolving legal area. Most organisations take the position that output produced using their systems and for their purposes is the company's IP. However, this may be more complex where individual employees use personal accounts or tools. Check whether your organisation has taken a position on this.</p>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">What's the incident reporting process for AI-related issues? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>If you accidentally share sensitive data with an AI tool, or if you suspect AI-generated content caused a problem — know who to contact. Most organisations with AI policies have an incident escalation path. If none exists, your data protection officer, IT security team, or line manager is the right starting point.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- RESPONSIBLE AI HABITS -->
+<section id="habits">
+  <div class="sec-label">Topic 11 of 11</div>
+  <h2>🌱 Responsible AI Habits for Daily Professional Usage</h2>
+
+  <p>Responsible AI use isn't a checklist you complete once — it's a set of habits embedded into how you work every day. These are the habits that distinguish professionals who use AI well from those who create risk for themselves and their organisations.</p>
+
+  <h3>Your Daily AI Hygiene Checklist</h3>
+  <div class="safety-checks">
+    <div class="safety-row"><span class="s-icon">🔍</span><span class="s-label">Before sharing content: "Does this include any sensitive data I should anonymise?"</span><span class="s-status s-do">DAILY HABIT</span></div>
+    <div class="safety-row"><span class="s-icon">✅</span><span class="s-label">Before publishing AI output: "Have I verified any specific claims in here?"</span><span class="s-status s-do">DAILY HABIT</span></div>
+    <div class="safety-row"><span class="s-icon">👁️</span><span class="s-label">Before sending externally: "Would I be comfortable if this was seen as my work?"</span><span class="s-status s-do">DAILY HABIT</span></div>
+    <div class="safety-row"><span class="s-icon">💻</span><span class="s-label">Before every Claude Code session: commit current state to Git</span><span class="s-status s-do">ALWAYS</span></div>
+    <div class="safety-row"><span class="s-icon">🔌</span><span class="s-label">MCP sessions: include scope constraints and "confirm before write actions"</span><span class="s-status s-do">ALWAYS</span></div>
+    <div class="safety-row"><span class="s-icon">🖥️</span><span class="s-label">Cowork sessions: specify exactly what's in scope and what's off-limits</span><span class="s-status s-do">ALWAYS</span></div>
+    <div class="safety-row"><span class="s-icon">🧠</span><span class="s-label">Long conversations: periodically restate key constraints to prevent context drift</span><span class="s-status s-verify">RECOMMENDED</span></div>
+    <div class="safety-row"><span class="s-icon">📋</span><span class="s-label">Before new AI tool adoption: check if it's approved by your organisation</span><span class="s-status s-verify">RECOMMENDED</span></div>
+  </div>
+
+  <h3>The Responsible AI Mindset in Practice</h3>
+  <div class="tab-wrap" id="mindset-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('mindset-tabs',0)">🎯 Own the Output</button>
+      <button class="tab-btn" onclick="switchTab('mindset-tabs',1)">🔍 Question Fluency</button>
+      <button class="tab-btn" onclick="switchTab('mindset-tabs',2)">🌱 Build Trust Gradually</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="callout c-green">
+          <div class="ic">🎯</div>
+          <div class="bd">
+            <strong>You Are the Professional — Not Claude</strong>
+            <p>When you put your name or your organisation's name on any output, you're taking responsibility for it. Use Claude as a powerful tool — but always exercise your professional judgment before committing to any AI-generated content. The AI accelerates your thinking; it doesn't replace it.</p>
+          </div>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink-soft)">This is especially important for:</p>
+        <ul style="list-style:none;padding-left:0">
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Client-facing documents and communications</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Technical decisions with downstream consequences</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Analysis that drives business decisions</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Code committed to production systems</li>
+        </ul>
+      </div>
+      <div class="tab-panel">
+        <div class="callout c-info">
+          <div class="ic">🔍</div>
+          <div class="bd">
+            <strong>Fluency Isn't the Same as Accuracy</strong>
+            <p>Claude writes in a clear, confident, well-structured style. This fluency can create an illusion of authority. Develop a habit of mentally separating "how well-written is this?" from "how accurate is this?" — these are completely different questions.</p>
+          </div>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink-soft)">When Claude sounds authoritative, ask yourself:</p>
+        <ul style="list-style:none;padding-left:0">
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Am I reading this as credible because it's accurate — or because it's well-written?</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Does this align with what I know from direct experience?</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Have I asked Claude where this claim comes from?</li>
+          <li style="padding:4px 0;font-size:13.5px;color:var(--ink-soft)">→ Would I act on this without an independent check?</li>
+        </ul>
+      </div>
+      <div class="tab-panel">
+        <div class="callout c-teal">
+          <div class="ic">🌱</div>
+          <div class="bd">
+            <strong>Earn Trust Through Experience</strong>
+            <p>The right approach to AI trust is empirical — verify enough outputs in a domain to calibrate how reliable Claude is in that context. Once you've seen it hallucinate citations, you'll always check citations. Once you've seen it get technical details right repeatedly, you'll extend more trust (with continued awareness).</p>
+          </div>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink-soft)">A calibrated trust model:</p>
+        <table class="tbl" style="margin-top:8px">
+          <thead><tr><th>Domain / Task</th><th>Suggested Starting Trust Level</th></tr></thead>
+          <tbody>
+            <tr><td>Brainstorming and ideation</td><td>High — ideas need evaluation regardless of source</td></tr>
+            <tr><td>Drafting and structure</td><td>High — you'll edit anyway; the structure is the value</td></tr>
+            <tr><td>Technical explanations (general)</td><td>Medium — verify before teaching others</td></tr>
+            <tr><td>Code (logic and approach)</td><td>Medium — test before committing</td></tr>
+            <tr><td>Specific facts and citations</td><td>Low — always verify from primary sources</td></tr>
+            <tr><td>Legal, medical, financial specifics</td><td>Very Low — always consult relevant professionals</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>✅ You're Now Equipped To…</h4>
+    <ul>
+      <li>Identify the failure modes that matter most for your professional context</li>
+      <li>Apply fact verification habits before any high-stakes AI output goes external</li>
+      <li>Handle sensitive data safely: anonymise, scope, and protect</li>
+      <li>Run Claude Code, MCP, and Cowork sessions with professional-grade safety habits</li>
+      <li>Navigate your organisation's AI policies — and advocate for better ones</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>🧠 Module 9 Quiz</h2>
+  <div class="quiz-wrap">
+    <h4>Safe Usage &amp; Responsible AI</h4>
+    <div class="quiz-sub">7 questions · Select the best answer for each</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Course Finale</div>
+  <h2>🎓 Module 9 Summary &amp; Course Completion</h2>
+
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">⚡</span>Claude fails most predictably on specific facts, citations, and recent events — these always need verification</div>
+    <div class="sum-item"><span class="ic">🌀</span>Hallucination is structural, not a bug — learn to spot it and build verification into your workflow</div>
+    <div class="sum-item"><span class="ic">✅</span>Apply the Trust Spectrum: trust structure and ideas; always verify specific facts before external use</div>
+    <div class="sum-item"><span class="ic">🔒</span>Never share PII, credentials, MNPI, or legally privileged content with Claude — anonymise first</div>
+    <div class="sum-item"><span class="ic">👁️</span>Build human review checkpoints into every AI workflow — the "whose name is on it" rule</div>
+    <div class="sum-item"><span class="ic">💻</span>Claude Code: Git commit before every session, scope explicitly, review every diff</div>
+    <div class="sum-item"><span class="ic">🔌</span>MCP: least privilege, confirm before write actions, audit connected tools regularly</div>
+    <div class="sum-item"><span class="ic">🖥️</span>Cowork: always specify scope, list off-limits areas, never walk away during complex automation</div>
+    <div class="sum-item"><span class="ic">🏢</span>Know your organisation's AI policy — and apply responsible defaults when one doesn't exist</div>
+  </div>
+
+  <div class="callout c-green" style="margin-top:24px">
+    <div class="ic">🎓</div>
+    <div class="bd">
+      <strong>Course Complete — Mastering Claude for Real-World Productivity</strong>
+      <p>You've completed all 9 modules. You now have the knowledge to use Claude as a powerful professional tool — writing, coding, thinking, deciding, and automating — with the safety habits and responsible practices that protect you, your team, and your organisation. The advantage isn't knowing that AI exists. It's knowing how to use it well.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 9 of 9 · Safe Usage &amp; Responsible AI</div>
+  <div class="nav-links">
+    <a href="module8_display.html" class="nav-link nav-prev">← Module 8</a>
+    <span style="padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;background:var(--green);color:#fff">🎓 Complete</span>
+  </div>
+</div>
+
+</div><!-- end page-wrap -->
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const qData=[
+  {
+    q:"Claude responds with high confidence and well-structured text. What does this tell you about the accuracy of its specific factual claims?",
+    opts:["High confidence = high accuracy","Nothing — fluency and accuracy are independent of each other","It means the facts are from verified sources","It means Claude has checked its training data"],
+    answer:1,
+    fb:["❌ Confidence in Claude's tone is not correlated with factual accuracy. It can sound certain while being wrong.","✅ Fluency (how well-written something is) and accuracy (whether it's factually correct) are completely separate. Always evaluate them independently.","❌ Claude does not cite sources in real-time or retrieve from verified databases — it generates plausible text.","❌ Claude doesn't perform internal fact-checking before responding."]
+  },
+  {
+    q:"You ask Claude: 'What are 5 academic papers on agile productivity from 2023?' What is the most responsible next step?",
+    opts:["Use the citations — Claude has broad academic knowledge","Cross-reference at least one citation by searching for it directly","Ask Claude to check its own work","Accept them if the journal names sound familiar"],
+    answer:1,
+    fb:["❌ Academic citations are one of the highest hallucination risk areas. Claude frequently fabricates plausible-sounding but non-existent papers.","✅ Citations must always be independently verified. Search for the paper by title and author. If it doesn't exist exactly as described, it's likely hallucinated.","❌ Claude cannot reliably verify its own outputs — it may 'confirm' a fabricated citation with equal confidence.","❌ Plausible-sounding names don't indicate real publications."]
+  },
+  {
+    q:"Before a Claude Code session working on your authentication module, what should you always do first?",
+    opts:["Tell Claude which files to avoid","Run the code to check it works currently","Git commit your current state","Disable write access temporarily"],
+    answer:2,
+    fb:["❌ Scoping is important but doesn't protect you if Claude makes an unintended change — you need the ability to roll back.","❌ A clean test run is useful but doesn't give you a recovery point.","✅ A Git commit before every Claude Code session is the single most important safety habit. It gives you a clean rollback point if anything goes wrong.","❌ This may limit Claude's ability to complete the task, and isn't as effective as having version control."]
+  },
+  {
+    q:"You're setting up an MCP connection to your company's CRM system. What principle should guide your permission settings?",
+    opts:["Grant full access so Claude can help with any CRM task","Least privilege — grant only what's needed for the current task","Admin access is safer because Claude can be more careful","MCP access doesn't expose data to Claude's context"],
+    answer:1,
+    fb:["❌ Broad access means any mistake, misunderstanding, or unintended action has a much larger blast radius.","✅ Least privilege is the foundational security principle. Grant read-only if you don't need writes. Scope to specific objects if you don't need full CRM access.","❌ Elevated permissions increase risk — they don't create more careful behaviour.","❌ When Claude queries your CRM via MCP, the results are loaded into its context window. Data is exposed within the conversation."]
+  },
+  {
+    q:"A colleague wants to paste a support email thread (including the customer's name, email, and order details) into Claude to draft a response. What's the right approach?",
+    opts:["It's fine — Claude is a secure enterprise tool","Paste the thread but redact the email address only","Anonymise the customer details before pasting, then describe the issue","Don't use Claude for anything involving customer communications"],
+    answer:2,
+    fb:["❌ Even enterprise AI tools have data handling considerations. PII should be protected regardless of the tool's security posture.","❌ Name and order details are still PII — partial redaction doesn't eliminate the risk.","✅ Anonymise all identifying information (name, email, order number, any other PII) and describe the situation in general terms. Claude can help you draft an excellent response without needing to know who the customer is.","❌ Claude can be highly useful for communication drafting — but with proper data handling practices in place."]
+  },
+  {
+    q:"When using Cowork to automate a file organisation task, which instruction is most important to include?",
+    opts:["Tell Cowork to work as fast as possible","Specify exactly which folders are in scope — and list what's off-limits","Ask Cowork to explain each step as it goes","Turn off notifications so the automation isn't interrupted"],
+    answer:1,
+    fb:["❌ Speed is not the primary concern — scope control is.","✅ Explicit scope definition is the most critical Cowork safety practice. Without it, a desktop automation agent may touch files, folders, or applications you didn't intend.","❌ Narration is helpful but not the most critical safety element — it doesn't prevent unintended actions.","❌ Staying present and able to intervene is actually recommended — not reducing your ability to respond."]
+  },
+  {
+    q:"Your organisation has no formal AI usage policy. Which of the following is the most responsible approach?",
+    opts:["Use AI freely — if there's no policy, there's no restriction","Avoid using AI at all until a policy is established","Apply your existing data handling and third-party tool standards to AI — and flag the policy gap to your manager","Only use AI for personal tasks, not professional ones"],
+    answer:2,
+    fb:["❌ Absence of policy doesn't mean absence of responsibility. Your professional obligations and existing data standards still apply.","❌ This would eliminate significant productivity benefits unnecessarily. Responsible use without a formal policy is achievable.","✅ Apply the standards you'd use for any third-party tool: protect sensitive data, verify outputs that go external, and flag to leadership that a formal AI policy is needed.","❌ This is overly restrictive and doesn't acknowledge that professional AI use can be done responsibly."]
+  }
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Outstanding! You\'re ready to use AI safely in professional practice.':_quizCorrect>=4?'👍 Good! Review the sections where you were unsure.':'📚 Revisit the module — these habits protect you and your organisation.'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="btn btn-green" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="btn btn-green" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>

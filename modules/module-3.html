@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 3 — Claude for Document Intelligence</title>
+<style>
+:root {
+  --ink:#0f1923; --ink-soft:#3d4f5e; --ink-muted:#7a8fa0;
+  --canvas:#f7f6f3; --surface:#ffffff; --border:#e0d8cc;
+  --amber:#c47a00; --amber-lt:#fff8e6; --amber-border:#e8c96a;
+  --green:#0fad74; --green-lt:#e6f8f2;
+  --red:#d63b3b; --red-lt:#fdeaea;
+  --accent:#1a6cf5; --accent-lt:#e8f0fe;
+  --purple:#7b52e8; --purple-lt:#f0ecfd;
+  --teal:#0891b2; --teal-lt:#e0f7fa;
+  --rose:#e03e6b; --rose-lt:#fde8ef;
+  --radius:10px; --radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 24px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+
+/* ── LAYOUT ── */
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* ── HEADER ── */
+.mod-header{background:linear-gradient(135deg,#1a0e00 0%,#3d2000 50%,#c47a00 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.04)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(196,122,0,.25)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#ffd98a;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#ffd98a;max-width:520px;line-height:1.5;opacity:.88}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#d4a855;display:flex;align-items:center;gap:5px}
+.progress-wrap{margin:22px 0 0}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#d98b00,#1a6cf5)}
+
+/* ── STICKY NAV ── */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--amber-lt);color:var(--amber)}
+
+/* ── SECTION ── */
+section{margin-top:48px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:26px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* ── OBJECTIVES ── */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* ── TWO COL COMPARE ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad  .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* ── PROMPT BOX ── */
+.prompt-box{background:#1a0e00;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#2a1800;border-bottom:1px solid #3d2800}
+.pb-header span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#ffd08a}.lbl-o{color:#62e8a4}.lbl-n{color:#8ab4d8}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#ffe0b0;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* ── TABS ── */
+.tab-wrap{margin:16px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ── ACCORDION ── */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--amber-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--amber);color:var(--amber)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* ── TOPIC CARD ── */
+.topic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:12px}
+.topic-card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.topic-icon{font-size:22px}
+.topic-title{font-size:15px;font-weight:700;color:var(--ink)}
+.topic-desc{font-size:13.5px;color:var(--ink-soft);margin-bottom:10px}
+
+/* ── CALLOUT ── */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}
+.c-tip .bd strong{color:var(--green)}
+.c-warn{background:var(--amber-lt);border-color:var(--amber-border)}
+.c-warn .bd strong{color:var(--amber)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}
+.c-info .bd strong{color:var(--accent)}
+.c-err{background:var(--red-lt);border-color:#f0aaaa}
+.c-err .bd strong{color:var(--red)}
+
+/* ── HOW-TO CARD ── */
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
+.how-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.how-num{width:26px;height:26px;background:var(--amber);color:#fff;border-radius:50%;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.how-card h5{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.how-card p{font-size:12.5px;color:var(--ink-muted);margin:0}
+
+/* ── EXERCISE ── */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.ex-pdf     {background:linear-gradient(135deg,#fff8e6,#fff3d6);border:1px solid #f5d07a}
+.ex-extract {background:linear-gradient(135deg,var(--teal-lt),#e8f6fb);border:1px solid #67d5eb}
+.ex-compare {background:linear-gradient(135deg,var(--purple-lt),#f5f0ff);border:1px solid #c4b2f5}
+.ex-resume  {background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border:1px solid #9fe8cc}
+.ex-contract{background:linear-gradient(135deg,var(--rose-lt),#fff0f5);border:1px solid #f0a8bc}
+.ex-policy  {background:linear-gradient(135deg,var(--accent-lt),#eef4ff);border:1px solid #a8c4f8}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ex-pdf     .ex-label{color:var(--amber)}
+.ex-extract .ex-label{color:var(--teal)}
+.ex-compare .ex-label{color:var(--purple)}
+.ex-resume  .ex-label{color:var(--green)}
+.ex-contract .ex-label{color:var(--rose)}
+.ex-policy  .ex-label{color:var(--accent)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0}
+.ex-pdf     .ex-steps li::before{color:var(--amber)}
+.ex-extract .ex-steps li::before{color:var(--teal)}
+.ex-compare .ex-steps li::before{color:var(--purple)}
+.ex-resume  .ex-steps li::before{color:var(--green)}
+.ex-contract .ex-steps li::before{color:var(--rose)}
+.ex-policy  .ex-steps li::before{color:var(--accent)}
+
+/* ── REVEAL ── */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;transition:all .15s;background:var(--amber);color:#fff}
+.reveal-btn:hover{background:var(--amber-mid,#b36b00)}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* ── DIFF ── */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+.diff-n{background:#f9f7f3;border-left:3px solid var(--border);color:var(--ink-muted)}
+
+/* ── SUMMARY GRID ── */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* ── DATA TABLE ── */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#faf8f3}
+.tbl tr:hover td{background:var(--amber-lt)}
+
+/* ── QUIZ ── */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--amber)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--amber);background:var(--amber-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--amber)}
+
+/* ── FOOTER ── */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}
+.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--amber);color:#fff}
+.nav-next:hover{background:#b36b00}
+
+/* ── MISC ── */
+.divider{border:none;border-top:1px dashed var(--border);margin:36px 0}
+.tag{display:inline-block;background:var(--amber-lt);color:var(--amber);font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;margin:2px}
+.highlight{background:linear-gradient(135deg,var(--amber-lt),#fff8d6);border-left:4px solid var(--amber);border-radius:var(--radius-sm);padding:14px 18px;margin:12px 0}
+.highlight p{margin:0;font-size:14px}
+code{font-family:var(--font-mono);background:#f5f0e8;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--amber)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-amber{background:var(--amber);color:#fff}
+.btn-amber:hover{background:#b36b00}
+.btn-ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--ink-soft)}
+.btn-ghost:hover{border-color:var(--amber);color:var(--amber)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<!-- ═══ HEADER ═══ -->
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 2 · Module 3 of 9</div>
+    <h1>Claude for Document Intelligence</h1>
+    <p class="tagline">Read less. Understand more. Extract exactly what you need.</p>
+    <div class="header-chips">
+      <span>⏱ 90 min</span>
+      <span>📄 6 Document Types</span>
+      <span>🏋️ 6 Exercises</span>
+    </div>
+    <div class="progress-wrap" style="margin-top:18px">
+      <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#how-to-use">How to Use</a>
+  <a href="#pdf">PDF</a>
+  <a href="#extraction">Extraction</a>
+  <a href="#comparison">Compare</a>
+  <a href="#resume">Resume</a>
+  <a href="#contract">Contracts</a>
+  <a href="#policy">Policy</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- ═══ OBJECTIVES ═══ -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">📄</span>Summarise any PDF or long document in under 2 minutes</div>
+    <div class="obj-item"><span class="ic">🔍</span>Extract only what you need — dates, risks, numbers, obligations</div>
+    <div class="obj-item"><span class="ic">⚖️</span>Compare two documents and get a recommendation for your situation</div>
+    <div class="obj-item"><span class="ic">👤</span>Tailor your resume to any job description with gap analysis</div>
+    <div class="obj-item"><span class="ic">📝</span>Understand any contract clause in plain English</div>
+    <div class="obj-item"><span class="ic">📋</span>Turn dense policies into clear, team-ready guidance</div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ HOW TO USE ═══ -->
+<section id="how-to-use">
+  <div class="sec-label">Foundation</div>
+  <h2>3 Ways to Give Claude a Document</h2>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <h5>📋 Copy &amp; Paste</h5>
+      <p>Copy text from any PDF, Word doc, or webpage and paste it into Claude. Works for any text-based document.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <h5>📎 File Upload</h5>
+      <p>On claude.ai, attach PDFs directly. Claude reads the file and you can ask any question about it.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <h5>🔗 Paste in Chunks</h5>
+      <p>For very long documents, paste section by section. Ask Claude to "read and remember" each part first.</p>
+    </div>
+  </div>
+
+  <div class="callout c-warn" style="margin-top:14px">
+    <div class="ic">🔑</div>
+    <div class="bd">
+      <strong>Always Tell Claude 3 Things</strong>
+      <p><strong>What</strong> the document is &nbsp;·&nbsp; <strong>Who</strong> you are &nbsp;·&nbsp; <strong>What</strong> you want extracted</p>
+    </div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="pb-header"><span class="lbl-i">Universal Document Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Document type: [e.g. vendor contract / annual report / HR policy]
+My role: [e.g. I'm a PM / job applicant / team lead]
+My purpose: [e.g. deciding whether to sign / briefing my team]
+
+[YOUR SPECIFIC QUESTION OR TASK]
+
+[PASTE DOCUMENT HERE]</pre>
+  </div>
+
+  <div class="callout c-err">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>Important Limits</strong>
+      <p>Claude is not a lawyer or accountant. For high-stakes contracts or compliance decisions, always get professional sign-off. Don't paste sensitive personal data (SSNs, bank details) into any AI tool.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 1: PDF ═══ -->
+<section id="pdf">
+  <div class="sec-label">Topic 1 of 6</div>
+  <h2>📄 PDF Summarisation</h2>
+
+  <p>Choose your summary level based on who it's for and how much time they have.</p>
+
+  <table class="tbl">
+    <thead><tr><th>Level</th><th>Use When</th><th>Key Phrase to Use</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Executive</strong></td><td>Briefing senior leadership</td><td>"3-sentence executive summary"</td></tr>
+      <tr><td><strong>5 Key Points</strong></td><td>Quick decision-making</td><td>"5 most important bullet points"</td></tr>
+      <tr><td><strong>Full Structured</strong></td><td>Deep understanding needed</td><td>"Full summary with section headers"</td></tr>
+      <tr><td><strong>Q&amp;A Format</strong></td><td>Teaching or explaining</td><td>"Format as 8 Q&amp;A pairs"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tab-wrap" id="pdf-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('pdf-tabs',0)">📊 Annual Report</button>
+      <button class="tab-btn" onclick="switchTab('pdf-tabs',1)">📑 Research Paper</button>
+      <button class="tab-btn" onclick="switchTab('pdf-tabs',2)">📋 Project Document</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Annual Report Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Document type: Annual Report
+My role: [business analyst / investor / procurement]
+My purpose: Evaluating as a potential partner / client
+
+Summarise with these sections:
+1. Company Overview (2 sentences)
+2. Financial Performance (key numbers and trends)
+3. Strategic Priorities (next 1–3 years)
+4. Key Risks (as the company identifies them)
+5. Red Flags (anything I should be concerned about)
+6. One-sentence verdict: Strong / Stable / Risky?
+
+Be analytical — give insights, not just a restatement.
+
+[PASTE REPORT HERE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Research Paper Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Document type: Research / Academic Paper
+My role: Practitioner — I need to apply findings, not publish research
+
+Summarise in plain English (no jargon):
+1. The Question — what problem did they study?
+2. The Method — how did they study it? (brief)
+3. The Findings — what did they discover? (use numbers)
+4. The "So What" — what does this mean for me practically?
+5. The Limitations — what are the caveats?
+6. Relevance — is this applicable to [my context]?
+
+[PASTE PAPER HERE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Project Document Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Document type: [Project Proposal / Technical Spec / SOW]
+Audience for this summary: [Technical team / Executives / Client]
+
+Summarise tailored to this audience:
+1. Project Purpose (1–2 sentences)
+2. Scope — what IS and IS NOT included
+3. Timeline — key milestones and final deadline
+4. Responsibilities — who does what
+5. Risks and Assumptions
+6. What the reader needs to approve or action
+
+No unexplained acronyms for non-technical audiences.
+
+[PASTE DOCUMENT HERE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise 1 -->
+  <div class="ex-card ex-pdf">
+    <div class="ex-label">Exercise 1 — PDF Summary</div>
+    <h4>Summarise This Report Excerpt</h4>
+    <p>Paste the sample below into Claude using the Annual Report prompt. Then try iterating to different formats.</p>
+    <div class="prompt-box">
+      <div class="pb-header"><span class="lbl-n">Sample: NexaCore Technologies Excerpt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>Revenue grew 18% to ₹420 Cr. Net profit margin: 6.2% → 8.4%.
+Cash reserves: ₹85 Cr. Debt-to-equity: 0.3.
+Cloud-first transition underway — targeting 60% recurring revenue by FY26 (currently 38%).
+Top 3 clients = 42% of revenue. AI team attrition: 22%.
+Pipeline for Q1 FY25: ₹180 Cr (strongest ever). 3 AI acquisitions planned.</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Run the Annual Report prompt with these notes</li>
+      <li>Follow up: "Give me a 2-sentence summary for someone with 30 seconds"</li>
+      <li>Follow up: "What are the top 3 risks for a potential client of this company?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Key Insights Claude Should Flag</button>
+    <div class="ans-box">
+      <p>🔴 <strong>Red Flag:</strong> 42% revenue concentrated in 3 clients — one departure is a major business risk.</p>
+      <p>⚠️ <strong>Contradiction:</strong> 22% AI team attrition while planning AI acquisitions — they may not retain acquired talent either.</p>
+      <p>✅ <strong>Positive:</strong> Strong pipeline + improving margins suggests execution capability despite transformation pressure.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 2: EXTRACTION ═══ -->
+<section id="extraction">
+  <div class="sec-label">Topic 2 of 6</div>
+  <h2>🔍 Extracting Key Information</h2>
+
+  <div class="callout c-info">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>Summarise vs Extract</strong>
+      <p><strong>Summarise</strong> — when you need an overview &nbsp;|&nbsp; <strong>Extract</strong> — when you know exactly what you're looking for</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📅 Extract All Dates &amp; Deadlines <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-header"><span class="lbl-i">Date Extraction Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Extract every date, deadline, and time-sensitive obligation.
+
+Format as a table: Date | What Must Happen | Who Is Responsible | Consequence If Missed
+
+If a deadline is relative (e.g. "within 30 days"), calculate the actual date.
+Assuming today is [TODAY] and the contract was signed [DATE].
+Bold any deadline within the next 30 days.
+
+[PASTE DOCUMENT HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">⚠️ Extract Risks &amp; Obligations <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-header"><span class="lbl-i">Risk &amp; Obligation Extraction</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Document type: [Contract / Policy / Agreement]
+My role: [buyer / vendor / employee]
+
+Extract:
+1. MY OBLIGATIONS — everything I must do
+2. THEIR OBLIGATIONS — everything the other party must do
+3. FINANCIAL COMMITMENTS — payments, penalties, fees
+4. RISKY CLAUSES — unusual or one-sided terms
+
+Rate each risk: 🔴 High | 🟡 Medium | 🟢 Low
+
+[PASTE DOCUMENT HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📊 Extract Numbers &amp; Metrics <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-header"><span class="lbl-i">Numbers Extraction Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Extract every number and metric from this document.
+
+Organise as:
+- Financial figures (revenue, costs, margins)
+- Performance metrics (growth rates, KPIs, percentages)
+- Timelines (durations, dates, periods)
+
+Format: Category | Metric | Value | Context
+
+Then: highlight the 3 most significant numbers and explain why each matters.
+
+[PASTE DOCUMENT HERE]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❓ Ask Specific Questions About a Document <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>The most flexible technique — interrogate a document like a conversation.</p>
+      <div class="prompt-box">
+        <div class="pb-header"><span class="lbl-i">Document Q&amp;A Technique</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>I'm going to paste a [document type] below. Read it carefully.
+Then answer my specific questions.
+
+For each answer:
+- Quote the relevant section
+- Explain in plain English
+- Flag if it's ambiguous or needs professional advice
+
+[PASTE DOCUMENT]
+
+My questions:
+1. [Question 1]
+2. [Question 2]
+3. [Question 3]</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-extract">
+    <div class="ex-label">Exercise 2 — Targeted Extraction</div>
+    <h4>Multiple Angles, Same Document</h4>
+    <p>Using the NexaCore excerpt from Exercise 1:</p>
+    <ul class="ex-steps">
+      <li>Ask: "Extract all numbers and metrics — put them in a table"</li>
+      <li>Ask: "Which 3 numbers matter most to a potential investor and why?"</li>
+      <li>Ask: "What risks does a client of NexaCore face based on this document?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Key Insight</button>
+    <div class="ans-box">
+      <p>The same document gives completely different outputs depending on your question. An investor focuses on client concentration (42%) and attrition (22%). A client focuses on transformation instability and acquisition risk. This is the power of targeted extraction — not "what is this document about" but "what does this mean <em>for me</em>."</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 3: COMPARISON ═══ -->
+<section id="comparison">
+  <div class="sec-label">Topic 3 of 6</div>
+  <h2>⚖️ Comparing Documents</h2>
+
+  <div class="highlight">
+    <p>💡 Don't just ask "what's different?" — ask "what differences affect <em>my decision</em>?" That's where the value is.</p>
+  </div>
+
+  <div class="tab-wrap" id="cmp-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('cmp-tabs',0)">📄 Two Documents</button>
+      <button class="tab-btn" onclick="switchTab('cmp-tabs',1)">📋 Multiple Options</button>
+      <button class="tab-btn" onclick="switchTab('cmp-tabs',2)">🔄 Version Changes</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Document vs Document</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Document A: [Brief description]
+Document B: [Brief description]
+My role: [Who you are]
+Decision I need: [What you're deciding]
+
+Provide:
+1. Overview — 2-sentence summary of each
+2. Key Differences — table: Topic | Doc A | Doc B | Better For Me
+3. What Both Agree On
+4. Recommendation — which suits my needs and why
+5. Questions to Clarify before deciding
+
+--- DOCUMENT A ---
+[PASTE]
+--- DOCUMENT B ---
+[PASTE]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Multiple Options Comparison</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to compare [N] options and choose the best.
+
+My situation: [Brief context]
+My criteria in order of importance:
+1. [Most important]
+2. [Second]
+3. [Third]
+
+Build a comparison table, rank against MY criteria,
+and flag any option with a disqualifying weakness.
+
+--- OPTION 1: [Name] ---
+[Paste]
+--- OPTION 2: [Name] ---
+[Paste]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Version Change Tracker</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Compare Version 1 and Version 2 of this document.
+My role: [I am reviewing before signing the updated version]
+
+Tell me:
+1. ADDITIONS — new content in V2
+2. REMOVALS — what was in V1 but removed
+3. CHANGES — what was modified (before and after)
+4. IMPACT — for each change: better / worse / neutral for me?
+5. NEGOTIATE — changes in V2 that disadvantage me
+
+--- V1 --- [Paste]
+--- V2 --- [Paste]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-compare">
+    <div class="ex-label">Exercise 3 — Compare Two Job Offers</div>
+    <h4>Same Offers, Different Recommendation</h4>
+    <p>Use the two job offers below. Run the comparison prompt twice — with two different personal contexts.</p>
+    <div class="prompt-box">
+      <div class="pb-header"><span class="lbl-n">Two Job Offers</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>OFFER A — TechCorp (Enterprise)
+₹32 LPA | ₹26L fixed + ₹6L variable | No ESOP
+Mandatory on-site Mon–Fri | 90-day notice | 18-month promotion cycle
+Family health insurance | Java/Spring Boot
+
+OFFER B — StartupX (Series B)
+₹30 LPA | ₹24L fixed + ₹4L variable | 0.05% ESOP (4yr vest)
+Hybrid 3 days | 30-day notice | Growth tied to company performance
+Individual health insurance only | Python/FastAPI</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Context 1: "I'm married with a child, 4-yr Java developer, prioritising stability"</li>
+      <li>Context 2: "I'm single, 2-yr experience, prioritising equity and rapid growth"</li>
+      <li>Notice: same two offers — completely different recommendations</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 4: RESUME ═══ -->
+<section id="resume">
+  <div class="sec-label">Topic 4 of 6</div>
+  <h2>👤 Resume Improvement</h2>
+
+  <div class="callout c-tip">
+    <div class="ic">🎯</div>
+    <div class="bd">
+      <strong>ATS Reality</strong>
+      <p>Most companies filter resumes with software (ATS) before a human reads them. ATS scans for keywords from the job description. Claude helps you match them naturally.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="res-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('res-tabs',0)">🔍 Gap Analysis</button>
+      <button class="tab-btn" onclick="switchTab('res-tabs',1)">✍️ Rewrite Bullets</button>
+      <button class="tab-btn" onclick="switchTab('res-tabs',2)">📝 Rewrite Summary</button>
+      <button class="tab-btn" onclick="switchTab('res-tabs',3)">💯 ATS Score</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Gap Analysis Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Compare this job description against my resume:
+
+1. MATCH STRENGTHS — where I align strongly
+2. GAPS — what the JD needs that's missing in my resume
+3. HIDDEN STRENGTHS — my experience that's relevant but not framed right
+4. HONEST ASSESSMENT — strong / moderate / weak candidate? Be direct.
+5. TOP 3 CHANGES — what would most increase my chances
+
+--- JOB DESCRIPTION ---
+[PASTE JD]
+--- MY RESUME ---
+[PASTE RESUME]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Bullet Rewriter</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Rewrite these experience bullets to better match the job description.
+
+Rules:
+- Keep all facts accurate — do NOT invent achievements
+- Use the JD's language where it's a genuine match
+- Start each bullet with a strong action verb
+- Quantify where I've given you numbers
+
+--- JD KEY REQUIREMENTS ---
+[PASTE TOP 5–8 REQUIREMENTS]
+--- MY CURRENT BULLETS ---
+[PASTE YOUR BULLETS]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Summary Rewriter</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Rewrite my professional summary for this specific role.
+
+Must:
+- Open with the exact role title or close variant
+- Reference my most relevant experience for THIS role
+- Include 2–3 specific strengths the JD prioritises
+- Be 3–4 sentences maximum
+
+Do NOT use: "results-driven", "passionate", "team player",
+"dynamic" or any clichéd phrases.
+
+--- TARGET ROLE ---
+[PASTE JOB TITLE + TOP 3 REQUIREMENTS]
+--- MY CURRENT SUMMARY ---
+[PASTE CURRENT SUMMARY]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">ATS Keyword Check</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as an ATS specialist.
+
+Extract the top 20 keywords from the JD.
+Check how many appear in my resume.
+
+Format: Keyword | In JD | In Resume | Fix Needed
+
+Give me a rough ATS match score (%) and the
+top 5 keywords to add that would improve it most.
+
+--- JD --- [PASTE]
+--- RESUME --- [PASTE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-resume">
+    <div class="ex-label">Exercise 4 — Your Real Resume</div>
+    <h4>Tailor Your Resume to a Real Job</h4>
+    <ul class="ex-steps">
+      <li>Find a job posting you're (or someone you know is) interested in</li>
+      <li>Run the Gap Analysis — note: is the honest assessment surprising?</li>
+      <li>Run the ATS Score Check — what % of keywords match?</li>
+      <li>Rewrite your top 2–3 bullets using the Bullet Rewriter</li>
+    </ul>
+    <div class="callout c-tip" style="margin-top:10px">
+      <div class="ic">💡</div>
+      <div class="bd">
+        <strong>Never fabricate experience.</strong>
+        <p>The value is reframing what's real — not inventing credentials.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 5: CONTRACTS ═══ -->
+<section id="contract">
+  <div class="sec-label">Topic 5 of 6</div>
+  <h2>📝 Contract Understanding</h2>
+
+  <div class="callout c-err">
+    <div class="ic">⚖️</div>
+    <div class="bd">
+      <strong>Not Legal Advice</strong>
+      <p>Claude helps you understand contracts and ask better questions. For significant commitments, always get qualified legal advice before signing.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="con-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('con-tabs',0)">🔎 Plain English</button>
+      <button class="tab-btn" onclick="switchTab('con-tabs',1)">🚩 Red Flags</button>
+      <button class="tab-btn" onclick="switchTab('con-tabs',2)">💼 Employment</button>
+      <button class="tab-btn" onclick="switchTab('con-tabs',3)">🤝 Vendor</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Plain English Translation</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Contract type: [employment / vendor / service agreement]
+My role: [employee / buyer / service provider]
+
+Explain in plain English:
+1. WHAT I'M AGREEING TO (my obligations, listed clearly)
+2. WHAT THEY AGREE TO (their obligations)
+3. MONEY (payments, penalties, fees)
+4. DURATION & EXIT (how long, how to terminate)
+5. WATCH OUT FOR (clauses to discuss with a lawyer)
+
+Then: the 3 most important things to confirm before signing.
+
+[PASTE CONTRACT]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Red Flag Scanner</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My position: I am the party named as [___]
+
+Find every clause that:
+- Significantly limits my rights
+- Creates disproportionate liability for me
+- Is unusual or non-standard
+- Could be interpreted against me
+- Restricts me after this contract ends
+
+For each red flag:
+- Quote the exact clause
+- Explain the risk in plain English
+- Suggest what to negotiate
+- Rate: 🔴 Major | 🟡 Moderate | 🟢 Minor
+
+[PASTE CONTRACT]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Employment Contract Checklist</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Check this employment contract on:
+
+COMPENSATION
+□ Salary, variable pay, review cycle
+□ Bonus calculation and payment timing
+□ ESOP / equity vesting terms
+
+INTELLECTUAL PROPERTY
+□ Who owns work I create (including personal projects?)
+
+RESTRICTIVE COVENANTS
+□ Non-compete — scope, duration, geography
+□ Non-solicitation — clients and employees
+□ Confidentiality — scope and duration
+
+EXIT TERMS
+□ Notice period (both directions)
+□ What happens to unvested equity on exit?
+
+Flag any clause that is non-standard or worth negotiating.
+
+[PASTE CONTRACT]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Vendor Agreement Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My role: I am the buyer/client
+
+Analyse:
+1. Scope — what IS and ISN'T included
+2. SLAs — uptime guarantees, remedies for failure
+3. Pricing — total cost, payment schedule, price increases
+4. Liability Cap — max I can recover if things go wrong?
+5. Data Protection — who owns our data?
+6. Termination — can I leave early and at what cost?
+7. Auto-Renewal — when must I notify to cancel?
+8. Red Flags — anything to push back on
+
+[PASTE VENDOR AGREEMENT]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-contract">
+    <div class="ex-label">Exercise 5 — Decode These Clauses</div>
+    <h4>What Do These Actually Mean?</h4>
+    <div class="prompt-box">
+      <div class="pb-header"><span class="lbl-n">4 Contract Clauses to Decode</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>CLAUSE A (IP Assignment):
+"Employee assigns to the Company all Inventions conceived during employment, whether or not during working hours."
+
+CLAUSE B (Non-Compete):
+"Employee shall not engage in any business competing with the Company in any market where the Company currently operates or has expressed intention to operate — for 12 months post-termination."
+
+CLAUSE C (Liability Cap):
+"Total liability shall not exceed fees paid by Client in the 3 months preceding the claim."
+
+CLAUSE D (Auto-Renewal):
+"Agreement renews automatically for successive one-year terms unless written notice of non-renewal is given 90 days before the end of the current term."</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Ask Claude: "Explain each clause in plain English and flag any risks"</li>
+      <li>For Clause A: "Does this mean they can claim my personal side projects?"</li>
+      <li>For Clause C: "If I pay ₹50k/month, what's the maximum I can recover in damages?"</li>
+      <li>For Clause D: "If this starts January 1st, when exactly must I notify them to avoid auto-renewal?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Plain English Answers</button>
+    <div class="ans-box">
+      <p><strong>Clause A:</strong> Potentially yes — "whether or not during working hours" is broad. Ask them to add "related to the Company's business" to limit the scope.</p>
+      <p><strong>Clause B:</strong> "Expressed intention to operate" is dangerously vague — almost any market qualifies. The 12-month period is significant. Get legal review on enforceability.</p>
+      <p><strong>Clause C:</strong> If paying ₹50k/month → max recovery = ₹1.5 lakh, regardless of actual damage. For critical services, negotiate for 12 months of fees as the minimum cap.</p>
+      <p><strong>Clause D:</strong> For a January 1 renewal → you must notify by October 3rd. Miss that date = locked in for another full year.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ TOPIC 6: POLICY ═══ -->
+<section id="policy">
+  <div class="sec-label">Topic 6 of 6</div>
+  <h2>📋 Policy Summarisation</h2>
+
+  <div class="tab-wrap" id="pol-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('pol-tabs',0)">📖 Policy Summary</button>
+      <button class="tab-btn" onclick="switchTab('pol-tabs',1)">✅ Can I / Can't I</button>
+      <button class="tab-btn" onclick="switchTab('pol-tabs',2)">📢 Team Communication</button>
+      <button class="tab-btn" onclick="switchTab('pol-tabs',3)">🔍 Compliance Check</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Policy Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Document type: [HR Policy / Compliance / Regulatory]
+My role: [Employee / Manager / New joiner]
+
+Summarise with:
+1. PURPOSE — what is this trying to achieve?
+2. WHO IS AFFECTED
+3. KEY RULES — 5–8 most important, in plain English
+4. WHAT I MUST DO — required actions
+5. WHAT I MUST AVOID — explicitly prohibited
+6. CONSEQUENCES — what happens if violated
+7. EXCEPTIONS — any circumstances with different rules?
+
+Plain English only — no HR or legal jargon.
+
+[PASTE POLICY]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Policy Q&amp;A</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Based on this policy, answer my specific questions.
+
+For each answer:
+- Yes / No / It Depends — lead with this
+- Quote the relevant section
+- Explain what it means practically
+- Flag if I should confirm with HR/Legal
+
+My questions:
+1. [Question]
+2. [Question]
+3. [Question]
+
+[PASTE POLICY]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Team-Ready Communication</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Channel: [Slack / Email / Meeting]
+Team: [Brief description — size, role]
+Tone: [Professional / Casual / Urgent]
+
+Create:
+1. 3-bullet TL;DR for people with 30 seconds
+2. Short paragraph on WHY this policy exists
+3. The 3 things my team needs to do differently
+4. A 4-question FAQ covering what they'll ask
+5. Where to go with more questions
+
+[PASTE POLICY]</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-header"><span class="lbl-i">Compliance Check</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Policy: [Name and brief description of the standard]
+What I'm checking: [My process / document / current practice]
+
+Tell me:
+1. COMPLIANT AREAS — where my practice meets requirements
+2. NON-COMPLIANT AREAS — where I fall short (be specific)
+3. AMBIGUOUS AREAS — requirements that need interpretation
+4. PRIORITY FIXES — rank by risk/urgency
+5. ACTIONS — specific steps to reach full compliance
+
+--- POLICY --- [PASTE]
+--- MY PRACTICE --- [PASTE]</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-policy">
+    <div class="ex-label">Exercise 6 — Policy to Slack Message</div>
+    <h4>Turn a Dense Policy Into Something Your Team Will Read</h4>
+    <div class="prompt-box">
+      <div class="pb-header"><span class="lbl-n">Sample: Info Security Policy Section 4</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>4.1 Incidental personal use is permitted on company devices, provided it does not interfere with business operations.
+4.2 Use of company systems to access illegal, offensive, or copyright-violating material is prohibited and may result in termination.
+4.3 Unauthorised software must not be installed. All installations require IT approval.
+4.4 Remote access must use company-approved VPN. Public Wi-Fi without VPN is a violation.
+4.5 Suspected security incidents must be reported within 2 hours using the incident portal or security hotline.
+4.6 Violations may result in disciplinary measures or referral to law enforcement.</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Use the Policy Summary prompt to get the rules in plain English</li>
+      <li>Ask: "Can I use my work laptop for YouTube during lunch?" — use the Q&A prompt</li>
+      <li>Use the Team Communication prompt to write a Slack post for your team</li>
+      <li>Iterate: "Make it more casual, add one emoji per bullet point"</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ QUIZ ═══ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 3 — Document Intelligence</h4>
+    <div class="quiz-sub">6 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ═══ SUMMARY ═══ -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">📄</span>Summarise any document at the right level for your audience</div>
+    <div class="sum-item"><span class="ic">🔍</span>Extract dates, risks, numbers, obligations — on demand</div>
+    <div class="sum-item"><span class="ic">⚖️</span>Compare documents and get a recommendation for YOUR situation</div>
+    <div class="sum-item"><span class="ic">👤</span>Tailor any resume to a specific job with gap analysis + ATS check</div>
+    <div class="sum-item"><span class="ic">📝</span>Understand any contract clause in plain English</div>
+    <div class="sum-item"><span class="ic">📋</span>Convert any policy into clear, team-ready communication</div>
+  </div>
+
+  <div class="callout c-info" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 4</strong>
+      <p>Research &amp; Analysis — using Claude to research topics, synthesise multiple sources, and build structured analytical outputs in a fraction of the time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="mod-footer">
+  <div class="ci">
+    <strong>Mastering Claude for Real-World Productivity</strong>
+    Module 3 of 9 · Document Intelligence
+  </div>
+  <div class="nav-links">
+    <a href="module2.html" class="nav-link nav-prev">← Module 2</a>
+    <a href="module4.html" class="nav-link nav-next">Module 4 →</a>
+  </div>
+</div>
+
+</div><!-- /page-wrap -->
+
+<script>
+// ── ACCORDION ──
+function toggleAcc(hd) {
+  const body = hd.nextElementSibling;
+  const open = hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s => {
+    s.classList.remove('open');
+    s.nextElementSibling.style.display = 'none';
+  });
+  if (!open) { hd.classList.add('open'); body.style.display = 'block'; }
+}
+
+// ── TABS ──
+function switchTab(id, idx) {
+  const w = document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+// ── REVEAL ──
+function toggleAns(btn) {
+  const box = btn.nextElementSibling;
+  const open = box.style.display === 'block';
+  box.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '👁 See Answer' : '🙈 Hide Answer';
+}
+
+// ── COPY ──
+function copyPre(btn) {
+  const pre = btn.closest('.prompt-box')?.querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    const o = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = o, 2000);
+  });
+}
+
+// ── NAV HIGHLIGHT ──
+window.addEventListener('scroll', () => {
+  const secs = document.querySelectorAll('section[id]');
+  let curr = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 90) curr = s.id; });
+  document.querySelectorAll('.sticky-nav a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + curr);
+  });
+});
+
+// ── QUIZ ──
+const qData = [
+  {q:"What are the 3 things you must always tell Claude before analysing a document?",opts:["The page count, the author, and the date","Your job title, the company name, and your goal","Upload the file, type a question, wait for the answer","What the document is, who you are, and what you want extracted"],answer:3,fb:["❌ Page count and author rarely affect the quality of analysis.","❌ These are part of 'who you are' but too narrow — what you want extracted matters most.","❌ That's a process, not the content guidance Claude needs.","✅ These three signals transform generic analysis into targeted, personalised insight."]},
+  {q:"When should you use 'extract' instead of 'summarise'?",opts:["When the document is very long","When you know specifically what you're looking for — dates, risks, numbers","When you want Claude to be more creative","When copy-paste doesn't work"],answer:1,fb:["❌ Length doesn't determine the approach — your goal does.","✅ Extract = targeted retrieval of specific items. Summarise = broad overview of everything.","❌ Extraction is about precision, not creativity.","❌ The copy-paste method is a delivery choice, separate from this decision."]},
+  {q:"You're comparing two job offers. What makes Claude's recommendation actually useful?",opts:["Providing your personal context — life situation, priorities, career goals","Asking Claude which offer has more money","Asking Claude to list all features of both offers","Asking which company has a better reputation"],answer:0,fb:["✅ The 'better' offer depends entirely on who you are. Context transforms a generic comparison into a personalised recommendation.","❌ Money alone ignores equity, growth, flexibility — all potentially more important.","❌ A feature list is a starting point — you still have to do the analysis yourself.","❌ Reputation doesn't tell you which offer fits your specific situation."]},
+  {q:"What is the ATS Keyword Check useful for when improving a resume?",opts:["Making the resume look more visually appealing","Checking your resume for grammatical errors","Identifying which keywords from the job description are missing from your resume","Finding the best companies to apply to"],answer:2,fb:["❌ ATS is about keywords and content — not visual design.","❌ Grammar checking is a different task.","✅ ATS systems filter resumes by keyword match before a human reads them. Knowing your score and missing terms lets you improve it naturally.","❌ ATS tools analyse your resume against a specific job — not the job market."]},
+  {q:"A colleague says they signed a vendor contract because 'Claude said it was fine.' What's the problem?",opts:["They should have used a different AI tool","The vendor probably tricked the AI","Claude can't read contracts correctly","Claude provides understanding and flags questions to ask — not certified legal advice"],answer:3,fb:["❌ The tool isn't the issue — the use of AI output as legal sign-off is.","❌ Nothing to do with the vendor.","❌ Claude reads contracts very well — the limitation is the nature of legal advice, not reading ability.","✅ Claude is an excellent tool for understanding what a contract says and identifying red flags. But for significant commitments, professional legal review is still needed."]},
+  {q:"You need your team of 8 engineers to understand a new security policy. What's the best approach?",opts:["Forward the original policy document to the team email","Use Claude's Team Communication prompt to create a TL;DR, FAQ, and Slack-ready message","Ask Claude to summarise it and send that summary","Discuss it verbally in the next stand-up with no written reference"],answer:1,fb:["❌ Most engineers won't read a dense policy document — the message will be ignored.","✅ The communication prompt creates channel-appropriate content: a TL;DR for skimmers, a FAQ for the curious, the right tone for Slack.","❌ A generic summary is better than the original, but not optimised for how your team actually communicates.","❌ Verbal without follow-up written reference leads to forgotten or inconsistent understanding."]}
+];
+
+let _quizCorrect = 0;
+
+function quizRender(idx) {
+  const bodyEl = document.getElementById('qzBody');
+  qData.forEach((_,i) => {
+    const d = document.getElementById('qd'+i);
+    if (d) d.className = 'q-dot' + (i < idx ? ' done' : i === idx ? ' curr' : '');
+  });
+  if (idx >= qData.length) {
+    bodyEl.innerHTML = `<div class="q-final">
+      <div class="q-big">${_quizCorrect}/${qData.length}</div>
+      <p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect >= 5 ? '🎉 Excellent!' : _quizCorrect >= 3 ? '👍 Good!' : '📚 Try again!'}</p>
+      <p style="font-size:13px;color:var(--ink-soft)">You got ${_quizCorrect} of ${qData.length} right.</p>
+      <button class="btn btn-amber" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button>
+    </div>`;
+    qData.forEach((_,i) => { const d = document.getElementById('qd'+i); if (d) d.className = 'q-dot done'; });
+    return;
+  }
+  const q = qData[idx];
+  bodyEl.innerHTML = `
+    <div class="q-text">${idx + 1}. ${q.q}</div>
+    <div class="q-opts">${q.opts.map((o, i) => `<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div>
+    <div class="q-fb" id="qfb${idx}"></div>
+    <div class="q-nav">
+      <span class="q-score">Score: ${_quizCorrect}/${idx}</span>
+      <button class="btn btn-amber" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx + 1})">Next →</button>
+    </div>`;
+}
+
+function ansQ(qi, oi) {
+  const qr = qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o => o.onclick = null);
+  const opts = document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi === qr.answer ? 'correct' : 'wrong');
+  if (oi !== qr.answer) opts[qr.answer].classList.add('correct');
+  const fb = document.getElementById('qfb' + qi);
+  fb.className = `q-fb show ${oi === qr.answer ? 'fb-ok' : 'fb-no'}`;
+  fb.textContent = qr.fb[oi];
+  if (oi === qr.answer) _quizCorrect++;
+  document.getElementById('qnxt').style.display = 'inline-flex';
+}
+
+function initQuiz() {
+  const dotsEl = document.getElementById('qzDots');
+  dotsEl.innerHTML = qData.map((_,i) => `<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect = 0;
+  quizRender(0);
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+</body>
+</html>

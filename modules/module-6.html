@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 6 — Claude for System Design, Architecture & MCP Integrations</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f6f5fa;--surface:#fff;--border:#dddaeb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#6c3fd4;--purple-dk:#4e2aa0;--purple-lt:#f0ebfc;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --indigo:#3730a3;--indigo-lt:#eef2ff;
+  --violet:#7c3aed;--violet-lt:#f5f3ff;
+  --orange:#c2410c;--orange-lt:#fff7ed;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#05101a 0%,#0c2a4a 50%,#0891b2 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(8,145,178,.3)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#9de8f8;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:600px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#a0d8ea;max-width:540px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#7ecfe8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--teal),var(--accent))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--teal-lt);color:var(--teal)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#021420;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#052030;border-bottom:1px solid #0a4060}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#7ecfe8}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#c4eef8;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--teal-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--teal);color:var(--teal)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-teal{background:var(--teal-lt);border-color:#67d5eb}.c-teal .bd strong{color:var(--teal)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+.c-amber{background:var(--amber-lt);border-color:#f0cc80}.c-amber .bd strong{color:var(--amber)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+
+/* FRAMEWORK CARD */
+.fw-card{background:var(--surface);border:2px solid #9de8f8;border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.fw-head{background:linear-gradient(90deg,#052030,var(--teal));padding:10px 16px;display:flex;align-items:center;gap:8px}
+.fw-head span{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fw-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.fw-step:last-child{border-bottom:none}
+.fw-num{min-width:24px;height:24px;background:var(--teal);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.fw-content h5{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.fw-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-hld{background:linear-gradient(135deg,var(--teal-lt),#e8f6fb);border-color:#67d5eb}
+.ex-lld{background:linear-gradient(135deg,var(--indigo-lt),#eef2ff);border-color:#a5b4fc}
+.ex-mcp{background:linear-gradient(135deg,var(--purple-lt),#ede8ff);border-color:#c4b2f5}
+.ex-pipe{background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border-color:#9fe8cc}
+.ex-review{background:linear-gradient(135deg,var(--amber-lt),#fffbeb);border-color:#f0cc80}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--teal)}
+.ex-lld .ex-label{color:var(--indigo)}
+.ex-mcp .ex-label{color:var(--purple)}
+.ex-pipe .ex-label{color:var(--green)}
+.ex-review .ex-label{color:var(--amber)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--teal)}
+.ex-lld .ex-steps li::before{color:var(--indigo)}
+.ex-mcp .ex-steps li::before{color:var(--purple)}
+.ex-pipe .ex-steps li::before{color:var(--green)}
+.ex-review .ex-steps li::before{color:var(--amber)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--teal);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:#0670a0}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #67d5eb;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--teal-lt),#cdf0f8);border:2px solid #67d5eb;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--teal);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--teal)}
+
+/* MCP ARCHITECTURE VISUAL */
+.mcp-arch{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:16px 0;box-shadow:var(--shadow)}
+.mcp-layer{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.mcp-box{background:var(--teal-lt);border:2px solid var(--teal);border-radius:var(--radius-sm);padding:10px 18px;font-size:13px;font-weight:700;color:var(--teal);text-align:center;min-width:120px}
+.mcp-box.host{background:#052030;border-color:#0891b2;color:#7ecfe8}
+.mcp-box.tool{background:var(--green-lt);border-color:var(--green);color:#0a5c3a;font-size:12px;min-width:90px}
+.mcp-arrow{font-size:20px;color:var(--ink-muted)}
+.mcp-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);text-align:center;margin:4px 0 10px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f0fbff}
+.tbl tr:hover td{background:var(--teal-lt)}
+
+/* TOOL CHIPS */
+.tool-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tool-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--ink-soft);box-shadow:var(--shadow)}
+.tool-chip .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-teal{background:var(--teal)}
+.dot-green{background:var(--green)}
+.dot-purple{background:var(--purple)}
+.dot-amber{background:var(--amber)}
+.dot-indigo{background:var(--indigo)}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:center;gap:0;margin:14px 0;flex-wrap:wrap}
+.pipe-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;font-weight:600;color:var(--ink-soft);flex:1;min-width:100px;text-align:center;position:relative}
+.pipe-step.active{background:var(--teal-lt);border-color:var(--teal);color:var(--teal)}
+.pipe-arrow{color:var(--ink-muted);font-size:16px;padding:0 4px;flex-shrink:0}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--teal)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--teal);background:var(--teal-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--teal)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--teal);color:#fff}.nav-next:hover{background:#0670a0}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#e0f7fa;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--teal)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:#0670a0}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 3 · Module 6 of 9</div>
+    <h1>Claude for System Design, Architecture & MCP Integrations</h1>
+    <p class="tagline">Build and review systems faster. Connect Claude to real tools via MCP.</p>
+    <div class="header-chips">
+      <span>⏱ 105 min</span>
+      <span>🏗️ 9 Topics</span>
+      <span>🔧 6 Exercises</span>
+      <span>👥 Engineers, Leads & Architects</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#hld">HLD</a>
+  <a href="#lld">LLD</a>
+  <a href="#scalability">Scalability</a>
+  <a href="#review">Design Review</a>
+  <a href="#mcp">MCP Deep Dive</a>
+  <a href="#tools">Real Tools</a>
+  <a href="#workflows">Workflows</a>
+  <a href="#patterns">Patterns</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">Module Overview</div>
+  <h2>🎯 What You'll Be Able to Do</h2>
+
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">🏗️</span>Generate high-level architecture descriptions and diagrams as structured text</div>
+    <div class="obj-item"><span class="ic">📐</span>Produce class diagrams, DB schemas, and service contracts with LLD prompts</div>
+    <div class="obj-item"><span class="ic">🔍</span>Identify scalability bottlenecks and edge cases with AI-guided review</div>
+    <div class="obj-item"><span class="ic">🧠</span>Run structured design critiques and improvement sessions in Claude</div>
+    <div class="obj-item"><span class="ic">🔌</span>Understand how MCP servers and clients work under the hood</div>
+    <div class="obj-item"><span class="ic">⚙️</span>Connect Claude to GitHub, Postgres, Slack, and the file system via MCP</div>
+    <div class="obj-item"><span class="ic">🔗</span>Build multi-tool MCP workflows for real engineering tasks</div>
+    <div class="obj-item"><span class="ic">🤖</span>Use Claude Code as an autonomous agent with MCP-supplied context</div>
+    <div class="obj-item"><span class="ic">🚀</span>Deploy practical patterns: code review pipelines, PR summaries, test generation at scale</div>
+  </div>
+
+  <div class="two-col" style="margin-top:18px">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Design Without AI</div>
+      <ul class="col-body">
+        <li>Hours spent on initial architecture docs</li>
+        <li>Edge cases caught only in production</li>
+        <li>Design reviews are slow and inconsistent</li>
+        <li>Tool integrations require custom code</li>
+        <li>Code reviews bottlenecked on senior devs</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Design With Claude + MCP</div>
+      <ul class="col-body">
+        <li>HLD scaffolded in minutes, iterated live</li>
+        <li>Systematic edge case and failure mode analysis</li>
+        <li>Structured critique in a single prompt</li>
+        <li>MCP connects Claude directly to your tools</li>
+        <li>Automated review pipeline across PRs at scale</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout c-teal">
+    <div class="ic">🏗️</div>
+    <div class="bd">
+      <strong>The Architect's Shift</strong>
+      <p>Claude doesn't replace your architecture judgment — it accelerates the scaffolding, surfaces what you'd otherwise miss, and connects to your real tools so reviews and pipelines happen at AI speed.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- HIGH LEVEL DESIGN -->
+<section id="hld">
+  <div class="sec-label">Topic 1 of 9</div>
+  <h2>🏗️ High-Level Design Generation</h2>
+
+  <p>Claude can translate a system description into a structured architecture — services, data flows, component responsibilities — as readable text you can refine into diagrams.</p>
+
+  <div class="diff-wrap">
+    <div class="diff-line diff-del">❌ "Design a URL shortener"</div>
+    <div class="diff-line diff-add">✅ "Design a URL shortener handling 10K writes/sec and 500K reads/sec. Users are global. Shortened links must resolve in under 100ms. Include: component diagram, data flow, key trade-offs, and one alternative architecture with its pros/cons."</div>
+  </div>
+
+  <div class="tab-wrap" id="hld-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('hld-tabs',0)">🗺️ Full HLD</button>
+      <button class="tab-btn" onclick="switchTab('hld-tabs',1)">🔄 Trade-off Analysis</button>
+      <button class="tab-btn" onclick="switchTab('hld-tabs',2)">📦 Component Breakdown</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Full HLD Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a senior solutions architect. Design the high-level architecture for:
+
+System: [Name and one-sentence purpose]
+Scale: [Requests/sec, data volume, users]
+Latency SLA: [e.g. &lt;200ms p99 for reads]
+Constraints: [Cloud provider, existing stack, budget limits]
+
+Produce:
+1. Component Diagram (as labelled ASCII or text boxes)
+2. Data Flow — happy path step by step
+3. Key design decisions and why (not just what)
+4. Top 3 failure modes and mitigations
+5. Alternative architecture with trade-offs vs your recommendation
+
+Be opinionated. State assumptions clearly.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Force a structured comparison before you commit to an approach.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Trade-off Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I'm choosing between these architectures for [system]:
+
+Option A: [e.g. Monolith with read replicas]
+Option B: [e.g. Microservices with event sourcing]
+Option C: [e.g. Modular monolith with async workers]
+
+My context:
+- Team size: [N engineers]
+- Current scale: [X req/sec], expected in 18 months: [Y req/sec]
+- Deployment target: [Cloud/on-prem]
+- Biggest constraint: [latency / cost / team expertise]
+
+Compare on: Operational complexity, scalability ceiling, team fit, migration risk.
+Give a weighted recommendation. Be direct.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Component Breakdown</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Break down this system into components:
+
+System: [Your system description]
+
+For each component:
+- Name and single responsibility
+- What it consumes (inputs)
+- What it produces (outputs/events)
+- Technology choices with reasoning
+- SLA it must meet
+- Who owns it (team or service)
+
+Format as a structured list. Then draw the dependency graph in ASCII.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-hld">
+    <div class="ex-label">🏗️ Exercise 1 — Generate a Real System's HLD</div>
+    <h4>Pick a system you've built or are designing now</h4>
+    <ul class="ex-steps">
+      <li>Run the Full HLD prompt with your actual scale numbers and constraints</li>
+      <li>Ask Claude: "What would break first if traffic grew 10×?"</li>
+      <li>Request an alternative architecture and compare the trade-offs</li>
+      <li>Note: which failure modes did you not think of yourself?</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Scaffold a full HLD with components, data flow, and trade-offs in under 5 minutes</li>
+      <li>Run structured architecture trade-off comparisons before committing</li>
+      <li>Get a second opinion on failure modes before the design review</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- LOW LEVEL DESIGN -->
+<section id="lld">
+  <div class="sec-label">Topic 2 of 9</div>
+  <h2>📐 Low-Level Design Support</h2>
+
+  <p>LLD is where architecture becomes code. Claude can generate class diagrams, DB schemas, API contracts, and interface definitions — all as structured, editable text.</p>
+
+  <div class="tab-wrap" id="lld-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('lld-tabs',0)">🗃️ DB Schema</button>
+      <button class="tab-btn" onclick="switchTab('lld-tabs',1)">📦 Class Diagram</button>
+      <button class="tab-btn" onclick="switchTab('lld-tabs',2)">📋 API Contract</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">DB Schema Generation</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Design the database schema for: [system / feature]
+
+Requirements:
+- [Key entities and their relationships]
+- [Query patterns: e.g. "users query orders by date range"]
+- [Scale: rows per table at 1 year, 5 years]
+- [DB engine: PostgreSQL / MySQL / MongoDB]
+
+For each table/collection:
+- Fields with types, constraints, and nullable rules
+- Primary keys, foreign keys, and indexes
+- Reasoning for index choices
+- Any denormalisation decisions and why
+
+Then: write the CREATE TABLE SQL (or schema doc for NoSQL).
+Flag any N+1 query risks in the schema.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Class / Domain Model</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Generate the class/domain model for: [feature or service]
+
+Context: [Language — Java/Python/TypeScript, framework if relevant]
+
+Include:
+- All domain entities with attributes and types
+- Methods with signatures (no implementation needed)
+- Relationships: inheritance, composition, aggregation
+- Design patterns applied and why (e.g. Strategy, Repository, Factory)
+
+Output as:
+1. UML class diagram in text/PlantUML notation
+2. Key design decisions explained
+3. Interface definitions for dependency injection points</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Service / API Contract</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Define the API contract for: [service name]
+
+Consumer: [Who calls this service and why]
+Provider: [This service's responsibilities]
+
+Generate:
+1. OpenAPI 3.0 spec (YAML) for all endpoints
+2. Request/response schemas with validation rules
+3. Error codes and their meanings
+4. Authentication and rate limit headers
+5. Idempotency requirements for write operations
+6. Versioning strategy recommendation
+
+Flag: any breaking change risks vs [existing API version if applicable].</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-lld">
+    <div class="ex-label">📐 Exercise 2 — LLD for a Current Feature</div>
+    <h4>Take any feature you're building or have built</h4>
+    <ul class="ex-steps">
+      <li>Generate the DB schema — compare Claude's index choices to yours</li>
+      <li>Ask: "What queries will be slow at 10M rows and how would you fix them?"</li>
+      <li>Generate the API contract and check it against your actual implementation</li>
+      <li>Spot any inconsistencies or gaps between the two</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SCALABILITY & EDGE CASES -->
+<section id="scalability">
+  <div class="sec-label">Topic 3 of 9</div>
+  <h2>🔍 Scalability & Edge Case Identification</h2>
+
+  <p>AI-guided review surfaces what experienced engineers forget to check — because they're inside the system. Claude approaches it from the outside.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🧪 Scalability Review Framework</span></div>
+    <div class="fw-step">
+      <div class="fw-num">1</div>
+      <div class="fw-content"><h5>Identify Hotspots</h5><p>Which components receive disproportionate load? Where is shared state?</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">2</div>
+      <div class="fw-content"><h5>Stress the Assumptions</h5><p>What happens at 10×, 100× traffic? Where does the first thing break?</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">3</div>
+      <div class="fw-content"><h5>Map Edge Cases</h5><p>Empty state, concurrent writes, retry storms, partial failures, clock skew.</p></div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">4</div>
+      <div class="fw-content"><h5>Evaluate Mitigations</h5><p>For each risk: rate likelihood × impact, then recommend the minimum viable fix.</p></div>
+    </div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Scalability & Edge Case Review Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Review this system design for scalability and edge cases:
+
+[Paste your design / architecture description]
+
+Current load: [X req/sec]   Peak load: [Y req/sec]
+SLA: [Latency and availability targets]
+
+Analyse:
+1. Top 5 bottlenecks at 10× current load — with specific components named
+2. Edge cases I haven't handled (concurrent writes, retry amplification, partial failure, etc.)
+3. Single points of failure that aren't obvious
+4. Data consistency risks in distributed paths
+5. For each issue: severity (P1/P2/P3), likelihood, and minimum viable mitigation
+
+Be critical. Don't summarise — identify real problems.</pre>
+  </div>
+
+  <div class="callout c-amber">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>The Edge Case Checklist</strong>
+      <p>Always ask Claude to check: empty collections, concurrent writes to the same row, clock skew between services, retry storms on failures, cascade deletes, and token/session expiry mid-request.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- DESIGN REVIEW -->
+<section id="review">
+  <div class="sec-label">Topic 4 of 9</div>
+  <h2>🧠 Design Review Using Claude</h2>
+
+  <p>A good design review is structured and challenging — not just confirmatory. Claude can play devil's advocate, identify gaps, and produce a written critique you can share with your team.</p>
+
+  <div class="tab-wrap" id="review-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('review-tabs',0)">🔴 Devil's Advocate</button>
+      <button class="tab-btn" onclick="switchTab('review-tabs',1)">✅ Structured Critique</button>
+      <button class="tab-btn" onclick="switchTab('review-tabs',2)">📝 Review Checklist</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Devil's Advocate Review</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a senior principal engineer reviewing this design.
+Your job is to be constructively critical — not destructive, not confirmatory.
+
+Design: [Paste your design]
+
+Challenge it on:
+1. Assumptions that seem reasonable but will hurt us at scale
+2. Choices where simpler alternatives exist that we overlooked
+3. Operational complexity that isn't justified by the requirements
+4. Security or compliance risks baked into the architecture
+5. What the team will regret in 12 months
+
+For each: explain the risk, its impact, and a concrete alternative.
+Conclude with: "The most critical change before we ship this is..."</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Structured Design Critique</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Produce a structured design review for the following:
+
+[Paste design doc / architecture description]
+
+Format:
+## Strengths (what's done well and why it matters)
+## Risks (concrete problems, not vague concerns)
+## Gaps (requirements not addressed in the design)
+## Improvement Recommendations (prioritised P1/P2/P3)
+## Open Questions (decisions that need explicit resolution)
+
+Be specific. Reference named components. No generic best-practice advice — only issues specific to this design.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Design Review Checklist Generator</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Generate a tailored design review checklist for this system:
+
+[System description]
+Domain: [e.g. payments, auth, data pipeline, ML inference]
+Team size: [N]   Deployment: [cloud/on-prem/hybrid]
+
+Produce a 20-point checklist covering:
+- Functional completeness
+- Non-functional requirements (latency, availability, consistency)
+- Security and access control
+- Observability (metrics, logs, traces, alerts)
+- Operational runbooks and failure recovery
+- Data migration and backwards compatibility
+
+For each item: what to check and what a passing answer looks like.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-review">
+    <div class="ex-label">🧠 Exercise 3 — Run a Real Design Review</div>
+    <h4>Use a design doc you've written or reviewed recently</h4>
+    <ul class="ex-steps">
+      <li>Paste it into the Devil's Advocate prompt — read the output carefully</li>
+      <li>Compare Claude's critique to what your team raised in the real review</li>
+      <li>Generate the tailored checklist — use it in your next actual review</li>
+      <li>Note: what did Claude catch that your team didn't?</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MCP DEEP DIVE -->
+<section id="mcp">
+  <div class="sec-label">Topic 5 of 9</div>
+  <h2>🔌 MCP — Deep Dive</h2>
+
+  <p>The <strong>Model Context Protocol (MCP)</strong> is an open standard that lets Claude communicate with external tools, data sources, and services — turning Claude from a chat interface into an agent with real-world reach.</p>
+
+  <h3>How MCP Works</h3>
+
+  <div class="mcp-arch">
+    <div class="mcp-label">MCP Architecture</div>
+    <div class="mcp-layer">
+      <div class="mcp-box host">🤖 Claude (MCP Client / Host)</div>
+    </div>
+    <div class="mcp-layer">
+      <div class="mcp-arrow">↕ JSON-RPC over stdio / SSE</div>
+    </div>
+    <div class="mcp-layer">
+      <div class="mcp-box">🖥️ MCP Server A<br/><small style="font-weight:400;font-size:11px">Exposes: tools, resources, prompts</small></div>
+      <div class="mcp-box">🖥️ MCP Server B</div>
+      <div class="mcp-box">🖥️ MCP Server C</div>
+    </div>
+    <div class="mcp-layer" style="margin-top:4px">
+      <div class="mcp-box tool">📂 File System</div>
+      <div class="mcp-box tool">🐙 GitHub</div>
+      <div class="mcp-box tool">🐘 Postgres</div>
+      <div class="mcp-box tool">💬 Slack</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🖥️ MCP Server — what it does <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>An MCP Server is a lightweight process that <strong>exposes capabilities</strong> to Claude. It declares three things:</p>
+      <p><strong>Tools</strong> — callable functions Claude can invoke (e.g. <code>read_file</code>, <code>run_query</code>, <code>create_pr</code>).</p>
+      <p><strong>Resources</strong> — data Claude can read (e.g. a file, a database row, a Slack channel's history).</p>
+      <p><strong>Prompts</strong> — reusable prompt templates the server makes available to the host.</p>
+      <p>Servers communicate via JSON-RPC 2.0, over <code>stdio</code> (for local processes) or <code>SSE/HTTP</code> (for remote servers). They can be written in any language — official SDKs exist for TypeScript, Python, and Kotlin.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">💻 MCP Client (Host) — what Claude does <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>The <strong>host</strong> (Claude Desktop, Claude Code, or your custom app) manages the connection to one or more MCP servers. When Claude wants to use a tool, it:</p>
+      <p>1. Sends a <code>tools/call</code> request to the relevant MCP server.</p>
+      <p>2. Receives the result and incorporates it into its reasoning.</p>
+      <p>3. Can chain multiple tool calls across multiple servers in a single turn.</p>
+      <p>Claude never directly accesses the external service — it goes through the MCP server, which enforces permissions and handles auth.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🔐 Authentication & Security in MCP <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>MCP servers handle authentication on behalf of Claude. Common patterns:</p>
+      <p><strong>Environment variables</strong> — API keys and tokens are passed to the MCP server process at startup, not exposed to Claude directly.</p>
+      <p><strong>OAuth 2.0</strong> — for hosted services (GitHub, Slack), the server handles the OAuth flow and token refresh.</p>
+      <p><strong>mTLS</strong> — for enterprise deployments, mutual TLS between client and server.</p>
+      <p>Claude only sees tool results — it never sees raw credentials. Permission scopes are defined in the server, not in Claude's prompt.</p>
+    </div>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr><th>Concept</th><th>MCP Server</th><th>MCP Client (Host)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Role</td><td>Exposes capabilities and data</td><td>Discovers and calls those capabilities</td></tr>
+      <tr><td>Who writes it</td><td>Tool/service owner or you</td><td>Claude, Claude Code, your app</td></tr>
+      <tr><td>Transport</td><td>stdio (local) or SSE/HTTP (remote)</td><td>Manages connections to N servers</td></tr>
+      <tr><td>Auth location</td><td>Handles credentials internally</td><td>Never sees raw credentials</td></tr>
+      <tr><td>Scale</td><td>One server per integration</td><td>One client, many servers in parallel</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<hr class="divider"/>
+
+<!-- REAL TOOLS VIA MCP -->
+<section id="tools">
+  <div class="sec-label">Topic 6 of 9</div>
+  <h2>⚙️ Connecting Claude to Real Tools via MCP</h2>
+
+  <p>Official and community MCP servers exist for the most common developer tools. Once connected, Claude can read, write, and act — not just advise.</p>
+
+  <div class="tool-chips">
+    <div class="tool-chip"><span class="dot dot-teal"></span>GitHub</div>
+    <div class="tool-chip"><span class="dot dot-green"></span>PostgreSQL</div>
+    <div class="tool-chip"><span class="dot dot-purple"></span>Slack</div>
+    <div class="tool-chip"><span class="dot dot-amber"></span>File System</div>
+    <div class="tool-chip"><span class="dot dot-indigo"></span>Jira / Linear</div>
+    <div class="tool-chip"><span class="dot dot-teal"></span>Notion</div>
+    <div class="tool-chip"><span class="dot dot-green"></span>Sentry</div>
+    <div class="tool-chip"><span class="dot dot-amber"></span>Google Drive</div>
+  </div>
+
+  <div class="tab-wrap" id="tools-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('tools-tabs',0)">🐙 GitHub</button>
+      <button class="tab-btn" onclick="switchTab('tools-tabs',1)">🐘 Postgres</button>
+      <button class="tab-btn" onclick="switchTab('tools-tabs',2)">💬 Slack</button>
+      <button class="tab-btn" onclick="switchTab('tools-tabs',3)">📂 File System</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">With the GitHub MCP server, Claude can read repos, list PRs, create issues, and post comments — directly from your conversation.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">GitHub MCP — PR Review Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>List the open pull requests in [owner/repo] that have been open more than 3 days.
+
+For each PR:
+- Summary of what the PR does (from title and diff)
+- Files changed and lines added/removed
+- Any blocking review comments
+- Your assessment: ready to merge, needs changes, or needs discussion
+
+Then: rank them by review urgency and tell me which to look at first.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">The Postgres MCP server lets Claude query your database, explain query plans, and suggest schema improvements — without you writing a single SQL line.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Postgres MCP — Schema & Query Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Connect to the database and:
+
+1. List all tables with row counts and last-updated timestamps
+2. Find tables with no indexes other than the primary key
+3. Identify foreign keys that are missing an index on the child side
+4. Show the 5 slowest queries from pg_stat_statements (if available)
+
+Then recommend the top 3 index additions, estimated impact, and the exact CREATE INDEX statements.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Slack MCP enables Claude to read channel history, post summaries, and create structured updates — useful for automated incident reports and sprint summaries.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Slack MCP — Incident Summary</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Read the last 4 hours of messages from #incidents.
+
+Summarise:
+1. Active incidents — name, severity, current status, assigned owner
+2. Resolved incidents — timeline of what happened and fix applied
+3. Any action items mentioned that haven't been assigned yet
+
+Post the summary as a formatted message to #engineering-digest with the current timestamp.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">The file system MCP gives Claude read/write access to your local files — enabling code review, refactoring, and documentation generation without copy-pasting.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">File System MCP — Codebase Review</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Read all Python files in ./src/ recursively.
+
+Analyse and report:
+1. Functions longer than 50 lines — name, file, length
+2. Functions with no docstrings
+3. Duplicate logic patterns across files (don't list trivial ones)
+4. Import cycles if any
+5. Any obvious anti-patterns (God classes, magic numbers, bare excepts)
+
+Output a prioritised list of refactoring targets with file:line references.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout c-tip">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>Setup Tip: Claude Desktop Config</strong>
+      <p>MCP servers are configured in <code>claude_desktop_config.json</code>. Add each server under <code>"mcpServers"</code> with its command, args, and env. Claude Desktop auto-discovers and connects on startup.</p>
+    </div>
+  </div>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">🔌 Exercise 4 — Connect One MCP Server</div>
+    <h4>Pick the integration most relevant to your workflow</h4>
+    <ul class="ex-steps">
+      <li>Install the server: <code>npx @modelcontextprotocol/server-github</code> (or postgres/slack equivalent)</li>
+      <li>Add it to your Claude Desktop config with the required env vars</li>
+      <li>Run the matching prompt above — check the real output vs your expectations</li>
+      <li>Ask Claude: "What else can you do with this server?" — review the tool list</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MCP WORKFLOWS -->
+<section id="workflows">
+  <div class="sec-label">Topic 7 of 9</div>
+  <h2>🔗 Building Simple MCP Workflows</h2>
+
+  <p>Multi-tool chaining is where MCP becomes powerful. Claude can read from one tool, reason, and write to another — all within a single conversation turn.</p>
+
+  <h3>Example: PR Triage → Slack Update Pipeline</h3>
+
+  <div class="pipeline">
+    <div class="pipe-step active">📥 Read PRs<br/><small>GitHub MCP</small></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step active">🧠 Claude Analysis<br/><small>Prioritise & summarise</small></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step active">💬 Post to Slack<br/><small>Slack MCP</small></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step active">📋 Log to File<br/><small>File System MCP</small></div>
+  </div>
+
+  <div class="prompt-box">
+    <div class="pb-head"><span class="lbl-i">Multi-Tool Chaining Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+    <pre>Do the following in sequence using your available tools:
+
+Step 1 — GitHub: List all open PRs in [owner/repo] modified in the last 24 hours.
+Step 2 — Analyse each PR: classify as (needs-review / blocked / ready-to-merge).
+Step 3 — GitHub: Add a label "needs-review" to any PR with no reviewer assigned.
+Step 4 — Slack: Post a structured daily PR digest to #engineering:
+  - Ready to merge: [list]
+  - Blocked (waiting for CI / author response): [list]
+  - Needs reviewer: [list + @mentions for relevant team members]
+Step 5 — File system: Append a timestamped summary to ./logs/pr_digest.log
+
+Confirm completion of each step before proceeding to the next.</pre>
+  </div>
+
+  <div class="callout c-info">
+    <div class="ic">🔧</div>
+    <div class="bd">
+      <strong>Design Pattern: Step-Confirm-Continue</strong>
+      <p>For multi-tool workflows, always ask Claude to confirm each step before proceeding. This lets you catch tool errors early and maintain a clear audit trail of what was changed.</p>
+    </div>
+  </div>
+
+  <div class="ex-card ex-pipe">
+    <div class="ex-label">🔗 Exercise 5 — Build Your Own Workflow</div>
+    <h4>Design a 3-step multi-tool workflow for your team</h4>
+    <ul class="ex-steps">
+      <li>Identify a repetitive manual task your team does weekly (standup prep, release notes, etc.)</li>
+      <li>Map it as: Source Tool → Claude Analysis → Target Tool</li>
+      <li>Write the chaining prompt using the step-by-step format above</li>
+      <li>Run it and review — what did Claude get right? What needed correction?</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CLAUDE CODE + MCP -->
+<section id="patterns">
+  <div class="sec-label">Topics 8 & 9 of 9</div>
+  <h2>🤖 Claude Code + MCP & Practical Patterns</h2>
+
+  <p>Claude Code is a command-line agent that can execute code, run tests, and manage files autonomously. Combined with MCP, it gains access to external context — making it a genuinely autonomous engineering agent.</p>
+
+  <div class="tab-wrap" id="patterns-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('patterns-tabs',0)">🤖 Claude Code + MCP</button>
+      <button class="tab-btn" onclick="switchTab('patterns-tabs',1)">🔍 Code Review Pipeline</button>
+      <button class="tab-btn" onclick="switchTab('patterns-tabs',2)">📋 PR Summarisation</button>
+      <button class="tab-btn" onclick="switchTab('patterns-tabs',3)">🧪 Test Generation</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Claude Code reads your codebase, runs commands, and fixes issues — MCP gives it live data from your issue tracker, DB, and monitoring tools to close the loop.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Claude Code + MCP: Bug Triage Agent</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre># In Claude Code (claude command line)
+
+claude --mcp github --mcp sentry "
+Do the following autonomously:
+
+1. Fetch the top 5 unresolved Sentry errors from the last 48 hours
+2. For each error: find the relevant source file in ./src using the stack trace
+3. Read the code around the error location
+4. Diagnose the root cause — explain it in one paragraph
+5. Propose a fix with the exact code change
+6. Create a GitHub issue with: error summary, root cause, proposed fix, and affected file:line
+7. Output a summary table: Error | Root Cause | Issue URL
+
+Do not apply any fixes without my confirmation."</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Automated Code Review Pipeline</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Review the diff in this pull request:
+
+[Paste diff or use GitHub MCP to fetch it]
+
+Review against these standards:
+1. Security: injection risks, auth gaps, exposed secrets
+2. Performance: N+1 queries, missing indexes, blocking calls
+3. Correctness: logic errors, off-by-one, null handling
+4. Testability: can this be unit tested? Are there hidden dependencies?
+5. Style: naming clarity, unnecessary complexity, missing docs
+
+Format each finding as:
+- Severity: P1 / P2 / P3
+- File:Line
+- Issue description
+- Suggested fix (code snippet where applicable)
+
+End with: overall recommendation — Approve / Request Changes / Needs Discussion.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">PR Summarisation for Stakeholders</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Summarise this pull request for two audiences:
+
+PR: [Title, link, or paste diff]
+
+Audience 1 — Engineering (technical):
+- What changed and why
+- Files affected and key logic changes
+- Test coverage added
+- Deployment considerations (migrations, feature flags, config changes)
+
+Audience 2 — Product / Non-technical:
+- What this enables for users (plain English)
+- Any behaviour changes they'll notice
+- Risk level and rollback plan
+
+Keep each summary under 150 words. No jargon in the product summary.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Test Generation at Scale</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Generate comprehensive tests for this function/class:
+
+[Paste code]
+
+Language/Framework: [e.g. Python/pytest, Java/JUnit, TypeScript/Jest]
+
+Generate:
+1. Happy path tests — all standard inputs and expected outputs
+2. Edge cases — empty, null, max/min values, boundary conditions
+3. Error cases — invalid input, external service failures, timeouts
+4. Concurrency tests if applicable (race conditions, thread safety)
+5. Performance test (if the function has a complexity concern)
+
+For each test:
+- Descriptive name (test_[scenario]_[expected_outcome] format)
+- Setup, action, assertion (Arrange-Act-Assert)
+- Comment explaining what risk this test covers
+
+Then: identify the 3 most important tests if we can only add 3 right now.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">🤖 Exercise 6 — Autonomous Agent Task</div>
+    <h4>Give Claude Code a real, bounded engineering task</h4>
+    <ul class="ex-steps">
+      <li>Pick a real function or module in your codebase with poor test coverage</li>
+      <li>Run the test generation prompt — review all generated tests for correctness</li>
+      <li>Ask Claude: "What scenarios am I most likely to miss in production?" after seeing the tests</li>
+      <li>If you have Claude Code: run it against a PR diff and compare output to a human review</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Run code review, PR summaries, and test generation across your entire codebase</li>
+      <li>Connect Claude to GitHub, Postgres, Slack, and the file system via MCP</li>
+      <li>Build multi-step engineering pipelines that run without manual copy-paste</li>
+      <li>Use Claude Code as an autonomous triage and analysis agent with real tool access</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>🧩 Module Quiz — 7 Questions</h2>
+
+  <div class="quiz-wrap">
+    <h4>Test Your Understanding</h4>
+    <p class="quiz-sub">Select the best answer for each question. Instant feedback after each choice.</p>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Module Wrap-Up</div>
+  <h2>✅ What You Can Do Now</h2>
+
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">🏗️</span>Generate a full HLD with components, trade-offs, and failure modes in minutes</div>
+    <div class="sum-item"><span class="ic">📐</span>Produce DB schemas, class diagrams, and API contracts as structured, editable text</div>
+    <div class="sum-item"><span class="ic">🔍</span>Identify scalability bottlenecks and edge cases with AI-guided review prompts</div>
+    <div class="sum-item"><span class="ic">🧠</span>Run devil's advocate and structured design critiques before committing to an approach</div>
+    <div class="sum-item"><span class="ic">🔌</span>Explain how MCP servers expose tools, resources, and prompts to Claude clients</div>
+    <div class="sum-item"><span class="ic">⚙️</span>Connect Claude to GitHub, Postgres, Slack, and the file system via MCP servers</div>
+    <div class="sum-item"><span class="ic">🔗</span>Chain multiple MCP tools in a single workflow for engineering automation tasks</div>
+    <div class="sum-item"><span class="ic">🤖</span>Deploy Claude Code as an autonomous agent with external tool context via MCP</div>
+    <div class="sum-item"><span class="ic">🚀</span>Run code review pipelines, PR summarisation, and test generation at scale</div>
+  </div>
+
+  <div class="callout c-teal" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 7</strong>
+      <p>Claude for Data, Analytics & Reporting — querying and analysing datasets with natural language, generating dashboards, writing data pipelines, and automating insight generation for business and technical audiences.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 6 of 9 · System Design, Architecture & MCP</div>
+  <div class="nav-links">
+    <a href="module5_display.html" class="nav-link nav-prev">← Module 5</a>
+    <a href="module7_display.html" class="nav-link nav-next">Module 7 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Answer':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const qData=[
+  {
+    q:"What is the key difference between asking Claude for 'a URL shortener design' vs providing scale numbers and SLA targets?",
+    opts:["It makes the prompt longer and more impressive","Specific constraints produce opinionated, contextual decisions — not generic patterns","Claude can only design systems when given exact numbers","It reduces the length of Claude's response"],
+    answer:1,
+    fb:["❌ Length of prompt is irrelevant — context quality is what matters.","✅ Vague prompts get textbook answers. Specific constraints (10K writes/sec, 100ms SLA) force Claude to make real trade-offs relevant to your system.","❌ Claude can design without exact numbers, but the output will be far less useful.","❌ More context generally produces longer, more detailed output — which is what you want."]
+  },
+  {
+    q:"In MCP architecture, which entity handles credentials like API keys and OAuth tokens?",
+    opts:["Claude, via the system prompt","The MCP Client (host application)","The MCP Server, keeping them away from Claude","The user, by pasting them into the conversation"],
+    answer:2,
+    fb:["❌ Claude's prompt should never contain raw credentials.","❌ The client manages connections but doesn't hold credentials.","✅ MCP Servers handle all authentication internally. Claude only ever sees tool results — never raw credentials or tokens.","❌ Pasting credentials into Claude is a security anti-pattern and is unnecessary with MCP."]
+  },
+  {
+    q:"What are the three things an MCP Server can expose to Claude?",
+    opts:["Files, databases, and APIs","Tools, Resources, and Prompts","Commands, schemas, and webhooks","Agents, memories, and embeddings"],
+    answer:1,
+    fb:["❌ These are types of external systems — not the MCP primitives.","✅ Tools (callable functions), Resources (readable data), and Prompts (reusable templates) are the three MCP primitives. Every MCP server exposes some combination of these.","❌ Commands and webhooks are not MCP concepts.","❌ These are AI/ML concepts unrelated to MCP's architecture."]
+  },
+  {
+    q:"You're reviewing a design with Claude. Which approach produces the most useful output?",
+    opts:["Ask 'Is this a good design?' for a quick validation","Ask Claude to generate a generic best-practice checklist","Use the Devil's Advocate prompt asking it to challenge named components with specific risks","Ask Claude to agree with your design so you can share it with stakeholders"],
+    answer:2,
+    fb:["❌ Binary 'good/bad' questions produce vague, uncommitted answers.","❌ Generic checklists aren't specific to your system — they add noise, not signal.","✅ Naming specific components and asking for concrete risks forces Claude to engage with your actual design, not a hypothetical. 'The most critical change before we ship this is...' produces actionable output.","❌ Confirmation bias from AI is the worst possible outcome of a design review."]
+  },
+  {
+    q:"What transport protocols does MCP use for server communication?",
+    opts:["WebSockets and gRPC","stdio (for local) and SSE/HTTP (for remote) using JSON-RPC 2.0","REST with JWT tokens","GraphQL subscriptions"],
+    answer:1,
+    fb:["❌ WebSockets and gRPC are valid protocols but not what MCP specifies.","✅ Local MCP servers use stdio (standard input/output) for zero-network-overhead IPC. Remote servers use SSE or HTTP. All communication follows JSON-RPC 2.0.","❌ REST and JWT are common patterns but not MCP's transport layer.","❌ GraphQL subscriptions are not part of the MCP specification."]
+  },
+  {
+    q:"In a multi-tool MCP workflow, what's the 'Step-Confirm-Continue' pattern for?",
+    opts:["To make Claude run faster by breaking the task into steps","To ensure Claude confirms each tool action before proceeding, enabling error catching and audit trails","To force Claude to ask for user permission before every single API call","To limit Claude to one tool per session"],
+    answer:1,
+    fb:["❌ Breaking tasks into steps doesn't speed up Claude — it improves reliability.","✅ Confirming each step catches tool failures early, prevents cascading errors, and creates a clear record of what was changed — critical for automated pipelines touching production data.","❌ You wouldn't need confirmation on every call — just at logical checkpoints between steps.","❌ Claude can use multiple MCP tools in parallel within a single turn."]
+  },
+  {
+    q:"When generating tests for a function, what's the most important category of test to include that developers most often miss?",
+    opts:["Happy path tests covering the standard input","Performance benchmarks for every function","Error cases — invalid input, external service failures, and timeouts","Style tests checking naming conventions"],
+    answer:2,
+    fb:["❌ Happy path tests are necessary but are the ones developers always write — they're not the gap.","❌ Performance benchmarks are important but only for specific high-load paths.","✅ Error case testing is where most production bugs hide. Invalid input, timeout handling, partial failures, and external service unavailability are consistently under-tested and are exactly what Claude excels at generating comprehensively.","❌ Style tests (linting) are handled by static analysis tools, not unit tests."]
+  }
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Excellent!':_quizCorrect>=4?'👍 Good!':'📚 Review the MCP section and retry!'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="btn btn-teal" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="btn btn-teal" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>

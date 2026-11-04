@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 4 — Claude for Thinking, Planning & Decision Support</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f6f5fa;--surface:#fff;--border:#dddaeb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#6c3fd4;--purple-dk:#4e2aa0;--purple-lt:#f0ebfc;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --indigo:#3730a3;--indigo-lt:#eef2ff;
+  --violet:#7c3aed;--violet-lt:#f5f3ff;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#0d0820 0%,#2d1a6e 55%,#6c3fd4 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(108,63,212,.3)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#d4c4ff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#c4b4f8;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#a89de8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--purple),var(--accent))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--purple-lt);color:var(--purple)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#0d0820;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#1a0f3a;border-bottom:1px solid #2d1a6e}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#c4b4f8}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#e0d4ff;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--purple);border-bottom-color:var(--purple)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--purple-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--purple);color:var(--purple)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+
+/* FRAMEWORK CARD */
+.fw-card{background:var(--surface);border:2px solid #c4b2f5;border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.fw-head{background:linear-gradient(90deg,#2d1a6e,var(--purple));padding:10px 16px;display:flex;align-items:center;gap:8px}
+.fw-head span{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fw-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.fw-step:last-child{border-bottom:none}
+.fw-num{min-width:24px;height:24px;background:var(--purple);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.fw-content h5{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.fw-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-brain  {background:linear-gradient(135deg,var(--purple-lt),#ede8ff);border-color:#c4b2f5}
+.ex-compare{background:linear-gradient(135deg,var(--indigo-lt),#eef2ff);border-color:#a5b4fc}
+.ex-decide {background:linear-gradient(135deg,var(--violet-lt),#f5f3ff);border-color:#c4b2f5}
+.ex-solve  {background:linear-gradient(135deg,var(--teal-lt),#e8f6fb);border-color:#67d5eb}
+.ex-plan   {background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border-color:#9fe8cc}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--purple)}
+.ex-compare .ex-label{color:var(--indigo)}
+.ex-decide  .ex-label{color:var(--violet)}
+.ex-solve   .ex-label{color:var(--teal)}
+.ex-plan    .ex-label{color:var(--green)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--purple)}
+.ex-compare .ex-steps li::before{color:var(--indigo)}
+.ex-decide  .ex-steps li::before{color:var(--violet)}
+.ex-solve   .ex-steps li::before{color:var(--teal)}
+.ex-plan    .ex-steps li::before{color:var(--green)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--purple);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:var(--purple-dk)}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #c4b2f5;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--purple-lt),#ede8ff);border:2px solid #c4b2f5;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--purple);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--purple)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f8f7fc}
+.tbl tr:hover td{background:var(--purple-lt)}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--purple)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--purple);background:var(--purple-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--purple)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--purple);color:#fff}.nav-next:hover{background:var(--purple-dk)}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#f0ebfc;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--purple)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:var(--purple-dk)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 2 · Module 4 of 9</div>
+    <h1>Claude for Thinking, Planning & Decision Support</h1>
+    <p class="tagline">Use AI to think better, not just write faster.</p>
+    <div class="header-chips">
+      <span>⏱ 90 min</span>
+      <span>🧠 5 Topics</span>
+      <span>🏋️ 7 Exercises</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:44%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#brainstorm">Brainstorming</a>
+  <a href="#compare">Comparing</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#problemsolve">Problem Solving</a>
+  <a href="#planning">Planning</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">💡</span>Generate diverse, specific ideas for any challenge in under 2 minutes</div>
+    <div class="obj-item"><span class="ic">⚖️</span>Compare options using weighted criteria tailored to your priorities</div>
+    <div class="obj-item"><span class="ic">🎯</span>Apply SWOT, pre-mortem, and devil's advocate to any decision</div>
+    <div class="obj-item"><span class="ic">🔧</span>Define problems precisely and find root causes with 5 Whys</div>
+    <div class="obj-item"><span class="ic">📅</span>Turn any goal into a week-by-week actionable plan with risk flags</div>
+    <div class="obj-item"><span class="ic">🔗</span>Chain brainstorm → compare → decide → plan in one conversation</div>
+  </div>
+
+  <div class="two-col" style="margin-top:18px">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Thinking Alone</div>
+      <ul class="col-body">
+        <li>Stuck in the same mental loops</li>
+        <li>Blind spots you can't see</li>
+        <li>2 hours generating options</li>
+        <li>Gut-feel decisions, no documentation</li>
+        <li>No one to challenge your assumptions</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Thinking With Claude</div>
+      <ul class="col-body">
+        <li>Fresh angles and missed perspectives</li>
+        <li>Structured frameworks in minutes</li>
+        <li>20 ideas in 2 minutes — pick the best</li>
+        <li>Criteria-based, defensible decisions</li>
+        <li>Devil's advocate stress-tests your logic</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout c-purple">
+    <div class="ic">🧠</div>
+    <div class="bd">
+      <strong>The Key Shift</strong>
+      <p>Claude doesn't make decisions for you — it expands your thinking space. You still decide. But you decide with more options, more angles, and less cognitive load.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- BRAINSTORMING -->
+<section id="brainstorm">
+  <div class="sec-label">Topic 1 of 5</div>
+  <h2>💡 Brainstorming Ideas</h2>
+
+  <div class="diff-wrap">
+    <div class="diff-line diff-del">❌ "Give me ideas to improve team productivity"</div>
+    <div class="diff-line diff-add">✅ "My team of 8 remote engineers loses most time in unclear requirements and slow PR reviews. Give me 10 specific low-cost ideas — 5 per area. For each: estimate effort and likely impact."</div>
+  </div>
+
+  <div class="tab-wrap" id="brain-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('brain-tabs',0)">🎯 Focused</button>
+      <button class="tab-btn" onclick="switchTab('brain-tabs',1)">👥 Persona-Based</button>
+      <button class="tab-btn" onclick="switchTab('brain-tabs',2)">🔀 Reverse</button>
+      <button class="tab-btn" onclick="switchTab('brain-tabs',3)">📊 Categorised</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Focused Brainstorm</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a creative strategist in [your field].
+
+Challenge: [Specific problem or goal]
+Context: [Who you are, team, resources]
+Constraints: [Budget / time / tools / what to avoid]
+
+Generate [number] specific, actionable ideas.
+For each:
+- One-sentence description
+- Why it works in this context
+- Implementation effort: Low / Medium / High
+- Most likely obstacle
+
+Avoid generic ideas — make them specific to my context.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Force different perspectives — surfaces ideas your viewpoint can't generate.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Persona-Based Brainstorm</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need ideas for: [challenge]
+Context: [brief situation]
+
+Generate ideas from 4 different personas:
+1. A frugal startup founder (no budget)
+2. A large enterprise operations manager
+3. The end user / customer
+4. A contrarian critic of obvious approaches
+
+3 specific ideas per persona.
+Mark your personal recommendation with ⭐.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <p style="font-size:13px;color:var(--ink-muted);margin-bottom:10px">Generate "make it worse" ideas first — then flip each into a solution. Breaks mental blocks.</p>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Reverse Brainstorm</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I want to improve: [goal / challenge]
+
+Step 1: 8 specific ways to make this WORSE or fail.
+Make them realistic — things that actually happen.
+
+Step 2: Flip each into a corresponding improvement action.
+
+Step 3: Top 3 most actionable flipped ideas for my context:
+[Brief context and constraints]
+
+Format: Two-column (Problem Behaviour → Improvement), then top 3.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Categorised Ideas</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Challenge: [Problem or opportunity]
+Context: [Situation and constraints]
+
+15 ideas in 3 categories:
+- QUICK WINS: Implement this week, low effort, immediate impact
+- MEDIUM-TERM: 1–4 weeks, moderate effort, solid impact
+- STRATEGIC: Longer-term, higher effort, transformational
+
+5 ideas per category. Specific — not generic best practices.
+End with: "The one idea I'd prioritise first is X, because..."</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-brain">
+    <div class="ex-label">💡 Exercise 1 — Brainstorm a Real Challenge</div>
+    <h4>Pick Your Scenario and Run the Focused Brainstorm</h4>
+    <ul class="ex-steps">
+      <li><strong>Engineer:</strong> "Sprint velocity dropped 30% after two senior devs left. Generate ideas to recover it within one sprint."</li>
+      <li><strong>Manager:</strong> "Team engagement dropped after a restructure. Budget is limited. Generate ideas to rebuild it."</li>
+      <li><strong>Student:</strong> "Build a professional network before graduating in 3 months with no work experience."</li>
+    </ul>
+    <ul class="ex-steps" style="margin-top:10px">
+      <li>Run the Focused Brainstorm — are any ideas surprising?</li>
+      <li>Then try the Reverse Brainstorm on the same problem</li>
+      <li>Compare: which technique produced more useful ideas?</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Generate 15–20 specific, contextual ideas in under 2 minutes</li>
+      <li>Break mental blocks using the reverse brainstorm technique</li>
+      <li>Get perspectives you'd never generate from your own viewpoint alone</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- COMPARING -->
+<section id="compare">
+  <div class="sec-label">Topic 2 of 5</div>
+  <h2>⚖️ Comparing Options</h2>
+
+  <div class="callout c-purple">
+    <div class="ic">🎯</div>
+    <div class="bd">
+      <strong>The Right Question</strong>
+      <p>Don't ask "which is better?" — ask "which is better <em>for me, given my specific criteria</em>?" The criteria are yours. Claude does the analysis.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="compare-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('compare-tabs',0)">📊 Options Table</button>
+      <button class="tab-btn" onclick="switchTab('compare-tabs',1)">🎯 Weighted Criteria</button>
+      <button class="tab-btn" onclick="switchTab('compare-tabs',2)">📋 Pros / Cons</button>
+      <button class="tab-btn" onclick="switchTab('compare-tabs',3)">🔮 Scenarios</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Options Comparison Table</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Options:
+A: [Description]  B: [Description]  C: [if applicable]
+
+My context: [Who you are, success criteria, constraints]
+
+Compare across these dimensions:
+[List your 4–6 criteria]
+
+For each cell: rating (1–5) + 1-sentence justification.
+After the table: recommend the best option for MY context.
+Flag any option with a disqualifying weakness.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Weighted Criteria Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Options: [list them]
+
+My criteria and weights (total = 100%):
+- [Criterion 1]: [weight]% — [why it matters]
+- [Criterion 2]: [weight]% — [why it matters]
+- [Criterion 3]: [weight]%
+- [Criterion 4]: [weight]%
+
+Score each option per criterion (1–10).
+Calculate weighted total. Show in a table.
+Recommend, and explain what would tip the decision if scores are close.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Structured Pros / Cons</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Options: A: [desc]  B: [desc]
+My situation: [context, goals, constraints]
+
+For each option:
+PROS: 4–5 genuine advantages (specific to my situation)
+CONS: 4–5 genuine disadvantages or risks
+HIDDEN RISKS: 2 things that could go wrong non-obviously
+BEST CASE: Success in 6 months looks like...
+WORST CASE: Failure in 6 months looks like...
+
+Recommendation + the single most important factor driving it.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Scenario Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Options: [list them]
+Context: [brief situation]
+
+Analyse each option under 3 scenarios:
+BEST CASE: [favourable conditions]
+BASE CASE: [most likely conditions]
+WORST CASE: [unfavourable conditions]
+
+For each option × scenario:
+- What happens? (1–2 sentences)
+- How recoverable is a bad outcome? High / Medium / Low
+
+Which option performs best across ALL scenarios?
+Which is most robust to uncertainty?</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-compare">
+    <div class="ex-label">⚖️ Exercise 2 — Tech Stack Decision</div>
+    <h4>Choose a Notifications Architecture</h4>
+    <p>3 options: (A) Build custom WebSockets, (B) Use Pusher managed service, (C) Firebase Realtime DB. Team of 4. 3-week deadline.</p>
+    <ul class="ex-steps">
+      <li>Use Weighted Criteria — your criteria: Delivery speed (40%), Scalability (25%), Team familiarity (20%), Cost (15%)</li>
+      <li>Score all three options and get a weighted recommendation</li>
+      <li>Follow up: "If our budget doubles next year — does the recommendation change?"</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- DECISIONS -->
+<section id="decisions">
+  <div class="sec-label">Topic 3 of 5</div>
+  <h2>🎯 Decision Frameworks</h2>
+
+  <table class="tbl">
+    <thead><tr><th>Framework</th><th>Best Used When</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SWOT Analysis</strong></td><td>Evaluating a plan, project, or product idea</td></tr>
+      <tr><td><strong>Pre-Mortem</strong></td><td>Stress-testing a plan before you commit</td></tr>
+      <tr><td><strong>Devil's Advocate</strong></td><td>You've decided — test it before announcing</td></tr>
+      <tr><td><strong>First Principles</strong></td><td>Challenging assumptions on a hard problem</td></tr>
+      <tr><td><strong>Eisenhower Matrix</strong></td><td>Prioritising tasks — urgent vs important</td></tr>
+    </tbody>
+  </table>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🔍 SWOT Analysis <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">SWOT Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a senior business strategist.
+Analyse: [your plan / idea / decision]
+Context: [who you are, goals, constraints]
+
+4–5 specific points per quadrant (no generic clichés):
+STRENGTHS — Internal advantages that are genuinely differentiated
+WEAKNESSES — Internal limitations honestly acknowledged
+OPPORTUNITIES — External conditions you can specifically exploit
+THREATS — External risks that could realistically materialise
+
+After the SWOT: 2–3 sentence strategic assessment.
+Then: the single most important action — leverage the best opportunity while mitigating the biggest threat.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">⚰️ Pre-Mortem — What Will Kill Your Plan? <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Pre-Mortem</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>My plan: [what you're about to commit to]
+Context: [team, resources, timeline, dependencies]
+
+Imagine it's 12 months from now. This plan failed completely.
+
+Step 1: 8 specific, realistic reasons why it failed.
+Cover: execution, external events, stakeholder issues, technical risks, human factors.
+
+Step 2: Rate each — Probability (H/M/L) × Impact (H/M/L)
+
+Step 3: Top 3 failure modes to mitigate now.
+For each: one concrete preventive action to take this week.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">😈 Devil's Advocate — Challenge Your Decision <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Devil's Advocate</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a smart devil's advocate — find genuine blind spots, not just be contrarian.
+
+My decision: [what you've decided]
+My reasoning: [why you think it's right]
+Context: [relevant background]
+
+Challenge this by:
+1. The 3 strongest arguments AGAINST this approach
+2. Assumptions I'm making that might be wrong
+3. Who would strongly disagree — and why they might be right
+4. The scenario where I'd look back and say "I should have done the other thing"
+
+Be direct. Don't soften the critique.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🧱 First Principles — Break the Assumptions <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">First Principles</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Problem: [describe the challenge]
+Context: [what's been tried, current constraints]
+
+Apply first principles thinking:
+1. What assumptions does everyone make about this problem?
+2. Which assumptions, if removed, would change the solution entirely?
+3. What is actually true at the most fundamental level?
+4. From those fundamentals — what new solutions become possible?
+
+Focus on 2–3 non-obvious directions conventional thinking misses.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-decide">
+    <div class="ex-label">🎯 Exercise 3 — Pre-Mortem Your Project</div>
+    <h4>Find What Could Kill Your Current Plan</h4>
+    <p>Use a real project, or: "Launching a new internal tool to replace our current Jira workflow for a team of 12."</p>
+    <ul class="ex-steps">
+      <li>Run the Pre-Mortem — are any failure modes surprising?</li>
+      <li>For each of the top 3 risks: "What's the minimum action this week to reduce this risk?"</li>
+    </ul>
+  </div>
+
+  <div class="ex-card ex-decide">
+    <div class="ex-label">😈 Exercise 4 — Challenge a Decision You've Made</div>
+    <h4>Devil's Advocate a Decision You Feel Confident About</h4>
+    <ul class="ex-steps">
+      <li>Think of a decision you've made recently that you feel confident about</li>
+      <li>Run the Devil's Advocate prompt — does any point genuinely challenge you?</li>
+      <li>Follow up: "Given these critiques, what one change to my plan addresses the most serious concern?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 What Good Output Looks Like</button>
+    <div class="ans-box">
+      <p>The best Devil's Advocate responses challenge your specific reasoning — not generic risks. Look for moments where Claude identifies an assumption you hadn't noticed you were making. That's the signal it's working.</p>
+      <p>If the output feels shallow: <em>"You're being too gentle. What's the single strongest case that this decision is wrong? Don't hedge."</em></p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Apply SWOT, pre-mortem, or first principles to any decision in under 5 minutes</li>
+      <li>Use devil's advocate to find blind spots before you commit</li>
+      <li>Make decisions with documented reasoning — not just gut feel</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PROBLEM SOLVING -->
+<section id="problemsolve">
+  <div class="sec-label">Topic 4 of 5</div>
+  <h2>🔧 Problem Solving</h2>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🔧 The Problem Solving Workflow</span></div>
+    <div class="fw-step"><div class="fw-num">1</div><div class="fw-content"><h5>Define the Problem Precisely</h5><p>Articulate what's happening, who's affected, and what "fixed" looks like</p></div></div>
+    <div class="fw-step"><div class="fw-num">2</div><div class="fw-content"><h5>Diagnose Root Causes</h5><p>Use 5 Whys — don't solve symptoms, find what's driving them</p></div></div>
+    <div class="fw-step"><div class="fw-num">3</div><div class="fw-content"><h5>Generate Solution Options</h5><p>Multiple approaches at 3 levels: symptomatic, structural, preventive</p></div></div>
+    <div class="fw-step"><div class="fw-num">4</div><div class="fw-content"><h5>Evaluate and Select</h5><p>Use comparison frameworks against your real constraints</p></div></div>
+    <div class="fw-step"><div class="fw-num">5</div><div class="fw-content"><h5>Plan Implementation</h5><p>Break into specific actions with owners, timelines, success metrics</p></div></div>
+  </div>
+
+  <div class="tab-wrap" id="solve-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('solve-tabs',0)">🎯 Define Problem</button>
+      <button class="tab-btn" onclick="switchTab('solve-tabs',1)">🔍 5 Whys</button>
+      <button class="tab-btn" onclick="switchTab('solve-tabs',2)">💡 Solutions</button>
+      <button class="tab-btn" onclick="switchTab('solve-tabs',3)">🧪 Test Hypothesis</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Problem Definition</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Situation: [what's going wrong, who's affected, impact]
+Context: [since when, what's been tried]
+
+Help me define the problem precisely:
+1. PROBLEM STATEMENT: "The problem is that [who] cannot [what] because [why], resulting in [impact]."
+2. SCOPE: What's inside this problem? What's outside it?
+3. SUCCESS CRITERIA: What does "fixed" look like specifically?
+4. CONSTRAINTS: What limits the solutions?
+5. ASSUMPTIONS: What are we assuming that might not be true?
+
+Don't propose solutions yet.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Root Cause Analysis (5 Whys)</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Problem: [describe the symptom]
+Context: [when it happens, who's affected, what's been tried]
+
+Apply 5 Whys:
+Why 1: Why is [problem] happening?
+Why 2: Why is [answer 1] happening?
+Why 3: Why is [answer 2] happening?
+Why 4: Why is [answer 3] happening?
+Why 5: Why is [answer 4] happening?
+
+State the root cause in one sentence.
+Is this a process problem, a people problem, or a system problem?</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">3-Level Solution Generation</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Root cause: [state it]
+Context and constraints: [brief description]
+
+Solutions at 3 levels:
+SYMPTOMATIC FIX: Stop the bleeding immediately (days)
+STRUCTURAL FIX: Address the root cause (weeks–months)
+PREVENTIVE FIX: Stop this class of problem recurring (longer-term)
+
+2–3 options per level.
+Mark recommended option per level ⭐ with a brief reason.
+End: "The most important thing to do first is X, because Y."</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Hypothesis Testing</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My hypothesis: [what I believe is the cause or solution]
+My reasoning: [evidence / logic behind it]
+Context: [the situation]
+
+Test this:
+1. EVIDENCE FOR — what supports it?
+2. EVIDENCE AGAINST — what contradicts it?
+3. ALTERNATIVE HYPOTHESES — what else could explain the same symptoms?
+4. CHEAPEST TEST — fastest way to validate or disprove?
+5. VERDICT — strong, weak, or needs more evidence?
+
+Be honest — tell me if I'm likely wrong.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-solve">
+    <div class="ex-label">🔧 Exercise 5 — Solve the PR Review Problem</div>
+    <h4>Full Problem-Solving Workflow</h4>
+    <p><strong>Scenario:</strong> Your team's PRs sit open for an average of 3 days. Developers are frustrated. Some are merging without full reviews to hit deadlines.</p>
+    <ul class="ex-steps">
+      <li>Step 1: Define the problem precisely — write the Problem Statement sentence</li>
+      <li>Step 2: Apply 5 Whys to find the root cause (hint: there may be more than one)</li>
+      <li>Step 3: Use 3-Level Solution Generation on the root cause you found</li>
+      <li>Step 4: "Which solution fits a small team with no budget?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 What Good Output Looks Like</button>
+    <div class="ans-box">
+      <p><strong>Problem Statement:</strong> "The problem is that developers cannot get timely feedback on PRs because reviewers don't prioritise reviews over their own coding tasks, resulting in 3-day cycle times and developers bypassing the process."</p>
+      <p><strong>Key insight:</strong> The root cause is almost never "developers are lazy" — it's usually a process or incentive design problem. No one was ever told "reviewing PRs is your highest priority task."</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PLANNING -->
+<section id="planning">
+  <div class="sec-label">Topic 5 of 5</div>
+  <h2>📅 Structuring Plans</h2>
+
+  <div class="tab-wrap" id="plan-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('plan-tabs',0)">📅 Project Plan</button>
+      <button class="tab-btn" onclick="switchTab('plan-tabs',1)">🗓 30-Day Plan</button>
+      <button class="tab-btn" onclick="switchTab('plan-tabs',2)">🎯 Goal Breakdown</button>
+      <button class="tab-btn" onclick="switchTab('plan-tabs',3)">⚠️ Risk Register</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Project Plan</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as an experienced project manager.
+
+Project: [Name and description]
+Goal: [What success looks like]
+Timeline: [Start and end date]
+Team: [Who's involved and their roles]
+Constraints: [What you cannot compromise on]
+
+Create a structured plan:
+1. PHASES: 3–5 phases with clear milestones
+2. TASKS: Key tasks per phase (critical path only)
+3. RISKS: Top 3 with mitigation strategies
+4. DEPENDENCIES: What must happen before what?
+5. SUCCESS METRICS: How to measure success per phase
+
+Be realistic — not optimistic.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">30-Day Action Plan</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Goal: [what I want to achieve in 30 days]
+Starting point: [where I am now]
+Available time: [hours per day/week]
+Constraints: [what limits me]
+Priority: [if time runs short, what matters most?]
+
+Week 1: Foundation (set up, learn, clarify)
+Week 2: Core work (main activities driving progress)
+Week 3: Refinement (iterate and deepen)
+Week 4: Completion and review
+
+3–5 specific actions per week with clear done/not-done criteria.
+End: "The most critical thing in week 1 is X, because..."</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Goal Breakdown</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My goal: [describe it]
+Timeframe: [when you want it]
+Context: [situation, resources, constraints]
+
+Break this down:
+1. OUTCOME GOAL: What exactly does success look like? Make it measurable.
+2. PROCESS GOALS: 3–5 behaviours/activities that drive progress
+3. MILESTONES: 4 checkpoints to track progress
+4. FIRST 3 ACTIONS: What to do starting today
+5. OBSTACLES: Top 3 likely obstacles and how to pre-empt each
+
+Make this specific enough to start today.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Risk Register</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Plan: [brief description]
+Context: [team, timeline, key dependencies]
+
+Top 8 risks. For each:
+- Risk description (one specific sentence)
+- Category: Technical / Resource / External / Process / Stakeholder
+- Probability: High / Medium / Low
+- Impact if it occurs: High / Medium / Low
+- Mitigation: what to do now
+- Contingency: what to do if it occurs
+
+Sort by risk score (High+High first). Flag top 3 as priority.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-plan">
+    <div class="ex-label">📅 Exercise 6 — Build a 30-Day Plan</div>
+    <h4>Turn a Goal Into a Week-by-Week Action Plan</h4>
+    <ul class="ex-steps">
+      <li><strong>Engineer:</strong> "Learn enough Kubernetes in 30 days to deploy our app to a k8s cluster. 1 hr/day."</li>
+      <li><strong>Manager:</strong> "Build a team feedback culture in 30 days. Currently no regular 1:1s or retrospectives."</li>
+      <li><strong>Student:</strong> "Be job-ready for a junior frontend role in 30 days. Know HTML/CSS, no framework yet."</li>
+    </ul>
+    <ul class="ex-steps" style="margin-top:10px">
+      <li>Run the 30-Day Plan prompt — do the Week 1 tasks feel achievable?</li>
+      <li>Iterate: "I only have 45 minutes/day. Reduce scope and tell me what to cut."</li>
+    </ul>
+  </div>
+
+  <div class="ex-card ex-plan">
+    <div class="ex-label">🔗 Exercise 7 — Full Thinking Workflow</div>
+    <h4>Chain All 5 Topics in One Conversation</h4>
+    <p><strong>Scenario:</strong> Launch an internal knowledge-base tool. 6 weeks, 2 developers, AWS hosting only.</p>
+    <ul class="ex-steps">
+      <li>Step 1 — Brainstorm: 10 ideas for MVP features (Focused Brainstorm)</li>
+      <li>Step 2 — Compare: Shortlist 3 tech approaches using Weighted Criteria</li>
+      <li>Step 3 — Decide: Pre-Mortem on the chosen approach</li>
+      <li>Step 4 — Problem-Solve: 5 Whys on the biggest technical risk</li>
+      <li>Step 5 — Plan: 6-week project plan with phases and risk register</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Key Insight</button>
+    <div class="ans-box">
+      <p>Each step uses the previous step's output as input — all within one conversation. Claude maintains context throughout, so you never re-explain your situation. The full workflow takes 30–45 minutes with Claude. Without it: 3 days of meetings and research.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Turn any goal into a week-by-week action plan in under 5 minutes</li>
+      <li>Build a prioritised risk register for any project</li>
+      <li>Chain all 5 thinking tools in a single Claude conversation</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 4 — Thinking, Planning &amp; Decisions</h4>
+    <div class="quiz-sub">7 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">💡</span>Generate 15–20 specific, contextual ideas for any challenge in 2 minutes</div>
+    <div class="sum-item"><span class="ic">⚖️</span>Compare any set of options using weighted criteria — get a recommendation, not just a list</div>
+    <div class="sum-item"><span class="ic">🎯</span>Apply SWOT, pre-mortem, devil's advocate to any decision in under 5 minutes</div>
+    <div class="sum-item"><span class="ic">🔧</span>Define problems precisely and find root causes before jumping to solutions</div>
+    <div class="sum-item"><span class="ic">📅</span>Turn any goal into a week-by-week plan with milestones and risk flags</div>
+    <div class="sum-item"><span class="ic">🔗</span>Chain all 5 tools in one Claude conversation — context maintained throughout</div>
+  </div>
+
+  <div class="callout c-purple" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 5</strong>
+      <p>Claude for Software Engineering — writing, debugging and explaining code; Java and Spring Boot examples; test generation; and system design with Claude as your technical co-pilot.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 4 of 9 · Thinking, Planning &amp; Decisions</div>
+  <div class="nav-links">
+    <a href="module3_display.html" class="nav-link nav-prev">← Module 3</a>
+    <a href="module5_display.html" class="nav-link nav-next">Module 5 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Answer':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const qData=[
+  {q:"What makes a brainstorm prompt produce specific, usable ideas instead of generic ones?",opts:["Asking for as many ideas as possible","Keeping the prompt short and simple","Including specific context, real constraints, and asking for implementation effort","Asking for only the single best idea"],answer:2,fb:["❌ Volume without constraints produces generic, impractical ideas.","❌ More context — not less — is what drives quality.","✅ Context makes ideas specific. Constraints make them realistic. Effort ratings make them actionable.","❌ One idea removes the value of brainstorming entirely."]},
+  {q:"What is the Reverse Brainstorm technique?",opts:["Generating 'make it worse' ideas first, then flipping each into a solution","Evaluating ideas you've already generated","Working backwards from the solution to find the problem","Asking Claude to argue against your best idea"],answer:0,fb:["✅ By thinking about how to make things worse first, you break mental blocks and surface solutions direct positive thinking misses.","❌ That's idea evaluation, not reverse brainstorming.","❌ That's backcasting — a different technique.","❌ That's closer to devil's advocate."]},
+  {q:"You're comparing 3 options with a tight deadline. What's the most useful approach?",opts:["Ask Claude which is objectively best","List pros and cons equally for each option","Ask Claude for general best practice","Define criteria with weights that reflect your priorities — then score each option"],answer:3,fb:["❌ 'Objectively best' ignores your specific constraints — a tight deadline changes everything.","❌ Unweighted pros/cons treats every factor as equal — but some matter far more.","❌ General best practice doesn't account for your deadline, team size, or existing stack.","✅ Weighted criteria force you to articulate what matters most in your context. The analysis then reflects your priorities, not generic best practice."]},
+  {q:"What is a Pre-Mortem and when should you use it?",opts:["A review done after a project fails","Imagining your plan has already failed, then identifying why — done BEFORE committing","A risk assessment done by external auditors","A template for writing post-project reports"],answer:1,fb:["❌ That's a post-mortem — after the fact.","✅ The pre-mortem forces optimism bias out of your planning. Use it whenever you're about to start something significant.","❌ Pre-mortems are self-administered thinking tools.","❌ Post-project reports are retrospectives — pre-mortems are prospective."]},
+  {q:"A problem keeps recurring despite your team applying the same fix. What technique should you use first?",opts:["Brainstorm more creative solutions","Build a better plan for next time","Root Cause Analysis (5 Whys) — find what's actually driving it","Ask Claude to generate a permanent solution directly"],answer:2,fb:["❌ More creative versions of the same ineffective approach won't help.","❌ Better planning doesn't fix the underlying cause.","✅ A recurring problem almost always means you're solving a symptom. 5 Whys digs through the layers to find the actual driver.","❌ Claude can't generate a permanent fix without understanding the root cause first."]},
+  {q:"What does 'First Principles thinking' help you do?",opts:["Generate more ideas faster","Create a weighted comparison of options","Write clearer problem statements","Strip away assumptions to find fundamentally new solutions"],answer:3,fb:["❌ First principles is about depth, not speed of idea generation.","❌ That's the comparison framework.","❌ That's the problem definition technique.","✅ First principles strips assumptions to reveal what's fundamentally true — opening up solutions that conventional thinking can't see because it's constrained by 'how things are done.'"]},
+  {q:"What's the key advantage of running the full workflow (brainstorm → compare → decide → solve → plan) in a single Claude conversation?",opts:["Claude maintains context from each step — no re-explaining your situation at every stage","It's faster than switching between tools","Claude can only process one topic at a time","It forces you to make all decisions at the start"],answer:0,fb:["✅ This is the real power. Claude remembers your constraints from the brainstorm, your criteria from the comparison, and the risks from the pre-mortem — building a coherent, connected analysis throughout.","❌ Speed is a benefit but not the key advantage.","❌ Claude maintains full context across the conversation — that's one of its core capabilities.","❌ You can and should revise decisions as new information emerges — that's good thinking, not a problem."]}
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Excellent!':_quizCorrect>=4?'👍 Good!':'📚 Review and retry!'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="btn btn-purple" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="btn btn-purple" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>

@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 7 — Advanced Claude Features: Projects, Artifacts, Long Context &amp; MCP</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f6f5fa;--surface:#fff;--border:#dddaeb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#6c3fd4;--purple-dk:#4e2aa0;--purple-lt:#f0ebfc;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --indigo:#3730a3;--indigo-lt:#eef2ff;
+  --violet:#7c3aed;--violet-lt:#f5f3ff;
+  --orange:#d97706;--orange-lt:#fff7ed;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#050e1f 0%,#0a2545 50%,#0d5ea6 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(13,94,166,.3)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#a8d4ff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(20px,3.5vw,30px);font-weight:700;line-height:1.2;max-width:600px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#8ec8ff;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#7ab8e8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--accent-lt);color:var(--accent)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#050e1f;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#0a1e36;border-bottom:1px solid #0d3363}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#8ec8ff}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#cde8ff;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--accent-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--accent);color:var(--accent)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-blue{background:var(--accent-lt);border-color:#a8c4f8}.c-blue .bd strong{color:var(--accent)}
+.c-info{background:var(--teal-lt);border-color:#67d5eb}.c-info .bd strong{color:var(--teal)}
+.c-amber{background:var(--amber-lt);border-color:#f0c870}.c-amber .bd strong{color:var(--amber)}
+.c-orange{background:var(--orange-lt);border-color:#fbbf24}.c-orange .bd strong{color:var(--orange)}
+
+/* FRAMEWORK CARD */
+.fw-card{background:var(--surface);border:2px solid #a8c4f8;border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.fw-head{background:linear-gradient(90deg,#0a2545,var(--accent));padding:10px 16px;display:flex;align-items:center;gap:8px}
+.fw-head span{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fw-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.fw-step:last-child{border-bottom:none}
+.fw-num{min-width:24px;height:24px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.fw-content h5{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.fw-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* EXERCISE CARDS */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-proj   {background:linear-gradient(135deg,var(--accent-lt),#dce9ff);border-color:#a8c4f8}
+.ex-art    {background:linear-gradient(135deg,var(--teal-lt),#d0f4fd);border-color:#67d5eb}
+.ex-ctx    {background:linear-gradient(135deg,var(--violet-lt),#ede8ff);border-color:#c4b2f5}
+.ex-chain  {background:linear-gradient(135deg,var(--indigo-lt),#e0e7ff);border-color:#a5b4fc}
+.ex-mcp    {background:linear-gradient(135deg,var(--green-lt),#d4f9ed);border-color:#9fe8cc}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--accent)}
+.ex-art   .ex-label{color:var(--teal)}
+.ex-ctx   .ex-label{color:var(--violet)}
+.ex-chain .ex-label{color:var(--indigo)}
+.ex-mcp   .ex-label{color:var(--green)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--accent)}
+.ex-art   .ex-steps li::before{color:var(--teal)}
+.ex-ctx   .ex-steps li::before{color:var(--violet)}
+.ex-chain .ex-steps li::before{color:var(--indigo)}
+.ex-mcp   .ex-steps li::before{color:var(--green)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--accent);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:#1558cc}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #a8c4f8;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--accent-lt),#dce9ff);border:2px solid #a8c4f8;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--accent);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--accent)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f5f8ff}
+.tbl tr:hover td{background:var(--accent-lt)}
+
+/* MCP CARD */
+.mcp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:14px 0}
+.mcp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);transition:box-shadow .15s}
+.mcp-card:hover{box-shadow:var(--shadow-md)}
+.mcp-icon{font-size:22px;margin-bottom:6px}
+.mcp-card h5{font-size:13px;font-weight:700;margin-bottom:4px}
+.mcp-card p{font-size:12px;margin:0;color:var(--ink-muted)}
+.mcp-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:6px;text-transform:uppercase;letter-spacing:.04em}
+.badge-on{background:var(--green-lt);color:var(--green)}
+.badge-connect{background:var(--amber-lt);color:var(--amber)}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--accent)}
+.q-dot.curr{background:var(--teal)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--accent);background:var(--accent-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--accent)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--accent);color:#fff}.nav-next:hover{background:#1558cc}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#e8f0fe;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-blue{background:var(--accent);color:#fff}.btn-blue:hover{background:#1558cc}
+
+/* STEP CHAIN */
+.chain{display:flex;flex-direction:column;gap:0;margin:12px 0}
+.chain-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+.chain-step:not(:last-child){border-bottom:1px dashed var(--border)}
+.chain-num{min-width:28px;height:28px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.chain-arrow{color:var(--accent);font-size:18px;margin:0 4px;flex-shrink:0;align-self:center}
+.chain-content strong{font-size:13.5px;display:block;margin-bottom:2px}
+.chain-content span{font-size:12.5px;color:var(--ink-muted)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 3 · Module 7 of 9</div>
+    <h1>Advanced Claude Features — Projects, Artifacts, Long Context &amp; MCP Workflows</h1>
+    <p class="tagline">Go beyond normal chat — build persistent workspaces, structured outputs, and connected productivity stacks.</p>
+    <div class="header-chips">
+      <span>⏱ 105 min</span>
+      <span>🧩 9 Topics</span>
+      <span>🏋️ 6 Exercises</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#projects">Projects</a>
+  <a href="#artifacts">Artifacts</a>
+  <a href="#longcontext">Long Context</a>
+  <a href="#chaining">Prompt Chaining</a>
+  <a href="#mcp">MCP Workflows</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">🗂️</span>Create and configure Claude Projects with persistent instructions for ongoing work</div>
+    <div class="obj-item"><span class="ic">🎨</span>Generate professional artifacts — documents, code, diagrams — inside Claude</div>
+    <div class="obj-item"><span class="ic">📄</span>Work with large files and multi-document analysis without losing context</div>
+    <div class="obj-item"><span class="ic">🔗</span>Chain multi-step prompts for complex, structured professional outputs</div>
+    <div class="obj-item"><span class="ic">🔌</span>Connect Notion, Google Drive, and Slack to Claude using MCP</div>
+    <div class="obj-item"><span class="ic">⚙️</span>Build a personal MCP-powered productivity stack for daily workflows</div>
+  </div>
+
+  <div class="callout c-blue" style="margin-top:18px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Why This Module Matters</strong>
+      <p>Most people use Claude like a search engine — one question, one answer. This module teaches you to use Claude like a professional workbench: persistent context, structured outputs, tool integrations, and multi-step workflows that compound over time.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CLAUDE PROJECTS -->
+<section id="projects">
+  <div class="sec-label">Topic 1–2 of 9</div>
+  <h2>🗂️ Claude Projects &amp; Project Instructions</h2>
+
+  <p>A <strong>Project</strong> is a persistent workspace in Claude where context, files, and instructions are maintained across all conversations. Instead of re-explaining your role, goals, and constraints every time, a Project remembers everything.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🗂️ What a Project Contains</span></div>
+    <div class="fw-step"><div class="fw-num">1</div><div class="fw-content"><h5>Project Instructions</h5><p>Your custom system prompt — who you are, how Claude should respond, what tone and format to use</p></div></div>
+    <div class="fw-step"><div class="fw-num">2</div><div class="fw-content"><h5>Uploaded Files</h5><p>Documents, code files, specs, data — Claude references these across every conversation in the project</p></div></div>
+    <div class="fw-step"><div class="fw-num">3</div><div class="fw-content"><h5>Conversation History</h5><p>All past chats within the project — Claude can refer back to earlier decisions and context</p></div></div>
+    <div class="fw-step"><div class="fw-num">4</div><div class="fw-content"><h5>Persistent Memory</h5><p>Claude remembers project-level facts so you never repeat yourself across sessions</p></div></div>
+  </div>
+
+  <h3>Writing Effective Project Instructions</h3>
+  <p>Project instructions are a one-time investment that multiplies every interaction. Poorly written instructions produce generic, off-target responses. Well-written ones turn Claude into a domain-specific expert that knows your context by default.</p>
+
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Weak Instructions</div>
+      <div class="col-body"><ul>
+        <li>You are a helpful assistant</li>
+        <li>Be professional and concise</li>
+        <li>Help me with my work tasks</li>
+        <li>Use bullet points where helpful</li>
+      </ul></div>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✓ Strong Instructions</div>
+      <div class="col-body"><ul>
+        <li>Role, company context, and team stated</li>
+        <li>Explicit tone and output format rules</li>
+        <li>Constraints: audience, level of detail</li>
+        <li>What to always/never do specified</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="proj-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('proj-tabs',0)">🧑‍💻 Engineering Project</button>
+      <button class="tab-btn" onclick="switchTab('proj-tabs',1)">📈 Business Analyst</button>
+      <button class="tab-btn" onclick="switchTab('proj-tabs',2)">🎓 Research / Study</button>
+      <button class="tab-btn" onclick="switchTab('proj-tabs',3)">✍️ Content Creator</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Engineering Project Instructions</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a senior software engineering assistant for a fintech startup.
+
+CONTEXT:
+- Stack: Java 17, Spring Boot 3, PostgreSQL, Kafka, AWS (ECS/RDS)
+- Team: 6 engineers, 2-week sprints, strict PR review culture
+- Standards: RESTful APIs, OpenAPI 3 docs, 80%+ test coverage
+
+MY ROLE: Senior backend engineer, 8 years experience
+
+ALWAYS:
+- Use modern Java idioms (records, streams, sealed classes)
+- Include error handling and edge cases by default
+- Flag performance issues and N+1 query risks proactively
+- Structure code examples to be copy-paste ready
+
+NEVER:
+- Suggest deprecated Spring patterns
+- Skip test coverage or security considerations
+- Give vague "it depends" answers without a concrete recommendation
+
+FORMAT: Code first, brief explanation after. Use inline comments.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Business Analyst Project Instructions</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a business analysis partner for an enterprise SaaS company.
+
+CONTEXT:
+- Industry: B2B HR Technology
+- Stakeholders: CPO, CFO, Head of Sales (non-technical)
+- My deliverables: requirements docs, process maps, exec summaries
+
+MY ROLE: Lead BA, bridging product and engineering
+
+ALWAYS:
+- Frame insights in business value and ROI terms
+- Flag assumptions and open questions explicitly
+- Structure documents for busy executives (key finding first)
+- Use measurable success criteria, not vague goals
+
+NEVER:
+- Use jargon without defining it for a non-technical audience
+- Leave requirements ambiguous — ask clarifying questions
+- Skip the "so what?" — every data point needs a business implication
+
+FORMAT: Use headings, executive summary at top, supporting detail below.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Research / Study Project Instructions</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a research and study assistant for a postgraduate student in AI/ML.
+
+CONTEXT:
+- Field: Machine Learning — focus on LLMs and agentic systems
+- Level: PhD Year 2 — comfortable with advanced maths and theory
+- Goal: Preparing thesis on multi-agent reasoning systems
+
+MY NEEDS: Literature synthesis, argument development, writing feedback
+
+ALWAYS:
+- Cite specific papers when making claims (author, year, venue)
+- Flag when a statement is contested or lacks strong evidence
+- Challenge weak arguments — don't just validate what I write
+- Distinguish between established results and open research questions
+
+NEVER:
+- Oversimplify complex topics — I prefer precision over accessibility
+- Present one perspective as settled when debate exists
+- Skip limitations or failure cases
+
+FORMAT: Academic tone, dense but clear. Use LaTeX notation for maths.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Content Creator Project Instructions</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>You are a content strategy and writing partner for a LinkedIn creator.
+
+CONTEXT:
+- Niche: AI for business professionals — practical, non-hype
+- Audience: Mid-senior professionals (managers, founders, analysts)
+- Platform: LinkedIn primary, email newsletter secondary
+- Posting frequency: 3x/week LinkedIn, 1x/week newsletter
+
+MY VOICE: Confident, direct, slightly contrarian. No fluff.
+
+ALWAYS:
+- Lead with a hook — first line must stop the scroll
+- Use short paragraphs (1–3 lines) and white space
+- Include one concrete, specific takeaway per post
+- Make it immediately usable — not just interesting
+
+NEVER:
+- Generic motivational content or engagement bait
+- "AI is changing everything" without specifics
+- Lists longer than 5 items unless the format demands it
+
+FORMAT: LinkedIn post format — no headers, short grafs, clear CTA.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-proj">
+    <div class="ex-label">🗂️ Exercise 1 — Build Your Own Project</div>
+    <h4>Create a Project for Your Most Frequent Claude Use Case</h4>
+    <ul class="ex-steps">
+      <li>In Claude.ai, create a new Project and name it after your primary use case</li>
+      <li>Write project instructions using the template above — fill in your role, context, always/never rules, and format preference</li>
+      <li>Upload 1–2 reference files: a recent doc, style guide, or spec your work references constantly</li>
+      <li>Run the same prompt you've used before — compare the response quality with and without the project context</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 What Makes a Project Instruction Excellent</button>
+    <div class="ans-box">
+      <p><strong>The test:</strong> Could someone unfamiliar with your role read these instructions and understand exactly how to help you? If yes — they're good. The most powerful instruction isn't the role statement, it's the NEVER list. Constraints generate quality.</p>
+      <p><strong>Iterate:</strong> After 5 conversations, ask Claude: "Based on these instructions, what's missing that would help you assist me better?" Claude will surface gaps you didn't notice.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Create a persistent Claude workspace that knows your role, stack, and constraints</li>
+      <li>Write project instructions that eliminate repeated context-setting</li>
+      <li>Upload reference files so Claude always has your domain context available</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ARTIFACTS -->
+<section id="artifacts">
+  <div class="sec-label">Topic 3 of 9</div>
+  <h2>🎨 Artifacts — Structured Outputs Inside Claude</h2>
+
+  <p>An <strong>Artifact</strong> is a self-contained, rendered output that Claude generates alongside the conversation — a document, a code file, a diagram, a table — displayed separately so you can read, copy, or refine it independently of the chat thread.</p>
+
+  <table class="tbl">
+    <thead><tr><th>Artifact Type</th><th>What It Produces</th><th>Best Used For</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Document</strong></td><td>Formatted text, markdown, reports</td><td>Briefs, READMEs, specs, summaries</td></tr>
+      <tr><td><strong>Code</strong></td><td>Rendered, syntax-highlighted code</td><td>Scripts, functions, configs, migrations</td></tr>
+      <tr><td><strong>SVG / Diagram</strong></td><td>Vector graphics rendered inline</td><td>Architecture diagrams, flowcharts, charts</td></tr>
+      <tr><td><strong>React Component</strong></td><td>Live interactive UI preview</td><td>Mockups, dashboards, calculators</td></tr>
+      <tr><td><strong>HTML Page</strong></td><td>Rendered web page</td><td>Reports, templates, landing page drafts</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout c-info">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>When to Request an Artifact</strong>
+      <p>Any time the output is a standalone deliverable — not a conversational answer. Ask explicitly: <em>"Create this as an artifact."</em> Claude will render it in the sidebar panel for easy copying and iteration.</p>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="art-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('art-tabs',0)">📄 PRD Document</button>
+      <button class="tab-btn" onclick="switchTab('art-tabs',1)">🖼️ Architecture Diagram</button>
+      <button class="tab-btn" onclick="switchTab('art-tabs',2)">📊 Data Table</button>
+      <button class="tab-btn" onclick="switchTab('art-tabs',3)">🎨 UI Mockup</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Product Requirements Document</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Create a Product Requirements Document as an artifact.
+
+Feature: [Feature name and one-line description]
+Context: [Product, user type, business goal]
+Constraints: [Tech stack, timeline, team size]
+
+Include these sections:
+1. Problem Statement — what user pain does this solve?
+2. Goals and Non-Goals — what we're building and explicitly NOT building
+3. User Stories — 3–5 in "As a [user], I want [action] so that [benefit]" format
+4. Functional Requirements — numbered, specific, testable
+5. Non-Functional Requirements — performance, security, accessibility
+6. Open Questions — decisions still needed
+
+Format as a professional markdown document. Use headers and tables where appropriate.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">System Architecture Diagram (SVG)</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Create an SVG architecture diagram as an artifact.
+
+System: [Name and brief description]
+Components to include: [list your services, databases, queues, clients]
+Key flows to show: [e.g. user request → API → service → DB → response]
+
+Requirements:
+- Clean, readable layout — boxes with labels, arrows for data flow
+- Colour-code by layer: client (blue), backend (green), data (orange), external (grey)
+- Label all connections with the protocol (REST, gRPC, Kafka, etc.)
+- Include a simple legend
+
+Make it suitable for a technical design review presentation.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Structured Comparison Table</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Create a detailed comparison table as an artifact.
+
+Items to compare: [List 3–5 tools, options, or approaches]
+Evaluation dimensions: [List your 5–8 criteria]
+
+For each cell:
+- A 1–5 score
+- A brief note (max 10 words) explaining the score
+
+Add a final row: "Recommended for" — describing the ideal use case for each option.
+Highlight the top overall performer in the header.
+
+Make this export-ready — clean markdown table format.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Interactive UI Mockup (React)</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Create an interactive React component as an artifact.
+
+Component: [Name and purpose — e.g. "User Settings Panel"]
+Layout: [Brief description — sidebar, modal, card, etc.]
+
+Include these elements:
+[List your UI elements: buttons, inputs, dropdowns, toggles]
+
+Interactions to demonstrate:
+[Describe 2–3 interactions — e.g. toggle, form submit, state change]
+
+Style: Clean, professional — white background, subtle shadows, blue primary colour
+State: Show realistic placeholder data
+Size: Fits within a 800px wide panel
+
+This is for stakeholder review — make it visually polished.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-art">
+    <div class="ex-label">🎨 Exercise 2 — Generate a Professional Artifact</div>
+    <h4>Build a Real Deliverable in Claude</h4>
+    <p>Choose one that matches your work:</p>
+    <ul class="ex-steps">
+      <li><strong>Engineer:</strong> Generate a PRD artifact for a feature you're currently building — then ask Claude to refine one section</li>
+      <li><strong>Manager/BA:</strong> Request a stakeholder-ready comparison table for a current vendor/tool decision</li>
+      <li><strong>Anyone:</strong> Ask Claude to create an SVG diagram of a process or system you deal with regularly</li>
+    </ul>
+    <ul class="ex-steps" style="margin-top:10px">
+      <li>After the artifact is generated: "Update section 3 to reflect [change]. Keep everything else the same."</li>
+      <li>Notice how Claude updates only the targeted section — this is iterative artifact editing</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Generate professional documents, diagrams, and interactive UI in a single prompt</li>
+      <li>Iterate on specific sections of an artifact without regenerating everything</li>
+      <li>Produce export-ready deliverables directly inside Claude conversations</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- LONG CONTEXT -->
+<section id="longcontext">
+  <div class="sec-label">Topic 4–5 of 9</div>
+  <h2>📄 Long Context &amp; Multi-File Analysis</h2>
+
+  <p>Claude's 200K token context window can hold roughly <strong>150,000 words</strong> — about 500 pages of text. This unlocks workflows that were previously impossible: analysing entire codebases, synthesising multiple research papers, or reviewing full contracts simultaneously.</p>
+
+  <div class="callout c-amber">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>The Common Mistake</strong>
+      <p>Uploading a large file and asking "summarise this" wastes the context window. Be specific: tell Claude what to look for, what decisions you need to make, and what format you need the output in.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📄 Analysing a Single Large Document <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Deep Document Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>[Upload document]
+
+I've uploaded: [document type — contract, report, codebase, paper]
+My role: [who you are and your relationship to this document]
+My decision: [what I need to decide or do based on this document]
+
+Please analyse this document for:
+1. KEY FINDINGS: Top 5 most important points for my decision
+2. RISKS / RED FLAGS: Anything that requires my attention or carries risk
+3. GAPS: What's missing that I'd normally expect in this type of document
+4. OPEN QUESTIONS: What I should ask or clarify before proceeding
+5. RECOMMENDATION: Your suggested next action based on the above
+
+Don't summarise every section — focus on what matters for my decision.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📚 Synthesising Multiple Documents <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Multi-Document Synthesis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>[Upload all documents]
+
+I've uploaded [N] documents: [brief description of each — e.g. "3 vendor proposals", "5 research papers on X", "4 sprint retrospectives"]
+
+SYNTHESIS TASK:
+1. COMMON THEMES: What do all documents agree on?
+2. KEY DIFFERENCES: Where do they diverge significantly?
+3. GAPS: What important topic is missing across all documents?
+4. CONTRADICTIONS: Any direct conflicts or inconsistencies between documents?
+5. INTEGRATED INSIGHT: What single conclusion do all documents collectively point toward?
+
+Label which document(s) support each point using: [Doc 1], [Doc 2], etc.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">💻 Working with a Large Codebase <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Codebase Analysis</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>[Upload code files]
+
+Codebase: [language, framework, approximate size]
+My goal: [what I'm trying to do — debug, refactor, add feature, review, understand]
+
+Please perform the following analysis:
+1. ARCHITECTURE: Explain how the codebase is structured (components, layers, dependencies)
+2. ENTRY POINTS: Where does execution begin? Trace the main flow.
+3. PROBLEM AREAS: Anti-patterns, tech debt, or code smells worth addressing
+4. RELEVANT SECTION: Which files/functions are most relevant to [my specific goal]?
+5. RECOMMENDED APPROACH: Given my goal, what's the safest way to proceed?
+
+Highlight line numbers when referencing specific code.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🔍 Extracting Structured Data from Documents <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">Structured Data Extraction</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>[Upload documents]
+
+Extract the following structured information from these documents:
+
+FIELDS TO EXTRACT:
+- [Field 1]: [what it is, where to find it]
+- [Field 2]: [what it is, where to find it]
+- [Field 3]: ...
+
+OUTPUT FORMAT: A clean table with one row per document/record.
+If a field is missing or ambiguous: mark as "—" and note "Source unclear".
+Do not infer or guess — only extract what's explicitly stated.
+
+After the table: flag any documents with incomplete or inconsistent data.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-ctx">
+    <div class="ex-label">📄 Exercise 3 — Multi-File Analysis</div>
+    <h4>Synthesise Multiple Documents in One Conversation</h4>
+    <ul class="ex-steps">
+      <li>Upload 2–3 related documents to a Project: meeting notes, reports, specs, or papers</li>
+      <li>Run the Multi-Document Synthesis prompt — do the contradictions surprise you?</li>
+      <li>Follow up: "Based on all three documents, draft a 3-paragraph executive summary for a non-technical stakeholder."</li>
+      <li>Then: "Which document has the weakest evidence for its claims?"</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Key Insight on Context Windows</button>
+    <div class="ans-box">
+      <p>The most powerful thing about Claude's long context isn't summarisation — it's <em>cross-document reasoning</em>. Ask Claude to find where two documents contradict each other, or what one document implies for a decision described in another. That's the analysis that used to take days of human reading time.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Analyse 500-page documents with decision-focused, structured prompts</li>
+      <li>Synthesise multiple documents simultaneously — finding contradictions and gaps</li>
+      <li>Extract structured data tables from unstructured document sets</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- STRUCTURED MULTI-STEP PROMPTING -->
+<section id="chaining">
+  <div class="sec-label">Topic 6 of 9</div>
+  <h2>🔗 Structured Multi-Step Prompting</h2>
+
+  <p>Complex professional outputs rarely come from a single prompt. <strong>Prompt chaining</strong> breaks a large deliverable into sequential steps, using each output as the input for the next — producing results that are far more structured, accurate, and professional than any single-shot prompt could achieve.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🔗 The Prompt Chaining Pattern</span></div>
+    <div class="fw-step">
+      <div class="fw-num">1</div>
+      <div class="fw-content">
+        <h5>Define the Final Deliverable</h5>
+        <p>Tell Claude the end goal before starting — it shapes how it approaches every step</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">2</div>
+      <div class="fw-content">
+        <h5>Break Into Logical Stages</h5>
+        <p>Research → Structure → Draft → Refine → Format — each stage builds on the last</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">3</div>
+      <div class="fw-content">
+        <h5>Validate Before Advancing</h5>
+        <p>After each step, review and adjust — correct errors early, not at the end</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">4</div>
+      <div class="fw-content">
+        <h5>Stay in One Conversation</h5>
+        <p>Claude maintains all context — no need to re-explain your requirements at each step</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">5</div>
+      <div class="fw-content">
+        <h5>Request the Final Assembly</h5>
+        <p>Ask Claude to combine all steps into the polished final artifact</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Example Chain: Strategy Report</h3>
+  <p>Here's how a full chained workflow looks in practice — each message builds on the previous response:</p>
+
+  <div class="chain">
+    <div class="chain-step">
+      <div class="chain-num">1</div>
+      <div class="fw-content">
+        <strong>Step 1 — Frame the Problem</strong>
+        <span>"I need to write a competitive analysis report for [product]. Our top 3 competitors are [A, B, C]. My audience is the CPO and CFO. Don't write anything yet — confirm you understand the task and what you'll need."</span>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num">2</div>
+      <div class="fw-content">
+        <strong>Step 2 — Analyse Each Competitor</strong>
+        <span>"Now analyse Competitor A. Focus on: pricing model, key differentiators, known weaknesses, and where they win/lose against us. Be specific — not generic industry observations."</span>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num">3</div>
+      <div class="fw-content">
+        <strong>Step 3 — Synthesise Across Competitors</strong>
+        <span>"Based on all three analyses: what are the top 3 strategic threats and 3 strategic opportunities for our product? Rank by urgency."</span>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num">4</div>
+      <div class="fw-content">
+        <strong>Step 4 — Draft Recommendations</strong>
+        <span>"Now write 4 concrete strategic recommendations for the CPO based on this analysis. Each must be specific, actionable within 90 days, and tied to a competitive insight."</span>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num">5</div>
+      <div class="fw-content">
+        <strong>Step 5 — Assemble Final Report</strong>
+        <span>"Assemble everything into a polished competitive analysis report as an artifact. Include: Executive Summary, Competitor Analyses, Strategic Synthesis, and Recommendations. Executive-level formatting."</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="chain-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('chain-tabs',0)">📋 Technical Design Doc</button>
+      <button class="tab-btn" onclick="switchTab('chain-tabs',1)">📧 Campaign Brief</button>
+      <button class="tab-btn" onclick="switchTab('chain-tabs',2)">🧑‍💻 Code Review Report</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Step 1 of 4 — Technical Design Chain</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to produce a Technical Design Document for: [feature/system name]
+Context: [stack, team, scale, key constraints]
+Audience: Engineering team leads and principal engineers
+
+Step 1 — REQUIREMENTS CAPTURE
+Extract and list:
+- Functional requirements (what the system must do)
+- Non-functional requirements (performance, security, scalability)
+- Out of scope (explicit exclusions)
+- Assumptions we're relying on
+
+Don't write the design yet. Confirm your understanding of the requirements first.
+Flag anything ambiguous or missing before we continue.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Step 1 of 4 — Campaign Brief Chain</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to develop a full marketing campaign brief for: [campaign name / product launch]
+Context: [product, target audience, budget range, timeline]
+Goal: [what conversion or awareness outcome we want]
+
+Step 1 — AUDIENCE AND INSIGHT
+Before writing any creative:
+- Define the target audience segment precisely (demographics + psychographics)
+- State the core insight: the one truth about this audience that our campaign must be built on
+- Identify the primary competitor message we're differentiating from
+- State the single most important thing we want the audience to think/feel/do
+
+Don't write headlines or copy yet. Validate the strategic foundation first.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Step 1 of 4 — Code Review Report Chain</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>[Upload code / paste code]
+
+I need to produce a structured code review report for: [PR title or feature name]
+Reviewer context: [your role, relationship to this code, standards it should meet]
+
+Step 1 — INVENTORY
+Before commenting on quality:
+1. What does this code do? (2-sentence functional summary)
+2. List all files/modules changed and their purpose
+3. Identify the entry points and main execution paths
+4. Flag anything that requires domain knowledge to understand
+
+Don't assess quality yet — ensure we both have a shared understanding of what the code is doing first.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-chain">
+    <div class="ex-label">🔗 Exercise 4 — Run a 4-Step Chain</div>
+    <h4>Produce a Complex Document Using Multi-Step Prompting</h4>
+    <p>Choose a real deliverable you need this week:</p>
+    <ul class="ex-steps">
+      <li><strong>Engineer:</strong> Technical design doc for a feature currently in planning</li>
+      <li><strong>Manager:</strong> Team retrospective report with insights and action items</li>
+      <li><strong>Analyst:</strong> Competitive analysis of a tool or vendor your team is evaluating</li>
+    </ul>
+    <ul class="ex-steps" style="margin-top:10px">
+      <li>Step 1: Frame the deliverable, confirm scope before writing begins</li>
+      <li>Step 2: Build the analytical foundation (research / requirements / analysis)</li>
+      <li>Step 3: Draft the core sections — review and refine each</li>
+      <li>Step 4: Ask Claude to assemble the final artifact with professional formatting</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 Why Chaining Beats Single-Shot Prompts</button>
+    <div class="ans-box">
+      <p>A single-shot prompt asks Claude to simultaneously understand the problem, structure the analysis, write all sections, and format professionally — with no correction points. Chaining gives you 4 correction opportunities. Each step produces a checkpoint where you redirect before errors compound.</p>
+      <p>The typical time investment: 30–45 minutes of conversation vs. 3–5 hours of manual work. The quality difference: the chained output has been reviewed and corrected at each stage — it's structurally sound by the time it's assembled.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Break any complex deliverable into a validated step-by-step chain</li>
+      <li>Correct errors at each stage before they compound into the final output</li>
+      <li>Produce professional, publication-ready documents in a single conversation</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MCP WORKFLOWS -->
+<section id="mcp">
+  <div class="sec-label">Topic 7–9 of 9</div>
+  <h2>🔌 MCP in Daily Workflows</h2>
+
+  <p><strong>MCP (Model Context Protocol)</strong> is an open standard that lets Claude connect directly to external tools and services — Notion, Google Drive, Slack, GitHub, and more. Instead of switching tabs to look something up, Claude can read and write to your tools in real time, inside the conversation.</p>
+
+  <div class="callout c-tip">
+    <div class="ic">🔌</div>
+    <div class="bd">
+      <strong>MCP Changes the Workflow Entirely</strong>
+      <p>Without MCP: copy content from Notion → paste into Claude → copy response → paste back into Notion. With MCP: "Summarise my Notion page on Q3 goals and turn it into a Slack update for the team." Done in one prompt.</p>
+    </div>
+  </div>
+
+  <h3>MCP Servers Available in Claude.ai</h3>
+
+  <div class="mcp-grid">
+    <div class="mcp-card">
+      <div class="mcp-icon">📁</div>
+      <h5>Google Drive</h5>
+      <p>Read, search, and summarise Drive files without leaving Claude</p>
+      <span class="mcp-badge badge-on">Available</span>
+    </div>
+    <div class="mcp-card">
+      <div class="mcp-icon">📧</div>
+      <h5>Gmail</h5>
+      <p>Search, read, and draft emails; summarise threads and action items</p>
+      <span class="mcp-badge badge-on">Available</span>
+    </div>
+    <div class="mcp-card">
+      <div class="mcp-icon">📅</div>
+      <h5>Google Calendar</h5>
+      <p>View upcoming events, check availability, draft meeting agendas</p>
+      <span class="mcp-badge badge-on">Available</span>
+    </div>
+    <div class="mcp-card">
+      <div class="mcp-icon">💬</div>
+      <h5>Slack</h5>
+      <p>Read channel history, search messages, draft and send updates</p>
+      <span class="mcp-badge badge-connect">Connect</span>
+    </div>
+    <div class="mcp-card">
+      <div class="mcp-icon">📝</div>
+      <h5>Notion</h5>
+      <p>Read pages, search databases, create and update content</p>
+      <span class="mcp-badge badge-connect">Connect</span>
+    </div>
+    <div class="mcp-card">
+      <div class="mcp-icon">🐙</div>
+      <h5>GitHub</h5>
+      <p>Browse repos, read issues/PRs, check code and CI status</p>
+      <span class="mcp-badge badge-connect">Connect</span>
+    </div>
+  </div>
+
+  <h3>Enabling MCP Servers in Claude.ai</h3>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>⚙️ How to Connect an MCP Server</span></div>
+    <div class="fw-step"><div class="fw-num">1</div><div class="fw-content"><h5>Open Claude.ai Settings</h5><p>Navigate to Settings → Integrations in your Claude.ai account</p></div></div>
+    <div class="fw-step"><div class="fw-num">2</div><div class="fw-content"><h5>Browse Available Connectors</h5><p>Find the service you want to connect — look for the puzzle piece icon in the tools panel</p></div></div>
+    <div class="fw-step"><div class="fw-num">3</div><div class="fw-content"><h5>Authenticate</h5><p>Authorise Claude to access your account — uses OAuth, no password sharing</p></div></div>
+    <div class="fw-step"><div class="fw-num">4</div><div class="fw-content"><h5>Enable in a Project</h5><p>Add the MCP server to specific Projects where it's relevant — keeps workspaces clean</p></div></div>
+    <div class="fw-step"><div class="fw-num">5</div><div class="fw-content"><h5>Use Naturally</h5><p>Just ask Claude to interact with the tool — it calls the MCP server automatically</p></div></div>
+  </div>
+
+  <h3>MCP Workflow Prompts</h3>
+
+  <div class="tab-wrap" id="mcp-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('mcp-tabs',0)">📁 Google Drive</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',1)">📧 Gmail</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',2)">💬 Slack</button>
+      <button class="tab-btn" onclick="switchTab('mcp-tabs',3)">🔗 Multi-Tool</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Google Drive Workflow</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Find my most recent document titled [document name or keyword] in Google Drive.
+
+Read it and:
+1. Write a 3-bullet executive summary (1 sentence each)
+2. Identify the top 3 action items or open decisions in the document
+3. Flag anything that looks out of date or needs updating
+
+Then: draft a brief status update I can send to my manager, based on this document.
+Keep the update to 5 sentences — professional tone, no jargon.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Gmail Workflow</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Search my Gmail for the email thread with [person/company] about [topic].
+
+From that thread:
+1. Summarise what was agreed or decided
+2. What is the current state — are there open commitments on either side?
+3. What's the most recent message and was it responded to?
+
+Then: draft a follow-up email from me that:
+- References our last exchange specifically
+- Asks for [the thing I need — a decision, update, or meeting]
+- Is direct and professional — under 100 words</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Slack Workflow</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Search the [channel name] Slack channel for messages from the last [7 days / 2 weeks].
+
+Produce:
+1. KEY DECISIONS: Any decisions made or agreed in this channel
+2. OPEN THREADS: Conversations where a decision or action is still pending
+3. MY ACTION ITEMS: Anything directed at me that I haven't responded to
+4. TEAM BLOCKERS: Issues raised that haven't been resolved
+
+Then: draft a channel summary message I can post to bring the whole team up to speed.
+Format: short intro + 3–5 bullet points. Professional but conversational tone.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Multi-Tool Chained Workflow</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Weekly Briefing — Multi-Tool Workflow
+
+Step 1 — Calendar: What meetings do I have this week? List them with dates and attendees.
+
+Step 2 — Gmail: For each meeting, search for recent emails with those attendees. 
+Summarise any relevant context or open items.
+
+Step 3 — Drive: Find any preparation documents linked to these meetings.
+Flag which meetings have prep material and which don't.
+
+Step 4 — Synthesis: 
+Produce my weekly briefing:
+- Priority meetings (require prep or decision)
+- Prep needed for each (what to read or decide beforehand)
+- Open items I should close before end of week
+
+Format this as a clean briefing document I can review each Monday morning.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Building Your Personal MCP Productivity Stack</h3>
+
+  <table class="tbl">
+    <thead><tr><th>Workflow</th><th>Tools Connected</th><th>What You Can Do</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Weekly Planning</strong></td><td>Calendar + Gmail + Drive</td><td>Auto-brief: meetings, prep docs, open emails in one view</td></tr>
+      <tr><td><strong>Research Synthesis</strong></td><td>Drive + Web Search</td><td>Read internal docs + search web → synthesise into one report</td></tr>
+      <tr><td><strong>Meeting Follow-up</strong></td><td>Gmail + Notion/Drive</td><td>Write meeting notes to Notion, send follow-up emails automatically</td></tr>
+      <tr><td><strong>Code Review</strong></td><td>GitHub + Slack</td><td>Summarise PR changes, post review summary to team Slack channel</td></tr>
+      <tr><td><strong>Content Pipeline</strong></td><td>Drive + Gmail</td><td>Draft content from brief → save to Drive → send for review via email</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">🔌 Exercise 5 — Connect and Use an MCP Server</div>
+    <h4>Run Your First MCP-Powered Workflow</h4>
+    <ul class="ex-steps">
+      <li>Connect at least one MCP server in Claude.ai Settings (Google Drive or Gmail recommended to start)</li>
+      <li>Run a simple workflow: "Find my most recent document about [project] in Drive and summarise the key decisions."</li>
+      <li>Follow up with a cross-tool action: "Draft an email to [team member] summarising what you found."</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 What Good MCP Usage Feels Like</button>
+    <div class="ans-box">
+      <p>The shift is from "assistant that answers questions" to "assistant that does things in your tools." The first time you watch Claude read a Drive document, extract action items, and draft the follow-up email in 15 seconds, the workflow change becomes obvious.</p>
+      <p><strong>Start small:</strong> Pick one workflow you do manually every week. Map the tools it involves. Connect those tools. Build the prompt. That one automation will save hours per month.</p>
+    </div>
+  </div>
+
+  <div class="ex-card ex-mcp">
+    <div class="ex-label">⚙️ Exercise 6 — Design Your Productivity Stack</div>
+    <h4>Map and Build Your Personal MCP Workflow</h4>
+    <ul class="ex-steps">
+      <li>List 3 repetitive workflows in your week that involve switching between 2+ tools</li>
+      <li>For each: identify which MCP servers would need to be connected to automate it</li>
+      <li>Write a prompt for your highest-value workflow using the multi-tool chaining pattern above</li>
+      <li>Run it, then ask Claude: "What would make this workflow even more efficient? What am I missing?"</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Connect Google Drive, Gmail, Slack, and Notion to Claude via MCP</li>
+      <li>Run cross-tool workflows in a single conversation — no more tab switching</li>
+      <li>Build a weekly automation that saves 3–5 hours of repetitive context-switching</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 7 — Advanced Features: Projects, Artifacts, Long Context &amp; MCP</h4>
+    <div class="quiz-sub">7 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">🗂️</span>Create Claude Projects with persistent instructions — eliminate repeated context-setting forever</div>
+    <div class="sum-item"><span class="ic">🎨</span>Generate professional artifacts — PRDs, diagrams, reports, and interactive UI — in one prompt</div>
+    <div class="sum-item"><span class="ic">📄</span>Analyse 500-page documents and synthesise multiple files simultaneously with structured prompts</div>
+    <div class="sum-item"><span class="ic">🔗</span>Chain multi-step prompts for complex deliverables with correction checkpoints at each stage</div>
+    <div class="sum-item"><span class="ic">🔌</span>Connect Google Drive, Gmail, Slack, and Notion to Claude via MCP for real tool integration</div>
+    <div class="sum-item"><span class="ic">⚙️</span>Build a personal productivity stack that automates your highest-frequency cross-tool workflows</div>
+  </div>
+
+  <div class="callout c-blue" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 8</strong>
+      <p>Claude for Communication &amp; Writing — professional email drafting, tone calibration, persuasive writing, and producing polished documents for external audiences.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 7 of 9 · Advanced Features &amp; MCP Workflows</div>
+  <div class="nav-links">
+    <a href="module6_display.html" class="nav-link nav-prev">← Module 6</a>
+    <a href="module8_display.html" class="nav-link nav-next">Module 8 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Insight':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const qData=[
+  {
+    q:"What is the primary advantage of using a Claude Project over starting a new chat every time?",
+    opts:["Projects are faster to load","Projects persist your instructions, files, and context across every conversation","Projects have a larger context window than regular chats","Projects let you use more advanced models"],
+    answer:1,
+    fb:["❌ Loading speed is the same — that's not the advantage.","✅ Exactly. You write your instructions once, upload your reference files once, and every conversation in that project inherits that context automatically.","❌ The context window is the same — but Projects use it more efficiently because you're not burning tokens on repeated setup.","❌ Model selection is independent of Projects."]
+  },
+  {
+    q:"What is the most important element in Project Instructions that distinguishes high-quality instructions from weak ones?",
+    opts:["A detailed role description","Specifying a professional and friendly tone","A NEVER list — explicit constraints on what Claude should avoid","Making the instructions as long as possible"],
+    answer:2,
+    fb:["❌ Role description is helpful context, but it's not what separates good from great instructions.","❌ Tone instructions are generic — almost every instruction says 'be professional'.","✅ Constraints drive quality. Knowing exactly what NOT to do is more useful than knowing what to do generically. A specific NEVER list eliminates the failure modes that make Claude responses feel off-target.","❌ Length isn't quality. Longer instructions with vague content are worse than shorter, precise ones."]
+  },
+  {
+    q:"You upload a 200-page contract to Claude and ask 'Summarise this'. What's wrong with this approach?",
+    opts:["Claude can't process documents this large","Summarising wastes the context window — you should ask decision-focused questions instead","You should split the document into smaller chunks first","Contracts can only be analysed using specific legal prompts"],
+    answer:1,
+    fb:["❌ Claude's 200K context window handles 200-page documents comfortably.","✅ 'Summarise this' produces a generic page-by-page summary. The power of long context is decision-focused analysis: what risks should I know? what's unusual here? what are my open questions before signing? Be specific about what you need to decide.","❌ You don't need to split documents — that actually loses Claude's ability to reason across the full document simultaneously.","❌ Legal analysis is available through regular prompts with the right specificity."]
+  },
+  {
+    q:"What is prompt chaining and why does it produce better results than a single large prompt?",
+    opts:["Sending multiple identical prompts to check consistency","Breaking a deliverable into sequential steps, correcting at each stage before proceeding","Connecting multiple Claude conversations together","Using Claude to write prompts for other AI tools"],
+    answer:1,
+    fb:["❌ Sending the same prompt multiple times tests for variance — that's not chaining.","✅ Chaining gives you correction points. A single large prompt asks Claude to simultaneously research, structure, draft, refine, and format — with no ability to catch errors before they compound. Chaining separates these stages, and you validate each step before advancing.","❌ Each conversation is independent in Claude — chaining is within a single conversation.","❌ That's prompt generation, not prompt chaining."]
+  },
+  {
+    q:"What does MCP (Model Context Protocol) fundamentally change about how you use Claude?",
+    opts:["It makes Claude's responses faster","It allows Claude to read and act within your external tools, not just answer questions","It gives Claude access to the internet","It improves Claude's memory between different users"],
+    answer:1,
+    fb:["❌ MCP isn't about speed — it's about capability.","✅ This is the key shift. Without MCP, Claude is a conversational assistant you manually supply with information. With MCP, Claude becomes an agent that can read your Drive files, search your email, and interact with your tools — turning it from Q&A to actual workflow automation.","❌ Web search is separate from MCP. MCP connects Claude to specific services you authorise.","❌ MCP is per-user authentication — it gives your instance of Claude access to your accounts specifically."]
+  },
+  {
+    q:"Which of these is the best example of a multi-tool MCP workflow?",
+    opts:["Asking Claude to write a poem about productivity","Asking Claude to find relevant Drive docs for today's meetings, summarise the open items, and draft a Slack update to the team","Uploading a document and asking Claude to rewrite it in simpler language","Asking Claude to compare two programming languages"],
+    answer:1,
+    fb:["❌ Writing a poem doesn't require any tool integration — Claude can do that from training alone.","✅ This is exactly the power of MCP. Three tools (Calendar, Drive, Slack), one prompt, one workflow. No manual copying between apps, no tab switching, no re-explaining context to each tool.","❌ Document editing doesn't require external tool access.","❌ Language comparison is a knowledge question — no external tools needed."]
+  },
+  {
+    q:"What is an Artifact in Claude, and when should you request one?",
+    opts:["A saved version of a previous conversation","A self-contained rendered output (document, code, diagram) displayed separately from the chat — use when the output is a standalone deliverable","A template saved in Project Instructions","A version of Claude's response formatted for export to PDF"],
+    answer:1,
+    fb:["❌ Conversation saving is separate from Artifacts.","✅ An Artifact is Claude's way of producing a standalone deliverable — a PRD, architecture diagram, React component, or report — rendered in a side panel so you can work with it independently from the conversation. Use it any time your goal is a deliverable, not a conversational answer.","❌ Templates belong in Project Instructions, not Artifacts.","❌ PDF export is a separate feature — an Artifact is the rendered output inside the Claude interface itself."]
+  }
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Excellent!':_quizCorrect>=4?'👍 Good!':'📚 Review and retry!'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="btn btn-blue" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="btn btn-blue" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>

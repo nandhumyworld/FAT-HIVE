@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 1 — Foundations of AI Productivity with Claude</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f5f7fa;--surface:#fff;--border:#dde3eb;
+  --accent:#1a6cf5;--accent-lt:#e8f0fe;--accent-dk:#0f4ecc;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --purple:#7b52e8;--purple-lt:#f0ecfd;
+  --teal:#0891b2;--teal-lt:#e0f7fa;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#0f1923 0%,#1a3a5c 60%,#1a6cf5 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.04)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(26,108,245,.18)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#c8d8ff;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:580px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#a8c4e8;max-width:520px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#8db4d8;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--purple))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--accent-lt);color:var(--accent)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px;color:var(--green)}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* FORMULA */
+.formula-box{background:linear-gradient(135deg,#0f1923,#1a3a5c);color:#fff;border-radius:var(--radius);padding:22px 28px;text-align:center;margin:14px 0}
+.formula-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#7ab0e8;margin-bottom:10px}
+.formula-text{font-size:clamp(15px,2.5vw,20px);font-weight:700;line-height:1.5}
+.formula-text span{color:#62e8a4}
+.formula-parts{display:flex;gap:4px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:14px}
+.fp{background:rgba(255,255,255,.08);border-radius:var(--radius-sm);padding:10px 16px;text-align:center;flex:1;min-width:100px;margin:3px}
+.fp .letter{font-size:24px;font-weight:700;color:#62e8a4}
+.fp .word{font-size:11px;color:#a8c4e8;margin-top:2px}
+
+/* PROMPT BOX */
+.prompt-box{background:#0f1923;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#1a2a3a;border-bottom:1px solid #2a3a4a}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#6bb5ff}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#d4e8ff;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--accent-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--accent);color:var(--accent)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+.acc-body ul{padding-left:18px;margin:6px 0}
+.acc-body li{padding:3px 0;font-size:13px}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-warn{background:var(--amber-lt);border-color:#f5d07a}.c-warn .bd strong{color:var(--amber)}
+.c-info{background:var(--accent-lt);border-color:#a8c4f8}.c-info .bd strong{color:var(--accent)}
+.c-err{background:var(--red-lt);border-color:#f0aaaa}.c-err .bd strong{color:var(--red)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-default{background:linear-gradient(135deg,var(--purple-lt),var(--accent-lt));border-color:#c4b2f5}
+.ex-eng{background:linear-gradient(135deg,var(--teal-lt),var(--accent-lt));border-color:#67d5eb}
+.ex-mgr{background:linear-gradient(135deg,var(--amber-lt),#fff8f0);border-color:#f5d07a}
+.ex-std{background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border-color:#9fe8cc}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin-bottom:6px}
+.ex-eng .ex-label{color:var(--teal)}
+.ex-mgr .ex-label{color:var(--amber)}
+.ex-std .ex-label{color:var(--green)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--purple)}
+.ex-eng .ex-steps li::before{color:var(--teal)}
+.ex-mgr .ex-steps li::before{color:var(--amber)}
+.ex-std .ex-steps li::before{color:var(--green)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--accent);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:var(--accent-dk)}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #a8c4f8;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* DIFF */
+.diff-wrap{margin:10px 0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.diff-line{padding:7px 12px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55}
+.diff-del{background:var(--red-lt);border-left:3px solid var(--red);color:#7a1a1a}
+.diff-add{background:var(--green-lt);border-left:3px solid var(--green);color:#0a4a30}
+.diff-n{background:#f5f7fa;border-left:3px solid var(--border);color:var(--ink-muted)}
+
+/* SCORE METERS */
+.score-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.score-label{font-size:12px;color:var(--ink-muted);min-width:70px}
+.score-bar-wrap{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.score-val{font-size:12px;font-weight:700;min-width:30px;text-align:right}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f9fafc}
+.tbl tr:hover td{background:var(--accent-lt)}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--green-lt),#f0fdf8);border:2px solid var(--green);border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--green);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--green)}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--green)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--accent);background:var(--accent-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--accent)}
+
+/* PROMPT GRADER */
+.grader-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin:14px 0}
+.grader-wrap h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.grader-wrap p{font-size:12px;color:var(--ink-muted);margin-bottom:12px}
+.grade-textarea{width:100%;min-height:80px;border:2px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;font-family:var(--font-mono);resize:vertical;transition:border-color .2s}
+.grade-textarea:focus{outline:none;border-color:var(--accent)}
+.grade-feedback{font-size:13px;color:var(--ink-soft);margin-top:10px;min-height:20px}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-next{background:var(--accent);color:#fff}
+.nav-next:hover{background:var(--accent-dk)}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#eef2f8;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--accent-dk)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:var(--accent-dk)}
+.btn-ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--ink-soft)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 1 · Module 1 of 9</div>
+    <h1>Foundations of AI Productivity with Claude</h1>
+    <p class="tagline">Think beyond simple prompts. Use AI like a real intelligent assistant.</p>
+    <div class="header-chips">
+      <span>⏱ 4 Hours</span>
+      <span>🎯 6 Objectives</span>
+      <span>🏋️ 6 Exercises</span>
+      <span>🔰 Beginner → Intermediate</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:11%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#concepts">Core Concepts</a>
+  <a href="#how-claude">How It Works</a>
+  <a href="#rctf">RCTF Formula</a>
+  <a href="#mistakes">5 Mistakes</a>
+  <a href="#demo">Demo</a>
+  <a href="#grader">Grader</a>
+  <a href="#exercises">Exercises</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>Learning Objectives</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">✅</span>Explain how Claude processes prompts and what shapes output quality</div>
+    <div class="obj-item"><span class="ic">✅</span>Distinguish AI assistants from search engines — and use each correctly</div>
+    <div class="obj-item"><span class="ic">✅</span>Apply the RCTF framework to get structured, high-quality output</div>
+    <div class="obj-item"><span class="ic">✅</span>Identify and fix the 5 most common prompting mistakes</div>
+    <div class="obj-item"><span class="ic">✅</span>Use iteration to improve Claude's output in real time</div>
+    <div class="obj-item"><span class="ic">✅</span>Complete role-based exercises for your actual work</div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CORE CONCEPTS -->
+<section id="concepts">
+  <div class="sec-label">Core Concept</div>
+  <h2>The Right Mental Model</h2>
+
+  <div class="callout c-info">
+    <div class="ic">🧠</div>
+    <div class="bd">
+      <strong>Think of Claude as a brilliant expert colleague — not a search engine</strong>
+      <p>You wouldn't hand a consultant a single word. You'd brief them. The better your brief, the better the work.</p>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Wrong Model — Search Engine</div>
+      <ul class="col-body">
+        <li>Matches keywords to pages</li>
+        <li>Returns links, not answers</li>
+        <li>No memory of context</li>
+        <li>Can't adapt to feedback</li>
+        <li>You do all the thinking</li>
+      </ul>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✅ Right Model — Expert Collaborator</div>
+      <ul class="col-body">
+        <li>Understands intent, not just words</li>
+        <li>Generates tailored original answers</li>
+        <li>Remembers full conversation</li>
+        <li>Adapts based on your feedback</li>
+        <li>Synthesises and reasons with you</li>
+      </ul>
+    </div>
+  </div>
+
+  <section>
+    <h3>3 Mental Models — Pick Yours</h3>
+    <div class="acc">
+      <div class="acc-hd" onclick="toggleAcc(this)">🎭 Expert Consultant — for business professionals &amp; managers <span class="acc-arr">▼</span></div>
+      <div class="acc-body">
+        <p>Brief Claude like you'd brief a consultant. The more specific your situation, constraints, and goal — the sharper the advice.</p>
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Give me tips for better team meetings"</div>
+          <div class="diff-line diff-add">✅ "My team of 6 engineers has daily standups that run 25 minutes. Decisions don't get made. I need a structured format under 12 minutes."</div>
+        </div>
+      </div>
+    </div>
+    <div class="acc">
+      <div class="acc-hd" onclick="toggleAcc(this)">👨‍💻 Pair Programmer — for software engineers &amp; developers <span class="acc-arr">▼</span></div>
+      <div class="acc-body">
+        <p>Think out loud together. Share your code, explain what it should do, describe what's broken, and what you've tried.</p>
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Fix my Spring Boot service"</div>
+          <div class="diff-line diff-add">✅ "My Spring Boot controller returns 200 but the DB shows no new record. @Autowired looks correct. The method IS being hit (I see the log). Here's the code: [paste]"</div>
+        </div>
+      </div>
+    </div>
+    <div class="acc">
+      <div class="acc-hd" onclick="toggleAcc(this)">📚 Personal Tutor — for students &amp; career switchers <span class="acc-arr">▼</span></div>
+      <div class="acc-body">
+        <p>Tell Claude your level, your goal, and how you learn. Ask for analogies from a domain you already understand.</p>
+        <div class="diff-wrap">
+          <div class="diff-line diff-del">❌ "Explain Kubernetes"</div>
+          <div class="diff-line diff-add">✅ "I understand Docker basics. Explain Kubernetes using a restaurant management analogy. Start from why we need it, then explain pods, nodes, and clusters."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<hr class="divider"/>
+
+<!-- HOW CLAUDE WORKS -->
+<section id="how-claude">
+  <div class="sec-label">Under the Hood</div>
+  <h2>How Claude Processes Your Prompt</h2>
+
+  <table class="tbl">
+    <thead><tr><th>Step</th><th>What Claude Does</th><th>What This Means for You</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Reads your entire prompt</td><td>Everything Claude knows comes only from what you write</td></tr>
+      <tr><td>2</td><td>Determines intent, not just words</td><td>Context shapes the answer even when the task is the same</td></tr>
+      <tr><td>3</td><td>Generates a response</td><td>The beginning of your prompt sets the entire direction</td></tr>
+      <tr><td>4</td><td>Remembers the full conversation</td><td>Follow-up instructions build on — never restart from scratch</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout c-warn">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>Key Limitation</strong>
+      <p>Claude does NOT browse the internet in real time. Its knowledge has a training cutoff. Always verify current data, statistics, or rapidly changing information with authoritative sources.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- RCTF -->
+<section id="rctf">
+  <div class="sec-label">The Core Framework</div>
+  <h2>The RCTF Prompt Formula</h2>
+
+  <div class="formula-box">
+    <div class="formula-label">The RCTF Formula</div>
+    <div class="formula-text"><span>Role</span> + <span>Context</span> + <span>Task</span> + <span>Format</span> = <span style="color:#fff">Consistently Great Output</span></div>
+    <div class="formula-parts">
+      <div class="fp"><div class="letter">R</div><div class="word">Role</div></div>
+      <div style="color:#62e8a4;font-size:20px">+</div>
+      <div class="fp"><div class="letter">C</div><div class="word">Context</div></div>
+      <div style="color:#62e8a4;font-size:20px">+</div>
+      <div class="fp"><div class="letter">T</div><div class="word">Task</div></div>
+      <div style="color:#62e8a4;font-size:20px">+</div>
+      <div class="fp"><div class="letter">F</div><div class="word">Format</div></div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🎭 R — Role: Tell Claude WHO to be <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Role is the lens Claude uses to filter its knowledge. Same question, different role = completely different output.</p>
+      <ul>
+        <li><code>"Act as a senior Java developer with 10 years of Spring Boot experience"</code></li>
+        <li><code>"You are an experienced HR manager at a tech company"</code></li>
+        <li><code>"Act as a patient university professor great at teaching beginners"</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📋 C — Context: Give the full picture <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Context transforms generic advice into advice for your exact situation. Include:</p>
+      <ul>
+        <li>Your role and expertise level</li>
+        <li>Your audience (who will read the output)</li>
+        <li>Your constraints (time, tools, team size)</li>
+        <li>What you've already tried (for troubleshooting)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🎯 T — Task: Be crystal clear on the ask <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Use specific action verbs and define the scope precisely.</p>
+      <div class="diff-wrap">
+        <div class="diff-line diff-del">❌ "Help me with my email"</div>
+        <div class="diff-line diff-add">✅ "Rewrite this email to be 30% shorter, remove passive voice, make the call-to-action impossible to miss"</div>
+      </div>
+      <p style="margin-top:8px"><strong>Action verbs:</strong> Write · Summarise · Compare · Explain · Debug · Rewrite · List · Analyse · Review · Create</p>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📐 F — Format: Control the output shape <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Without a format instruction, Claude picks one. Always specify when it matters:</p>
+      <ul>
+        <li><code>"5 bullet points, max 15 words each, start with action verbs"</code></li>
+        <li><code>"3-column table: Feature | Benefit | Example"</code></li>
+        <li><code>"Professional email format, subject line, under 150 words"</code></li>
+        <li><code>"Return only valid JSON. No explanation."</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout c-tip">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>Pro Tip</strong>
+      <p>For simple tasks, Role + Task is enough. For complex or high-stakes work, use all four. RCTF is a guide, not a rigid rule.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Explain each RCTF component and why it matters</li>
+      <li>Write a Role assignment for your own profession</li>
+      <li>Specify a Format that matches how you'll use the output</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- 5 MISTAKES -->
+<section id="mistakes">
+  <div class="sec-label">What to Avoid</div>
+  <h2>The 5 Most Common Prompting Mistakes</h2>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❌ Mistake 1 — The One-Word Prompt <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="diff-wrap">
+        <div class="diff-line diff-del">❌ "Python" / "Marketing" / "Write email"</div>
+        <div class="diff-line diff-add">✅ Add: what you want + who it's for + what outcome you need</div>
+      </div>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❌ Mistake 2 — No Context <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="diff-wrap">
+        <div class="diff-line diff-del">❌ "How should I structure my team?"</div>
+        <div class="diff-line diff-add">✅ Add your team size, tech stack, experience levels, delivery goals, and constraints</div>
+      </div>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❌ Mistake 3 — Accepting the First Draft <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>The first response is a starting point. Always iterate. Try:</p>
+      <ul>
+        <li><code>"Cut this by 40%. Keep only essential points."</code></li>
+        <li><code>"Point 3 is too vague — give a specific example."</code></li>
+        <li><code>"Rewrite to sound more human, less corporate."</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❌ Mistake 4 — Vague Open-Enders <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <div class="diff-wrap">
+        <div class="diff-line diff-del">❌ "Tell me everything about React"</div>
+        <div class="diff-line diff-add">✅ "I'm a backend Java dev. Explain the 3 React concepts I'll need most in week 1 of a React project. Skip basics I'd know from Java."</div>
+      </div>
+    </div>
+  </div>
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">❌ Mistake 5 — Forgetting the Format <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>No format = Claude picks one. You then spend time reformatting. Quick fixes:</p>
+      <ul>
+        <li><code>"Format as a numbered list."</code></li>
+        <li><code>"Return as a professional email."</code></li>
+        <li><code>"Under 200 words."</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="sec-label">Live Demo</div>
+  <h2>Weak Prompt → Strong Prompt</h2>
+
+  <div class="tab-wrap" id="demo-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('demo-tabs',0)">✉️ Email Demo</button>
+      <button class="tab-btn" onclick="switchTab('demo-tabs',1)">💻 Technical Explanation</button>
+      <button class="tab-btn" onclick="switchTab('demo-tabs',2)">📊 Score Comparison</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-b">❌ Weak Prompt</span></div>
+          <pre>write email to client about delay</pre>
+        </div>
+        <div class="callout c-err" style="margin:8px 0 14px">
+          <div class="ic">🚫</div>
+          <div class="bd"><strong>What Claude doesn't know:</strong><p>Who is the client · What kind of delay · How long · The reason · What tone · What format</p></div>
+        </div>
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">✅ Strong Prompt (RCTF)</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a professional business writer.
+
+Context: I'm a PM at TechBuild Ltd. We promised delivery of Phase 1 to TechCorp Solutions by March 15th. Two senior devs left — pushing us to March 28th. The client relationship is strong.
+
+Task: Write a formal but empathetic email to Sarah Chen (VP Operations). Acknowledge the delay, mention resource constraints briefly, confirm the new deadline, and offer a quick call.
+
+Format: Subject line + 3 short paragraphs + CTA. Under 200 words.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-b">❌ Weak Prompt</span></div>
+          <pre>explain REST API</pre>
+        </div>
+        <div class="prompt-box" style="margin-top:12px">
+          <div class="pb-head"><span class="lbl-i">✅ Strong Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Act as a patient senior developer great at explaining technical concepts to non-technical people.
+
+Context: I'm explaining REST APIs to business analysts who understand websites but have never written code.
+
+Task: Explain REST API using a restaurant analogy. Then explain GET, POST, PUT, DELETE mapped to restaurant actions.
+
+Format: Brief intro + the analogy + a 4-row table: Method | What it does | Restaurant example. Under 250 words.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <table class="tbl">
+          <thead><tr><th>Component</th><th>❌ Weak</th><th>✅ Strong</th></tr></thead>
+          <tbody>
+            <tr><td>Role</td><td>None</td><td>✅ Professional business writer</td></tr>
+            <tr><td>Context</td><td>None</td><td>✅ Company, client, dates, reason</td></tr>
+            <tr><td>Task</td><td>Vague verb only</td><td>✅ Specific with named constraints</td></tr>
+            <tr><td>Tone guidance</td><td>None</td><td>✅ "Formal but empathetic"</td></tr>
+            <tr><td>Format</td><td>None</td><td>✅ Subject, 3 paragraphs, CTA</td></tr>
+            <tr><td>Usable as-is?</td><td>❌ No</td><td>✅ Nearly yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PROMPT GRADER -->
+<section id="grader">
+  <div class="sec-label">Interactive Tool</div>
+  <h2>Prompt Quality Grader</h2>
+  <p>Type any prompt and see how it scores across all four RCTF dimensions instantly.</p>
+
+  <div class="grader-wrap">
+    <h4>🏆 Grade Your Prompt</h4>
+    <p>Type a prompt below — scores update as you type.</p>
+    <textarea class="grade-textarea" id="graderInput" placeholder="Type a prompt here to grade it…" oninput="gradePrompt()"></textarea>
+    <div style="margin-top:12px">
+      <div class="score-row"><span class="score-label">🎭 Role</span><div class="score-bar-wrap"><div class="score-bar-fill" id="gRole" style="width:0%"></div></div><span class="score-val" id="gRoleV" style="color:var(--ink-muted)">0/25</span></div>
+      <div class="score-row"><span class="score-label">📋 Context</span><div class="score-bar-wrap"><div class="score-bar-fill" id="gCtx" style="width:0%"></div></div><span class="score-val" id="gCtxV" style="color:var(--ink-muted)">0/25</span></div>
+      <div class="score-row"><span class="score-label">🎯 Task</span><div class="score-bar-wrap"><div class="score-bar-fill" id="gTask" style="width:0%"></div></div><span class="score-val" id="gTaskV" style="color:var(--ink-muted)">0/25</span></div>
+      <div class="score-row"><span class="score-label">📐 Format</span><div class="score-bar-wrap"><div class="score-bar-fill" id="gFmt" style="width:0%"></div></div><span class="score-val" id="gFmtV" style="color:var(--ink-muted)">0/25</span></div>
+    </div>
+    <div style="text-align:center;font-size:16px;font-weight:700;margin-top:10px">Total: <span id="gTotal" style="color:var(--ink-muted)">0</span>/100</div>
+    <div class="grade-feedback" id="gFeedback"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- EXERCISES -->
+<section id="exercises">
+  <div class="sec-label">Hands-On Practice</div>
+  <h2>Role-Based Exercises</h2>
+  <p>Pick the exercise that matches your role. Try it live in Claude.</p>
+
+  <!-- Engineer -->
+  <div class="ex-card ex-eng">
+    <div class="ex-label">💻 Software Engineer</div>
+    <h4>Understanding a Codebase You Didn't Write</h4>
+    <p><strong>Scenario:</strong> You just joined a team. You're asked to fix a bug in a Spring Boot service you've never seen.</p>
+    <ul class="ex-steps">
+      <li>Write an RCTF prompt to get a plain-English explanation of the class</li>
+      <li>Ask Claude to identify the most likely cause of the bug</li>
+      <li>Ask what tests you should run before making any change</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Prompt</button>
+    <div class="ans-box">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">✅ Model Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a senior Java developer doing an onboarding review for a new team member.
+
+Context: I just joined a fintech startup. I need to extend PaymentNotificationProcessor — handles Stripe/PayPal webhooks, 3 years old, minimal docs. I need to add support for 'payment.refund.completed'.
+
+Task: Looking at the code below:
+1. Explain the class in plain English (2–3 sentences)
+2. Where exactly should I add the new event handler?
+3. Flag any fragile areas I should not touch
+4. List 3 tests to run before and after my change
+
+Format: 4 numbered sections. Specific class/method names. Plain English for architecture, technical for the rest.
+
+[Paste your code here]</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manager -->
+  <div class="ex-card ex-mgr">
+    <div class="ex-label">📊 Manager / PM</div>
+    <h4>Upgrade a Weak Prompt — Sprint Update Email</h4>
+    <p><strong>Scenario:</strong> You're a PM. Your team completed 6 of 8 sprint features. You need to brief your director and 3 stakeholders before Monday's review.</p>
+    <ul class="ex-steps">
+      <li>Write a full RCTF prompt for this email</li>
+      <li>Be honest about the shortfall but include a recovery plan</li>
+      <li>Specify a format that's easy to skim in a meeting</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Prompt</button>
+    <div class="ans-box">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">✅ Model Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a senior PM who communicates clearly with stakeholders under pressure.
+
+Context: My team completed 6/8 sprint features. Missed: payment retry module (vendor API change) and dashboard filter (design changed requirements mid-sprint). Briefing director Meera + 3 cross-functional stakeholders before Monday's review.
+
+Task: Write an email that covers what was delivered, what wasn't (with honest brief reasons), and the recovery plan. Pre-empt difficult questions. Show the team is in control.
+
+Tone: Honest, calm, forward-looking. Not defensive.
+
+Format: Subject line + 4 sections with bold headers: Delivered / Not Completed / Recovery Plan / Next Steps. Under 220 words. Easy to scan.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student -->
+  <div class="ex-card ex-std">
+    <div class="ex-label">🎓 Student / Career Switcher</div>
+    <h4>Learning a New Tech Stack Before Your First Job</h4>
+    <p><strong>Scenario:</strong> You start a backend developer role in 3 weeks. Stack: Java 17, Spring Boot 3, PostgreSQL, Docker, AWS. You have 2 hours/day to study.</p>
+    <ul class="ex-steps">
+      <li>Ask Claude for a realistic 3-week learning plan</li>
+      <li>Prioritise "most likely needed in week 1 at a real job"</li>
+      <li>Ask it to include free resources only, and add a "skip for now" section</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 See Model Prompt</button>
+    <div class="ans-box">
+      <div class="prompt-box">
+        <div class="pb-head"><span class="lbl-i">✅ Model Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+        <pre>Act as a senior dev and mentor who has onboarded 20+ junior developers.
+
+Context: Fresh graduate with 2yr university Java. Starting backend dev role in 3 weeks. Stack: Java 17, Spring Boot 3, PostgreSQL, Docker, AWS. 2 hours/day available. Company builds B2B SaaS.
+
+Task: A realistic 3-week learning plan that:
+1. Prioritises "what will I definitely need in week 1 at a real job"
+2. Skips things I can learn on the job
+3. Fits 2 hrs/day with daily checkable goals
+4. Includes free resources only (no paid courses)
+
+Format: Week-by-week table: Day | Topic | Time | Goal | Resource. Add a "What to skip for now" section at the end.</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Iteration exercise -->
+  <div class="ex-card ex-default">
+    <div class="ex-label">🔄 All Roles — Iteration Practice</div>
+    <h4>Improve Claude's Output in 3 Follow-Ups</h4>
+    <p>Start with this prompt, then iterate using each follow-up instruction below.</p>
+    <div class="prompt-box">
+      <div class="pb-head"><span class="lbl-i">Starting Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+      <pre>Write a short LinkedIn bio for me.
+I'm a software engineer with 4 years in Java and cloud. I recently became a team lead.</pre>
+    </div>
+    <ul class="ex-steps">
+      <li>Run the prompt · read the output</li>
+      <li>Follow-up 1: "More confident. Start with a strong action statement."</li>
+      <li>Follow-up 2: "Trim to exactly 3 sentences."</li>
+      <li>Follow-up 3: "Add one line about what I'm passionate about in tech."</li>
+    </ul>
+    <button class="reveal-btn" onclick="toggleAns(this)">👁 What to Notice</button>
+    <div class="ans-box">
+      <p>Each follow-up refines the output without losing previous improvements. Claude never starts from scratch — it builds on the last version. This is <strong>iterative prompting</strong>. The final result after 3 passes will be dramatically better than the first draft.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>Quick Quiz</h2>
+  <div id="qz" class="quiz-wrap">
+    <h4>Module 1 — Foundations</h4>
+    <div class="quiz-sub">6 questions · Instant feedback</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Wrap-Up</div>
+  <h2>What You Can Now Do</h2>
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">🤖</span>Describe why Claude is an intelligent collaborator, not a search engine</div>
+    <div class="sum-item"><span class="ic">📐</span>Apply RCTF — Role + Context + Task + Format — to any work task</div>
+    <div class="sum-item"><span class="ic">🚫</span>Spot and fix all 5 common prompting mistakes instantly</div>
+    <div class="sum-item"><span class="ic">🔄</span>Iterate on Claude's output to reach production quality in 2–3 exchanges</div>
+    <div class="sum-item"><span class="ic">💻</span>Write role-appropriate prompts for engineering, management, or study tasks</div>
+    <div class="sum-item"><span class="ic">⏱</span>Invest 60 extra seconds writing a better prompt — save 20–40 minutes</div>
+  </div>
+
+  <div class="callout c-purple" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 2</strong>
+      <p>Claude for Everyday Professional Work — emails, meeting summaries, difficult message rewrites, reports, and presentation outlines.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 1 of 9 · Foundations</div>
+  <div class="nav-links"><a href="module2_display.html" class="nav-link nav-next">Module 2 →</a></div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Model Prompt':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+function gradePrompt(){
+  const txt=document.getElementById('graderInput').value.toLowerCase();
+  const words=txt.split(/\s+/).length;
+  const score=(kws)=>Math.min(25,Math.round((kws.filter(k=>txt.includes(k)).length/2)*25+(words>15?5:0)));
+  const r=score(['act as','you are','senior','expert','professional','specialist']),
+        c=score(['context','i am',"i'm",'we are','background','situation','currently','working on','my team']),
+        t=score(['write','explain','create','list','compare','analyze','summarize','debug','review','draft','rewrite']),
+        f=score(['format','bullet','table','paragraph','numbered','words','json','short','concise','sections']);
+  const total=r+c+t+f;
+  const setBar=(id,vid,val)=>{
+    const pct=Math.round(val/25*100),col=pct<30?'var(--red)':pct<60?'var(--amber)':'var(--green)';
+    document.getElementById(id).style.cssText=`width:${pct}%;background:${col}`;
+    const sv=document.getElementById(vid);sv.textContent=val+'/25';sv.style.color=col;
+  };
+  setBar('gRole','gRoleV',r);setBar('gCtx','gCtxV',c);setBar('gTask','gTaskV',t);setBar('gFmt','gFmtV',f);
+  const te=document.getElementById('gTotal');te.textContent=total;
+  te.style.color=total<40?'var(--red)':total<70?'var(--amber)':'var(--green)';
+  const fb=document.getElementById('gFeedback');
+  if(!txt||words<3){fb.textContent='';return;}
+  fb.textContent=total<30?'⚠️ Needs work — add a role (Act as...), more context, and a format.'
+    :total<55?'📈 Getting there — try specifying a format and who Claude should be.'
+    :total<75?'✅ Good prompt! A bit more specific context would make it even stronger.'
+    :'🏆 Excellent prompt! All four RCTF components are well represented.';
+}
+const qData=[
+  {q:"Which best describes Claude's key advantage over a search engine?",opts:["It's faster","It understands intent, maintains conversation context, and adapts to your feedback","It has more information","It's free to use"],answer:1,fb:["❌ Speed isn't the main advantage.","✅ These three capabilities — understanding intent, context memory, and adaptability — are what make Claude genuinely different from a keyword-matching tool.","❌ More information isn't the point; how it uses information is.","❌ Free access isn't the distinguishing capability."]},
+  {q:"Which RCTF component is missing? 'Summarise this article about microservices in bullet points.'",opts:["Task","Format","Context and Role","Nothing — this is complete"],answer:2,fb:["❌ Task (summarise) is present.","❌ Format (bullet points) is present.","✅ There's no Role (who should Claude be?) and no Context (who is this for, what's your goal, what level of depth?). Both are missing.","❌ Two critical components are absent — this will produce a generic summary."]},
+  {q:"Claude gives you a good first response but one section is too formal. What's the best follow-up?",opts:["Start a new conversation and reprompt from scratch","'The [section] is too formal — rewrite it to sound more conversational, keep the content'","Delete that section and just use the rest","Ask Claude why the section is formal"],answer:1,fb:["❌ Never restart — you lose all context and all the good work done so far.","✅ Targeted, specific instruction. You tell Claude exactly what to change and what to keep. This is the correct iteration technique.","❌ You're losing value and doing manual editing when Claude can do it.","❌ Asking 'why' gets an explanation — not the fix. Be direct about what you want changed."]},
+  {q:"What's the 'iterative prompting' technique?",opts:["Writing longer and longer prompts until you get a good answer","Using follow-up instructions to progressively refine Claude's output in the same conversation","Starting a new conversation for every new question","Copying Claude's output into a new prompt"],answer:1,fb:["❌ Longer prompts can help, but iteration is about follow-up, not just length.","✅ Exactly. You build on each response with targeted instructions. Each exchange gets closer to the perfect output. This is how professionals use Claude.","❌ Starting fresh loses your context — always continue in the same conversation.","❌ That's repetition, not iteration."]},
+  {q:"A colleague types 'Java' as their entire prompt. Which mistake is this?",opts:["Mistake 3 — Accepting the first draft","Mistake 1 — The one-word prompt","Mistake 5 — Forgetting the format","Mistake 4 — Vague open-ender"],answer:1,fb:["❌ Mistake 3 is about not iterating after getting a response.","✅ Classic Mistake 1. A single word gives Claude nothing to work with — it'll pick the most common interpretation, which is likely wrong for their actual need.","❌ Mistake 5 is about not specifying output structure.","❌ Mistake 4 is a broad question, not a single word."]},
+  {q:"For a complex, high-stakes prompt (like a client proposal), how many RCTF components should you include?",opts:["Just Role — that's the most important","Role + Task is always enough","All four — Role, Context, Task, and Format","Format is optional for written content"],answer:2,fb:["❌ Role is critical but Context + Task + Format are all needed for high-stakes output.","❌ For complex tasks, missing Context means generic advice; missing Format means you'll need to reformat the output.","✅ For complex, high-stakes outputs, using all four components ensures Claude has everything it needs to produce something close to final quality on the first pass.","❌ Format is especially important for proposals — structure, length, and presentation matter enormously."]}
+];
+let _quizCorrect = 0;
+
+function quizRender(idx) {
+  const bodyEl = document.getElementById('qzBody');
+  qData.forEach((_,i) => {
+    const d = document.getElementById('qd'+i);
+    if (d) d.className = 'q-dot' + (i < idx ? ' done' : i === idx ? ' curr' : '');
+  });
+  if (idx >= qData.length) {
+    bodyEl.innerHTML = `<div class="q-final">
+      <div class="q-big">${_quizCorrect}/${qData.length}</div>
+      <p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect >= 5 ? '🎉 Excellent!' : _quizCorrect >= 3 ? '👍 Good!' : '📚 Review and retry!'}</p>
+      <p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p>
+      <button class="btn btn-accent" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button>
+    </div>`;
+    qData.forEach((_,i) => { const d = document.getElementById('qd'+i); if (d) d.className = 'q-dot done'; });
+    return;
+  }
+  const q = qData[idx];
+  bodyEl.innerHTML = `
+    <div class="q-text">${idx + 1}. ${q.q}</div>
+    <div class="q-opts">${q.opts.map((o, i) => `<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div>
+    <div class="q-fb" id="qfb${idx}"></div>
+    <div class="q-nav">
+      <span class="q-score">Score: ${_quizCorrect}/${idx}</span>
+      <button class="btn btn-accent" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx + 1})">Next →</button>
+    </div>`;
+}
+
+function ansQ(qi, oi) {
+  const qr = qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o => o.onclick = null);
+  const opts = document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi === qr.answer ? 'correct' : 'wrong');
+  if (oi !== qr.answer) opts[qr.answer].classList.add('correct');
+  const fb = document.getElementById('qfb' + qi);
+  fb.className = `q-fb show ${oi === qr.answer ? 'fb-ok' : 'fb-no'}`;
+  fb.textContent = qr.fb[oi];
+  if (oi === qr.answer) _quizCorrect++;
+  document.getElementById('qnxt').style.display = 'inline-flex';
+}
+
+function initQuiz() {
+  const dotsEl = document.getElementById('qzDots');
+  dotsEl.innerHTML = qData.map((_,i) => `<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect = 0;
+  quizRender(0);
+}
+
+document.addEventListener('DOMContentLoaded', initQuiz);
+</script>
+</body>
+</html>

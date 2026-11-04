@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 8 — Claude as Your AI Coworker</title>
+<style>
+:root{
+  --ink:#0f1923;--ink-soft:#3d4f5e;--ink-muted:#7a8fa0;
+  --canvas:#f4f8fa;--surface:#fff;--border:#d6e4ea;
+  --accent:#0891b2;--accent-lt:#e0f7fa;
+  --green:#0fad74;--green-lt:#e6f8f2;
+  --red:#d63b3b;--red-lt:#fdeaea;
+  --amber:#d98b00;--amber-lt:#fff8e6;
+  --teal:#0891b2;--teal-dk:#056a87;--teal-lt:#e0f7fa;
+  --teal2:#0e7490;--teal2-lt:#cffafe;
+  --blue:#1d6fb8;--blue-lt:#dbeafe;
+  --purple:#6c3fd4;--purple-lt:#f0ebfc;
+  --indigo:#3730a3;--indigo-lt:#eef2ff;
+  --radius:10px;--radius-sm:6px;
+  --shadow:0 2px 10px rgba(15,25,35,.07);
+  --shadow-md:0 5px 22px rgba(15,25,35,.12);
+  --font-head:'Georgia','Times New Roman',serif;
+  --font-body:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  --font-mono:'Courier New',Courier,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--canvas);color:var(--ink);font-size:15px;line-height:1.6}
+strong{color:var(--ink)}
+.page-wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+/* HEADER */
+.mod-header{background:linear-gradient(135deg,#021821 0%,#0a3d52 50%,#0891b2 100%);color:#fff;padding:48px 40px 42px;position:relative;overflow:hidden}
+.mod-header::before{content:'';position:absolute;right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.03)}
+.mod-header::after{content:'';position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;background:rgba(8,145,178,.3)}
+.mod-badge{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#a0e8f5;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.mod-header h1{font-family:var(--font-head);font-size:clamp(22px,3.5vw,32px);font-weight:700;line-height:1.2;max-width:600px;margin-bottom:10px}
+.mod-header .tagline{font-size:15px;color:#9de4f0;max-width:540px;line-height:1.5}
+.header-chips{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.header-chips span{font-size:12px;color:#7dd8ea;display:flex;align-items:center;gap:5px}
+.progress-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;overflow:hidden;margin-top:18px}
+.progress-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--teal),var(--accent))}
+
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;gap:4px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sticky-nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:4px 10px;border-radius:14px;transition:background .15s,color .15s;white-space:nowrap;text-decoration:none}
+.sticky-nav a:hover,.sticky-nav a.active{background:var(--teal-lt);color:var(--teal)}
+
+/* SECTION */
+section{margin-top:44px}
+.sec-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+section>h2{font-family:var(--font-head);font-size:21px;font-weight:700;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+section>h3{font-size:16px;font-weight:700;color:var(--ink);margin:24px 0 10px}
+p{margin-bottom:12px;color:var(--ink-soft);font-size:14.5px}
+
+/* OBJECTIVES */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:4px}
+.obj-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.obj-item .ic{flex-shrink:0;font-size:15px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+.col-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.col-head{padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center}
+.col-bad .col-head{background:var(--red);color:#fff}
+.col-good .col-head{background:var(--green);color:#fff}
+.col-body{background:var(--surface);border:1px solid var(--border);border-top:none;padding:14px 16px}
+.col-body li{font-size:13px;color:var(--ink-soft);padding:3px 0;list-style:none}
+.col-bad  .col-body li::before{content:'✗ ';color:var(--red)}
+.col-good .col-body li::before{content:'✓ ';color:var(--green)}
+
+/* PROMPT BOX */
+.prompt-box{background:#021821;border-radius:var(--radius);overflow:hidden;margin:12px 0;box-shadow:var(--shadow-md)}
+.pb-head{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#0a3040;border-bottom:1px solid #0e5a78}
+.pb-head span{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.lbl-i{color:#9de4f0}.lbl-o{color:#62e8a4}.lbl-b{color:#ff8080}
+.prompt-box pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;color:#c8f0f8;white-space:pre-wrap;word-break:break-word;margin:0}
+.copy-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;transition:background .15s;font-family:var(--font-body)}
+.copy-btn:hover{background:rgba(255,255,255,.2)}
+
+/* TABS */
+.tab-wrap{margin:14px 0}
+.tab-btns{display:flex;gap:3px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab-btns::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-family:var(--font-body);white-space:nowrap}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.tab-content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:18px}
+
+/* ACCORDION */
+.acc{margin:8px 0}
+.acc-hd{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .15s}
+.acc-hd:hover{background:var(--teal-lt)}
+.acc-hd.open{border-bottom-left-radius:0;border-bottom-right-radius:0;border-color:var(--teal);color:var(--teal)}
+.acc-arr{font-size:11px;transition:transform .22s;flex-shrink:0}
+.acc-hd.open .acc-arr{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);line-height:1.65}
+.acc-body p{margin-bottom:8px}
+.acc-body p:last-child{margin-bottom:0}
+
+/* CALLOUT */
+.callout{border-radius:var(--radius);padding:12px 16px;margin:12px 0;display:flex;gap:10px;align-items:flex-start;border:1px solid transparent}
+.callout .ic{font-size:18px;flex-shrink:0;line-height:1.4}
+.callout .bd strong{display:block;font-size:13px;margin-bottom:2px}
+.callout .bd p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.c-tip{background:var(--green-lt);border-color:#9fe8cc}.c-tip .bd strong{color:var(--green)}
+.c-teal{background:var(--teal-lt);border-color:#67d5eb}.c-teal .bd strong{color:var(--teal)}
+.c-info{background:var(--accent-lt);border-color:#a8d8e8}.c-info .bd strong{color:var(--accent)}
+.c-amber{background:var(--amber-lt);border-color:#f5c878}.c-amber .bd strong{color:var(--amber)}
+.c-purple{background:var(--purple-lt);border-color:#c4b2f5}.c-purple .bd strong{color:var(--purple)}
+
+/* FRAMEWORK CARD */
+.fw-card{background:var(--surface);border:2px solid #7dd8ea;border-radius:var(--radius);overflow:hidden;margin:14px 0}
+.fw-head{background:linear-gradient(90deg,#0a3d52,var(--teal));padding:10px 16px;display:flex;align-items:center;gap:8px}
+.fw-head span{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.fw-step{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border)}
+.fw-step:last-child{border-bottom:none}
+.fw-num{min-width:24px;height:24px;background:var(--teal);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:2px}
+.fw-content h5{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.fw-content p{font-size:12.5px;margin:0;color:var(--ink-muted)}
+
+/* TASK CARD */
+.task-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.task-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--teal)}
+.task-card .task-num{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.task-card h5{font-size:14px;font-weight:700;margin-bottom:6px}
+.task-card p{font-size:12.5px;color:var(--ink-muted);margin:0}
+.task-card .time-save{margin-top:8px;font-size:11px;font-weight:700;background:var(--teal-lt);color:var(--teal);padding:2px 8px;border-radius:10px;display:inline-block}
+
+/* WORKFLOW TIMELINE */
+.workflow{margin:14px 0}
+.wf-item{display:flex;gap:14px;margin-bottom:6px;align-items:flex-start}
+.wf-dot-col{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.wf-dot{width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.wf-line{width:2px;flex:1;min-height:16px;background:var(--border);margin-top:3px}
+.wf-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;flex:1;font-size:13.5px;color:var(--ink-soft)}
+.wf-body strong{display:block;color:var(--ink);font-size:14px;margin-bottom:2px}
+
+/* EXERCISE */
+.ex-card{border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;border:1px solid var(--border)}
+.ex-morning{background:linear-gradient(135deg,var(--teal-lt),#d0f0f8);border-color:#7dd8ea}
+.ex-accel{background:linear-gradient(135deg,var(--accent-lt),#cff0f8);border-color:#67d5eb}
+.ex-iter{background:linear-gradient(135deg,var(--blue-lt),#dbeafe);border-color:#93c5fd}
+.ex-cowork{background:linear-gradient(135deg,var(--green-lt),#d1fae5);border-color:#9fe8cc}
+.ex-team{background:linear-gradient(135deg,#f0ebfc,#ede8ff);border-color:#c4b2f5}
+.ex-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:var(--teal)}
+.ex-accel .ex-label{color:var(--accent)}
+.ex-iter .ex-label{color:var(--blue)}
+.ex-cowork .ex-label{color:var(--green)}
+.ex-team .ex-label{color:var(--purple)}
+.ex-card h4{font-size:15px;font-weight:700;margin-bottom:8px}
+.ex-card p{font-size:13.5px;margin-bottom:8px}
+.ex-steps{list-style:none}
+.ex-steps li{padding:5px 0;font-size:13px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.08);display:flex;gap:6px}
+.ex-steps li:last-child{border-bottom:none}
+.ex-steps li::before{content:'→';font-weight:700;flex-shrink:0;color:var(--teal)}
+.ex-accel .ex-steps li::before{color:var(--accent)}
+.ex-iter .ex-steps li::before{color:var(--blue)}
+.ex-cowork .ex-steps li::before{color:var(--green)}
+.ex-team .ex-steps li::before{color:var(--purple)}
+
+/* REVEAL */
+.reveal-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);margin-top:10px;background:var(--teal);color:#fff;transition:background .15s}
+.reveal-btn:hover{background:var(--teal-dk)}
+.ans-box{display:none;margin-top:12px;background:var(--surface);border:1px solid #7dd8ea;border-radius:var(--radius-sm);padding:14px 16px;font-size:13px;color:var(--ink-soft)}
+.ans-box p{margin-bottom:6px}
+.ans-box p:last-child{margin-bottom:0}
+
+/* MICRO WIN */
+.micro-win{background:linear-gradient(135deg,var(--teal-lt),#cff8fc);border:2px solid #7dd8ea;border-radius:var(--radius);padding:14px 18px;margin:22px 0}
+.micro-win h4{color:var(--teal);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.micro-win ul{list-style:none}
+.micro-win ul li{padding:3px 0;font-size:13px;color:var(--ink-soft)}
+.micro-win ul li::before{content:'⚡ ';color:var(--teal)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.tbl th{background:var(--ink);color:#fff;padding:9px 14px;text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--ink-soft)}
+.tbl tr:nth-child(even) td{background:#f0f9fb}
+.tbl tr:hover td{background:var(--teal-lt)}
+
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px;margin:14px 0}
+.quiz-wrap h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.quiz-sub{font-size:12px;color:var(--ink-muted);margin-bottom:14px}
+.quiz-dots{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:22px;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.q-dot.done{background:var(--teal)}
+.q-dot.curr{background:var(--accent)}
+.q-text{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px}
+.q-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:480px){.q-opts{grid-template-columns:1fr}}
+.q-opt{padding:9px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .18s;background:var(--surface);color:var(--ink-soft)}
+.q-opt:hover{border-color:var(--teal);background:var(--teal-lt)}
+.q-opt.correct{border-color:var(--green)!important;background:var(--green-lt)!important;color:#0a4a30}
+.q-opt.wrong{border-color:var(--red)!important;background:var(--red-lt)!important;color:#7a1a1a}
+.q-fb{padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;display:none;margin-bottom:10px}
+.q-fb.show{display:block}
+.fb-ok{background:var(--green-lt);color:#0a4a30;border:1px solid #9fe8cc}
+.fb-no{background:var(--red-lt);color:#7a1a1a;border:1px solid #f0aaaa}
+.q-nav{display:flex;justify-content:space-between;align-items:center}
+.q-score{font-size:12px;color:var(--ink-muted)}
+.q-final{text-align:center;padding:14px}
+.q-big{font-size:44px;font-weight:700;color:var(--teal)}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.sum-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;box-shadow:var(--shadow)}
+.sum-item .ic{font-size:18px;flex-shrink:0}
+
+/* FOOTER */
+.mod-footer{margin-top:56px;padding:22px 28px;background:var(--ink);color:#7a8fa0;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.mod-footer .ci{font-size:12px}
+.mod-footer .ci strong{color:#fff;display:block;margin-bottom:2px}
+.nav-links{display:flex;gap:8px}
+.nav-link{padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s}
+.nav-prev{background:rgba(255,255,255,.1);color:#a0b8c8}.nav-prev:hover{background:rgba(255,255,255,.18);color:#fff}
+.nav-next{background:var(--teal);color:#fff}.nav-next:hover{background:var(--teal-dk)}
+
+.divider{border:none;border-top:1px dashed var(--border);margin:34px 0}
+code{font-family:var(--font-mono);background:#e0f7fa;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--teal2)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-body);transition:all .15s}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:var(--teal-dk)}
+
+/* INDUSTRY CARDS */
+.industry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:14px 0}
+.industry-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.industry-card .ind-icon{font-size:22px;margin-bottom:6px}
+.industry-card h5{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.industry-card ul{list-style:none}
+.industry-card ul li{font-size:12px;color:var(--ink-muted);padding:2px 0}
+.industry-card ul li::before{content:'› ';color:var(--teal);font-weight:700}
+
+/* COWORK FEATURE */
+.cowork-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0}
+.cowork-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);border-top:3px solid var(--teal)}
+.cowork-card .cw-icon{font-size:20px;margin-bottom:8px}
+.cowork-card h5{font-size:14px;font-weight:700;margin-bottom:6px}
+.cowork-card p{font-size:12.5px;color:var(--ink-muted);margin:0}
+</style>
+</head>
+<body><a href="../index.html#claude" style="position:fixed;top:0;left:0;z-index:99999;font-family:Oswald,system-ui,sans-serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;background:#04140f;color:#F4CB52;border:1px solid #16503c;border-top:none;border-left:none;border-radius:0 0 10px 0;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.4)">&larr; The FAT Hive</a>
+
+<header class="mod-header">
+  <div style="max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:2">
+    <div class="mod-badge">Day 3 · Module 8 of 9</div>
+    <h1>Claude as Your AI Coworker — Daily Workflows, Cowork & Team Productivity</h1>
+    <p class="tagline">Stop using AI occasionally. Start working with it every single day.</p>
+    <div class="header-chips">
+      <span>⏱ 90 min</span>
+      <span>🧠 10 Topics</span>
+      <span>🏋️ 6 Exercises</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+  </div>
+</header>
+
+<nav class="sticky-nav">
+  <a href="#objectives">Objectives</a>
+  <a href="#morning">Morning Briefing</a>
+  <a href="#acceleration">5 Tasks</a>
+  <a href="#iteration">Iteration</a>
+  <a href="#habits">Habits</a>
+  <a href="#cowork">Cowork</a>
+  <a href="#team">Team Use</a>
+  <a href="#industries">Industries</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-wrap">
+
+<!-- OBJECTIVES -->
+<section id="objectives">
+  <div class="sec-label">By End of This Module</div>
+  <h2>What You'll Be Able to Do</h2>
+  <div class="obj-grid">
+    <div class="obj-item"><span class="ic">🌅</span><span>Run a structured morning briefing with Claude to start every workday with clarity and direction.</span></div>
+    <div class="obj-item"><span class="ic">⚡</span><span>Identify and execute the 5 daily tasks where Claude saves you the most time as a professional.</span></div>
+    <div class="obj-item"><span class="ic">🔄</span><span>Review, critique, and iterate AI-generated outputs to professional standard — not just first drafts.</span></div>
+    <div class="obj-item"><span class="ic">🛤️</span><span>Build repeatable AI workflow habits that compound over weeks and months.</span></div>
+    <div class="obj-item"><span class="ic">🖥️</span><span>Set up and use Cowork to automate desktop file management and document workflows without code.</span></div>
+    <div class="obj-item"><span class="ic">👥</span><span>Define team workflow patterns so leads and managers can extend Claude's impact across their teams.</span></div>
+  </div>
+
+  <div class="callout c-teal" style="margin-top:18px">
+    <div class="ic">🎯</div>
+    <div class="bd">
+      <strong>Focus for this Module</strong>
+      <p>Claude as AI Coworker · Cowork — building repeatable AI workflows for sustained personal and team productivity.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- MORNING PLANNING -->
+<section id="morning">
+  <div class="sec-label">Topic 1 of 10</div>
+  <h2>🌅 Morning Planning with AI</h2>
+
+  <p>Most professionals start their day reactively — inbox, notifications, whatever fires first. A structured morning briefing with Claude takes under five minutes and sets the frame for everything that follows.</p>
+
+  <div class="callout c-info">
+    <div class="ic">💡</div>
+    <div class="bd">
+      <strong>The Daily Briefing Mindset</strong>
+      <p>Treat Claude like a chief of staff who has read your context overnight. You feed it your priorities; it helps you structure, sequence, and prepare for the day ahead.</p>
+    </div>
+  </div>
+
+  <h3>The Three-Part Morning Briefing</h3>
+  <div class="workflow">
+    <div class="wf-item">
+      <div class="wf-dot-col"><div class="wf-dot">1</div><div class="wf-line"></div></div>
+      <div class="wf-body"><strong>Daily Briefing — What matters today?</strong>Dump your tasks, meetings, blockers into Claude and get a structured priority view. High-stakes items surface first. Context you need for each meeting is ready.</div>
+    </div>
+    <div class="wf-item">
+      <div class="wf-dot-col"><div class="wf-dot">2</div><div class="wf-line"></div></div>
+      <div class="wf-body"><strong>Priority Setting — Where does focus go?</strong>Use Claude to apply the Eisenhower matrix or your own criteria to your task list. Decide what you won't do today — that's as important as what you will.</div>
+    </div>
+    <div class="wf-item">
+      <div class="wf-dot-col"><div class="wf-dot">3</div><div class="wf-line"></div></div>
+      <div class="wf-body"><strong>Agenda Drafting — How will the day run?</strong>Turn priorities into a time-blocked agenda. Claude surfaces prep items for each meeting, buffers for deep work, and flags any scheduling conflicts.</div>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="morning-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('morning-tabs',0)">🌅 Daily Briefing</button>
+      <button class="tab-btn" onclick="switchTab('morning-tabs',1)">🎯 Priority Setting</button>
+      <button class="tab-btn" onclick="switchTab('morning-tabs',2)">📅 Agenda Draft</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Daily Briefing Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Today is [Day, Date]. Here's what I'm working with:
+
+MEETINGS: [List meetings + times]
+TASKS PENDING: [List open tasks]
+BLOCKERS: [Anything waiting on others]
+DEADLINES THIS WEEK: [Any hard dates]
+
+Act as my chief of staff. Give me:
+1. The 3 things that matter most today and why
+2. What I should prep before each meeting (2 bullets per meeting)
+3. One thing I can defer without consequence
+4. Any conflict or risk I should address first thing</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Priority Setting Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Here is my full task list for today:
+[Paste or describe your tasks]
+
+My role: [Your role]
+My current top goal: [What matters most this week]
+Time available for deep work: [hours]
+
+Apply the Eisenhower Matrix: Urgent+Important / Important-not-Urgent / 
+Urgent-not-Important / Neither.
+
+Then give me:
+- My "Do First" list (max 3 items)
+- What to schedule for later this week
+- What to delegate or drop entirely
+- The one task I'm probably avoiding but shouldn't be</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Agenda Drafting Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>My top priorities today: [from briefing above]
+My calendar: [paste rough schedule / meetings]
+I work best for deep tasks: [morning / afternoon]
+Commute or fixed constraints: [any]
+
+Build me a time-blocked day plan:
+- Deep work blocks for my priority tasks
+- 10-min prep slots before each meeting
+- A protected lunch / break
+- A 15-min end-of-day review slot
+
+Flag any overload or unrealistic expectations clearly.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-morning">
+    <div class="ex-label">🌅 Exercise 1 — Run Your Morning Briefing</div>
+    <h4>Build Your Real Day Plan with Claude</h4>
+    <ul class="ex-steps">
+      <li>Open a fresh Claude conversation and paste the Daily Briefing prompt with your actual tasks and meetings</li>
+      <li>Then run the Priority Setting prompt on the output to tighten your focus list</li>
+      <li>Finally, use the Agenda Draft prompt to generate a time-blocked plan</li>
+      <li>Compare it to how your day actually ran — what did Claude surface that you hadn't thought of?</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Start every workday with a structured briefing instead of reacting to the inbox</li>
+      <li>Have your priorities, prep items and agenda ready within 5 minutes of sitting down</li>
+      <li>Make a conscious decision each morning about what you won't do today</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ACCELERATION PATTERNS -->
+<section id="acceleration">
+  <div class="sec-label">Topic 2 of 10</div>
+  <h2>⚡ Daily Work Acceleration Patterns</h2>
+
+  <p>Not all tasks benefit equally from AI help. These are the five categories where professionals consistently report the biggest time savings when working with Claude daily.</p>
+
+  <div class="task-grid">
+    <div class="task-card">
+      <div class="task-num">Task 1 of 5</div>
+      <h5>✍️ First-Draft Writing</h5>
+      <p>Emails, reports, proposals, updates, documentation. Claude produces a credible first draft from your bullet points in under 30 seconds.</p>
+      <span class="time-save">⏱ Saves 20–40 min/day</span>
+    </div>
+    <div class="task-card">
+      <div class="task-num">Task 2 of 5</div>
+      <h5>📖 Reading & Summarising</h5>
+      <p>Long documents, threads, reports, research papers. Paste the content and get the key points, decisions needed, and action items extracted.</p>
+      <span class="time-save">⏱ Saves 15–30 min/day</span>
+    </div>
+    <div class="task-card">
+      <div class="task-num">Task 3 of 5</div>
+      <h5>📊 Structuring Ideas</h5>
+      <p>Turn scattered thinking into structured proposals, frameworks, agendas, or project plans. Brain dump to Claude — get a clear structure back.</p>
+      <span class="time-save">⏱ Saves 15–25 min/day</span>
+    </div>
+    <div class="task-card">
+      <div class="task-num">Task 4 of 5</div>
+      <h5>🔎 Research & Comparison</h5>
+      <p>Vendor evaluation, competitive analysis, option comparisons, policy lookups. Claude synthesises and compares across multiple inputs fast.</p>
+      <span class="time-save">⏱ Saves 30–60 min/task</span>
+    </div>
+    <div class="task-card">
+      <div class="task-num">Task 5 of 5</div>
+      <h5>🔁 Repurposing Content</h5>
+      <p>Turn a report into a slide deck outline, a meeting into an email, a blog post into a LinkedIn post. One source → many formats.</p>
+      <span class="time-save">⏱ Saves 10–20 min/task</span>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="accel-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('accel-tabs',0)">✍️ First Draft</button>
+      <button class="tab-btn" onclick="switchTab('accel-tabs',1)">📖 Summarising</button>
+      <button class="tab-btn" onclick="switchTab('accel-tabs',2)">🔁 Repurpose</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">First Draft — From Bullet Points</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Write a [type: email / report / proposal / update] for:
+Recipient / audience: [Who is reading this]
+My key points (rough notes):
+- [point 1]
+- [point 2]
+- [point 3]
+
+Tone: [professional / direct / warm / formal]
+Length: [short / 1 page / as needed]
+Important context: [anything they must know]
+
+Write the full draft. I'll refine from there.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Document Summary — Action-Oriented</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>[Paste the document / thread / report here]
+
+My role: [Your context]
+I need to know: 
+1. The 3–5 key points or decisions
+2. What action is required from me (if any)
+3. Any risks, disagreements, or open questions
+4. What I can safely ignore
+
+Keep it under 200 words. Be direct — I'm time-poor.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Content Repurposing</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>SOURCE CONTENT:
+[Paste your original: report / meeting notes / blog post / talk]
+
+Convert this into:
+TARGET FORMAT: [LinkedIn post / slide deck outline / executive summary / email]
+Audience: [Who will read the output]
+Tone shift needed: [e.g., "make it conversational" or "make it formal"]
+Length: [target word/slide count]
+
+Keep the original meaning intact.
+Don't invent new points — repurpose, don't embellish.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-accel">
+    <div class="ex-label">⚡ Exercise 2 — Your Personal Time Audit</div>
+    <h4>Find Your Highest-Leverage AI Tasks</h4>
+    <ul class="ex-steps">
+      <li>Think about yesterday. List 5–8 tasks that took 15+ minutes each</li>
+      <li>For each, ask: could Claude have produced a strong first draft or summary?</li>
+      <li>Pick the top 2 that would have saved the most time and try those prompts now</li>
+      <li>Note your actual time saved — track it for one week to see the compound effect</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Identify where Claude saves you the most time in your specific role</li>
+      <li>Go from scattered notes to a polished first draft in under a minute</li>
+      <li>Extract the key points from any long document without reading it fully</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- REVIEWING & ITERATING -->
+<section id="iteration">
+  <div class="sec-label">Topic 3 of 10</div>
+  <h2>🔄 Reviewing, Iterating & Improving AI Outputs</h2>
+
+  <p>The first Claude output is rarely your best version. The professionals who get the most from AI aren't the ones who accept first drafts — they're the ones who iterate systematically.</p>
+
+  <div class="two-col">
+    <div class="col-box col-bad">
+      <div class="col-head">❌ Passive Use</div>
+      <div class="col-body">
+        <ul>
+          <li>Accept the first output without review</li>
+          <li>Lightly edit surface-level wording</li>
+          <li>Never tell Claude what was wrong</li>
+          <li>Switch topics without building on the draft</li>
+          <li>Treat Claude as a vending machine</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-box col-good">
+      <div class="col-head">✓ Active Iteration</div>
+      <div class="col-body">
+        <ul>
+          <li>Critique the output before accepting it</li>
+          <li>Tell Claude exactly what missed the mark</li>
+          <li>Ask it to improve a specific part</li>
+          <li>Push for a tighter, stronger version</li>
+          <li>Treat Claude as a collaborator</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>The Three-Step Iteration Framework</h3>
+  <div class="fw-card">
+    <div class="fw-head"><span>🔄 Review → Critique → Improve</span></div>
+    <div class="fw-step">
+      <div class="fw-num">1</div>
+      <div class="fw-content">
+        <h5>Review with Intent</h5>
+        <p>Read the output asking: Does this do the job it was meant to do? Is the tone right? Is anything missing, wrong, or weak? Identify specifically what you want to change — don't just feel it's not right.</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">2</div>
+      <div class="fw-content">
+        <h5>Give Precise Critique</h5>
+        <p>Tell Claude exactly what didn't work. "The opening is too formal for this audience." "The second paragraph buries the key point." "This misses the fact that we have a tight budget." Vague feedback gets vague revisions.</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">3</div>
+      <div class="fw-content">
+        <h5>Request Targeted Improvement</h5>
+        <p>Ask Claude to revise only what needs changing — not rewrite everything. "Rewrite just the opening paragraph to be warmer and more direct. Keep everything else." This preserves what worked while fixing what didn't.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-wrap" id="iter-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('iter-tabs',0)">🔍 Self-Critique</button>
+      <button class="tab-btn" onclick="switchTab('iter-tabs',1)">✂️ Targeted Edit</button>
+      <button class="tab-btn" onclick="switchTab('iter-tabs',2)">🎚️ Tone Shift</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Ask Claude to Critique Its Own Output</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Review the email / document you just wrote.
+
+Act as a senior editor. Identify:
+1. The weakest sentence or paragraph — why?
+2. Any point that's vague when it should be specific
+3. Any word or phrase that sounds generic rather than my voice
+4. Anything a reader might misunderstand or push back on
+
+Then rewrite the output fixing those specific issues.
+Don't change what was working — only what you flagged.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Targeted Section Edit</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>The draft you produced is mostly good but I want to change:
+
+ISSUE: [Describe specifically what's wrong with a section]
+SECTION TO FIX: [Quote or describe the part]
+WHAT I WANT INSTEAD: [Describe the goal for that section]
+
+Rewrite ONLY that section. Keep all other paragraphs identical.
+Show me: OLD VERSION → NEW VERSION side by side.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Tone Adjustment Prompt</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Rewrite the following [email / message / paragraph]:
+[Paste the content]
+
+Current tone: [e.g., too formal / too casual / too defensive]
+Target tone: [e.g., warm but authoritative / direct but respectful]
+
+Audience: [Who is reading this]
+My goal with this communication: [What I want them to do or feel]
+
+Keep the same facts and structure. Only shift the tone and voice.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ex-card ex-iter">
+    <div class="ex-label">🔄 Exercise 3 — The Three-Pass Iteration</div>
+    <h4>Take a Draft from Good to Excellent</h4>
+    <ul class="ex-steps">
+      <li>Generate a first-draft email or document using a prompt from Topic 2</li>
+      <li>Before editing it yourself, run the Self-Critique prompt — what does Claude flag?</li>
+      <li>Now apply the Targeted Edit prompt for the weakest section it identified</li>
+      <li>Compare your Pass 1 vs Pass 3 output — how much stronger is the final version?</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Systematically improve Claude outputs instead of accepting or abandoning first drafts</li>
+      <li>Use Claude to critique its own work — faster than doing it yourself</li>
+      <li>Get to a polished professional output in 2–3 targeted passes</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- REPEATABLE HABITS -->
+<section id="habits">
+  <div class="sec-label">Topics 4 of 10</div>
+  <h2>🛤️ Building Repeatable AI Workflow Habits</h2>
+
+  <p>The gap between professionals who get marginal value from AI and those who transform their output isn't intelligence — it's habit. Repeatable workflows convert one-off experiments into compounding productivity gains.</p>
+
+  <div class="callout c-amber">
+    <div class="ic">⚠️</div>
+    <div class="bd">
+      <strong>The Experimentation Trap</strong>
+      <p>Most people try Claude once for a task, get a mediocre result, and stop. The fix isn't a better tool — it's a better habit. Prompts improve with repetition. Context builds with practice.</p>
+    </div>
+  </div>
+
+  <h3>Four Habit Patterns for Sustained Productivity</h3>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📋 The Prompt Library Habit <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Every time you write a prompt that works well, save it. Build a personal prompt library — a document or notion page with your best prompts organised by task type (emails, summaries, analysis, code, planning).</p>
+      <p>Within two weeks of doing this, you'll stop typing prompts from scratch. You'll open your library, paste, fill in the blanks, and go. Time per task drops by 60–70%.</p>
+      <p><strong>Start today:</strong> Create a document called "My Claude Prompt Library" with sections for your most frequent work tasks. Paste your best prompt from this module as the first entry.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">🔁 The Trigger-Routine-Reward Loop <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p><strong>Trigger:</strong> Pick a consistent moment — first task of the day, every time you open a new doc, every long email you need to write. The trigger is the on-ramp to AI use.</p>
+      <p><strong>Routine:</strong> The standard action you always take at that trigger. For example: "Every time I need to write anything longer than 5 sentences, I open Claude first."</p>
+      <p><strong>Reward:</strong> You finish in a quarter of the time with a better result. The reward is the time and mental energy saved. That positive reinforcement builds the habit automatically.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📂 The Context-Persistence Habit <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>Claude's most powerful mode isn't single prompts — it's long conversations where context builds. Build the habit of keeping one Claude conversation open per project for the full week. Don't start fresh every time.</p>
+      <p>At the start of each project thread: paste your role, your goals, the key constraints, and the audience. That context persists across all subsequent prompts in the conversation. You stop re-explaining yourself.</p>
+      <p>Combine this with <strong>Claude Projects</strong> (if available in your plan) to make the context permanent across sessions.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-hd" onclick="toggleAcc(this)">📊 The Weekly AI Audit Habit <span class="acc-arr">▼</span></div>
+    <div class="acc-body">
+      <p>At the end of each week, spend 10 minutes asking: Which task this week took longer than it should have? Could Claude have helped? What prompts worked well that I should save?</p>
+      <p>This keeps your workflow improving. After four weekly audits, you will have identified your personal top-10 use cases and have a polished prompt for each one.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Build a personal prompt library so you stop starting from scratch</li>
+      <li>Identify your personal AI triggers — the moments where Claude should always come first</li>
+      <li>Maintain persistent context so Claude becomes more useful over time, not less</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- COWORK SECTION -->
+<section id="cowork">
+  <div class="sec-label">Topics 5–8 of 10</div>
+  <h2>🖥️ Cowork — Extending Claude to Your Desktop</h2>
+
+  <div class="callout c-teal">
+    <div class="ic">🤝</div>
+    <div class="bd">
+      <strong>What is Cowork?</strong>
+      <p>Cowork is a desktop tool that extends Claude's capabilities to your local machine — letting you automate file management, task tracking, and document workflows without writing a single line of code.</p>
+    </div>
+  </div>
+
+  <h3>What Cowork Does</h3>
+  <div class="cowork-grid">
+    <div class="cowork-card">
+      <div class="cw-icon">📁</div>
+      <h5>File Management</h5>
+      <p>Automatically organise, rename, sort, and move files based on rules you describe in plain English. No shell scripts. No manual dragging.</p>
+    </div>
+    <div class="cowork-card">
+      <div class="cw-icon">✅</div>
+      <h5>Task Tracking</h5>
+      <p>Connect to your task lists and let Claude surface what's due, overdue, or blocked — updated across your desktop and projects automatically.</p>
+    </div>
+    <div class="cowork-card">
+      <div class="cw-icon">📄</div>
+      <h5>Document Workflows</h5>
+      <p>Automate repetitive document creation: generate weekly reports, fill templates from data, convert between formats — all triggered with a prompt.</p>
+    </div>
+    <div class="cowork-card">
+      <div class="cw-icon">🔗</div>
+      <h5>Desktop Integration</h5>
+      <p>Works alongside your existing apps — no migration needed. Claude operates on your actual files, folders, and local workflows.</p>
+    </div>
+  </div>
+
+  <h3>Cowork for Non-Developers</h3>
+  <p>Cowork was designed explicitly so that people without coding experience can automate repetitive desktop tasks. If you can describe a task in plain English, Cowork can help you build a workflow for it.</p>
+
+  <div class="fw-card">
+    <div class="fw-head"><span>🚀 Getting Started with Cowork</span></div>
+    <div class="fw-step">
+      <div class="fw-num">1</div>
+      <div class="fw-content">
+        <h5>Install Cowork</h5>
+        <p>Download and install from claude.ai. Sign in with your Anthropic account — Cowork is connected to your existing Claude subscription.</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">2</div>
+      <div class="fw-content">
+        <h5>Describe Your First Task in Plain English</h5>
+        <p>Start with a simple, repetitive task you do manually. "Every Monday morning, move all PDFs from my Downloads folder into a folder named by week." That's a Cowork workflow.</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">3</div>
+      <div class="fw-content">
+        <h5>Review, Test, and Activate</h5>
+        <p>Cowork shows you exactly what it will do before running. Confirm, test on one item, then activate. The workflow runs automatically from that point forward.</p>
+      </div>
+    </div>
+    <div class="fw-step">
+      <div class="fw-num">4</div>
+      <div class="fw-content">
+        <h5>Combine with Claude Projects + MCP</h5>
+        <p>The full power comes when Cowork workflows connect to Claude Projects for persistent context and MCP tools for external integrations — a complete personal AI workspace.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Building Your Full AI-Powered Personal Workspace</h3>
+
+  <div class="callout c-tip">
+    <div class="ic">🏗️</div>
+    <div class="bd">
+      <strong>The Three-Layer Workspace</strong>
+      <p><strong>Layer 1 — Claude Projects:</strong> Your persistent context. Role, goals, style preferences, company info — Claude always has this. <strong>Layer 2 — MCP Tools:</strong> Connected services (calendar, email, drive, task management). <strong>Layer 3 — Cowork:</strong> Desktop automation for local files and document workflows. Together, these three layers give you an AI coworker that knows you, connects to your tools, and handles your repetitive work.</p>
+    </div>
+  </div>
+
+  <table class="tbl">
+    <thead>
+      <tr><th>Repetitive Task</th><th>Without Cowork</th><th>With Cowork</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Weekly report generation</td><td>30–45 min manually</td><td>2 min to review auto-draft</td></tr>
+      <tr><td>Organising downloaded files</td><td>10–15 min/week</td><td>Fully automated, zero time</td></tr>
+      <tr><td>Converting docs to PDF</td><td>3–5 clicks per file</td><td>Batch convert in one prompt</td></tr>
+      <tr><td>Renaming files consistently</td><td>Manual, error-prone</td><td>Rule-based automation</td></tr>
+      <tr><td>Filling recurring templates</td><td>Copy-paste, 15+ min</td><td>Auto-filled from data sources</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ex-card ex-cowork">
+    <div class="ex-label">🖥️ Exercise 4 — Design Your First Cowork Workflow</div>
+    <h4>Identify and Automate One Repetitive Desktop Task</h4>
+    <ul class="ex-steps">
+      <li>List 3 repetitive tasks you do on your desktop at least weekly (file sorting, renaming, report creation, template filling)</li>
+      <li>Pick the one that takes the most cumulative time per week</li>
+      <li>Write it out in plain English: "Every [when], I [action] files from [source] to [destination] because [reason]"</li>
+      <li>If Cowork is installed: build the workflow now. If not: describe it to Claude and ask it to outline the automation steps</li>
+    </ul>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Understand what Cowork is and how it extends Claude to your local desktop</li>
+      <li>Design automation workflows in plain English — no coding required</li>
+      <li>See how Claude Projects + MCP + Cowork combine into a full personal AI workspace</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TEAM USE CASES -->
+<section id="team">
+  <div class="sec-label">Topics 9–10 of 10</div>
+  <h2>👥 Team Use Cases & Industry Applications</h2>
+
+  <p>Claude's value multiplies when it moves from individual use to team-level workflows. Leads and managers who equip their teams with consistent prompts and shared processes see compounding returns.</p>
+
+  <h3>How Leads and Managers Use Claude + Cowork</h3>
+
+  <div class="tab-wrap" id="team-tabs">
+    <div class="tab-btns">
+      <button class="tab-btn active" onclick="switchTab('team-tabs',0)">📋 Team Comms</button>
+      <button class="tab-btn" onclick="switchTab('team-tabs',1)">📊 Status & Reporting</button>
+      <button class="tab-btn" onclick="switchTab('team-tabs',2)">🎓 Onboarding</button>
+      <button class="tab-btn" onclick="switchTab('team-tabs',3)">🔍 Performance</button>
+    </div>
+    <div class="tab-content">
+      <div class="tab-panel active">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Team Update / All-Hands Draft</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to write a team update / all-hands communication.
+Audience: My team of [size] — [role types]
+Period covered: [week / sprint / month]
+
+Key points to include:
+- Wins: [list]
+- Challenges or blockers: [list]
+- Priority shift (if any): [describe]
+- What I need from the team: [specific ask]
+
+Tone: [transparent / motivating / direct]
+Channel: [Slack / email / meeting opener]
+
+Draft the communication. Keep it under [length].
+End with one clear call to action.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Status Report — From Raw Notes</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>Here are my raw project notes for this week:
+[Paste your notes / updates / Slack threads]
+
+My stakeholders: [Who reads this report]
+Report format required: [RAG / narrative / table]
+
+Generate a status report with:
+- Overall RAG status + one-line reason
+- Progress against key milestones
+- Risks and mitigations
+- Decisions needed from stakeholders (if any)
+
+Keep it under one page. Use direct language — no padding.</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Onboarding Document / Handbook Section</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to create an onboarding document for new [role] joiners.
+Team: [Team name and purpose]
+Key tools they use: [list]
+First-week priorities: [list]
+Common mistakes new joiners make: [list]
+
+Write a friendly, structured onboarding guide:
+- What we do and why it matters (2 paragraphs)
+- Your first 5 days (day-by-day)
+- Who to go to for what (people + tools)
+- Top 3 things that make someone successful here</pre>
+        </div>
+      </div>
+      <div class="tab-panel">
+        <div class="prompt-box">
+          <div class="pb-head"><span class="lbl-i">Performance Feedback Draft</span><button class="copy-btn" onclick="copyPre(this)">Copy</button></div>
+          <pre>I need to write performance feedback for [role / period].
+Strengths I've observed: [list specific examples]
+Areas for development: [list specific examples]
+Overall trajectory: [on track / exceeding / needs support]
+
+Write structured feedback that is:
+- Specific (not generic)
+- Balanced (lead with strengths)
+- Actionable (development points have a clear "what to do")
+- Tone: direct and caring — not harsh, not vague
+
+This will be delivered [in a meeting / in writing].
+Keep it to 300–400 words.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>How Professionals in Different Industries Use Claude Daily</h3>
+  <div class="industry-grid">
+    <div class="industry-card">
+      <div class="ind-icon">💻</div>
+      <h5>Software Engineering</h5>
+      <ul>
+        <li>Code review prep & PR descriptions</li>
+        <li>Technical documentation drafts</li>
+        <li>Sprint retrospective summaries</li>
+        <li>Debugging hypothesis generation</li>
+      </ul>
+    </div>
+    <div class="industry-card">
+      <div class="ind-icon">📈</div>
+      <h5>Product & Strategy</h5>
+      <ul>
+        <li>PRD first drafts from brief notes</li>
+        <li>Competitive analysis summaries</li>
+        <li>Stakeholder update emails</li>
+        <li>Feature prioritisation frameworks</li>
+      </ul>
+    </div>
+    <div class="industry-card">
+      <div class="ind-icon">⚖️</div>
+      <h5>Legal & Compliance</h5>
+      <ul>
+        <li>Contract clause summaries</li>
+        <li>Policy comparison tables</li>
+        <li>First-draft client advisories</li>
+        <li>Research briefing notes</li>
+      </ul>
+    </div>
+    <div class="industry-card">
+      <div class="ind-icon">🏥</div>
+      <h5>Healthcare & Research</h5>
+      <ul>
+        <li>Literature review summaries</li>
+        <li>Patient communication drafts</li>
+        <li>Protocol documentation</li>
+        <li>Grant application sections</li>
+      </ul>
+    </div>
+    <div class="industry-card">
+      <div class="ind-icon">🎓</div>
+      <h5>Education</h5>
+      <ul>
+        <li>Lesson plan outlines</li>
+        <li>Student feedback drafts</li>
+        <li>Parent communication letters</li>
+        <li>Assessment rubric creation</li>
+      </ul>
+    </div>
+    <div class="industry-card">
+      <div class="ind-icon">💰</div>
+      <h5>Finance & Consulting</h5>
+      <ul>
+        <li>Client deck narrative drafts</li>
+        <li>Data commentary for reports</li>
+        <li>Meeting prep summaries</li>
+        <li>Issue and hypothesis trees</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ex-card ex-team">
+    <div class="ex-label">👥 Exercise 5 — Design Your Team Workflow</div>
+    <h4>Identify the Highest-Impact Team Use Case</h4>
+    <ul class="ex-steps">
+      <li>List the 3 most time-consuming recurring tasks your team does as a group (not individually)</li>
+      <li>For each, ask: is this mostly writing, summarising, structuring, or researching?</li>
+      <li>Pick the one with the highest combined time cost and write a shared prompt template for it</li>
+      <li>Share that template with your team — even one shared prompt used consistently by 5 people multiplies the value</li>
+    </ul>
+  </div>
+
+  <div class="callout c-tip">
+    <div class="ic">🔑</div>
+    <div class="bd">
+      <strong>The Manager's Multiplier</strong>
+      <p>When you create a well-crafted prompt template and share it with your team, you don't save one person's time — you save everyone's. Five people each saving 30 minutes a day is 12.5 hours per week of recovered capacity.</p>
+    </div>
+  </div>
+
+  <div class="micro-win">
+    <h4>⚡ You Can Now…</h4>
+    <ul>
+      <li>Draft team communications, status reports, and performance feedback faster and more consistently</li>
+      <li>Identify the highest-leverage team use cases for Claude in your specific context</li>
+      <li>Build shared prompt templates that make AI productivity a team-level capability, not an individual one</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="sec-label">Knowledge Check</div>
+  <h2>🧠 Module 8 Quiz</h2>
+  <div class="quiz-wrap">
+    <h4>Test Your Understanding</h4>
+    <div class="quiz-sub">7 questions · Instant feedback · Retake anytime</div>
+    <div class="quiz-dots" id="qzDots"></div>
+    <div id="qzBody"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SUMMARY -->
+<section id="summary">
+  <div class="sec-label">Module Complete</div>
+  <h2>✅ What You've Learned in Module 8</h2>
+
+  <div class="sum-grid">
+    <div class="sum-item"><span class="ic">🌅</span>Run a structured 3-part morning briefing — daily briefing, priority setting, time-blocked agenda — in under 5 minutes</div>
+    <div class="sum-item"><span class="ic">⚡</span>Identify the 5 daily task categories where Claude saves the most professional time and apply the right prompt for each</div>
+    <div class="sum-item"><span class="ic">🔄</span>Use the Review → Critique → Improve loop to take first drafts to professional standard in 2–3 targeted passes</div>
+    <div class="sum-item"><span class="ic">🛤️</span>Build repeatable AI habits: prompt library, trigger-routine loops, context persistence, and weekly audit</div>
+    <div class="sum-item"><span class="ic">🖥️</span>Understand Cowork, install it, and design your first automated desktop workflow in plain English — no code required</div>
+    <div class="sum-item"><span class="ic">🏗️</span>Combine Claude Projects + MCP + Cowork to build a complete, three-layer personal AI workspace</div>
+    <div class="sum-item"><span class="ic">👥</span>Draft team communications, reports, and onboarding content faster — and design shared prompt templates your whole team can use</div>
+    <div class="sum-item"><span class="ic">🌍</span>See how professionals across six industries embed Claude into their daily practice as a genuine coworker</div>
+  </div>
+
+  <div class="callout c-teal" style="margin-top:20px">
+    <div class="ic">🚀</div>
+    <div class="bd">
+      <strong>Coming Up — Module 9</strong>
+      <p>The final module: Advanced Claude — fine-tuning, API access, building your own Claude-powered tools, and designing your personal AI strategy for the next 12 months.</p>
+    </div>
+  </div>
+</section>
+
+<div class="mod-footer">
+  <div class="ci"><strong>Mastering Claude for Real-World Productivity</strong>Module 8 of 9 · Claude as Your AI Coworker</div>
+  <div class="nav-links">
+    <a href="module7_display.html" class="nav-link nav-prev">← Module 7</a>
+    <a href="module9_display.html" class="nav-link nav-next">Module 9 →</a>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleAcc(hd){
+  const b=hd.nextElementSibling,o=hd.classList.contains('open');
+  document.querySelectorAll('.acc-hd.open').forEach(s=>{s.classList.remove('open');s.nextElementSibling.style.display='none';});
+  if(!o){hd.classList.add('open');b.style.display='block';}
+}
+function switchTab(id,idx){
+  const w=document.getElementById(id);
+  w.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  w.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+function toggleAns(btn){
+  const b=btn.nextElementSibling,o=b.style.display==='block';
+  b.style.display=o?'none':'block';btn.textContent=o?'👁 See Answer':'🙈 Hide';
+}
+function copyPre(btn){
+  const pre=btn.closest('.prompt-box')?.querySelector('pre');
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const o=btn.textContent;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent=o,2000);});
+}
+window.addEventListener('scroll',()=>{
+  let curr='';
+  document.querySelectorAll('section[id]').forEach(s=>{if(window.scrollY>=s.offsetTop-90)curr=s.id;});
+  document.querySelectorAll('.sticky-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+curr));
+});
+
+const qData=[
+  {
+    q:"What is the core purpose of running a structured morning briefing with Claude?",
+    opts:["To replace your calendar app with AI","To start the day proactively with clarity on priorities instead of reacting to the inbox","To generate a to-do list automatically","To summarise your emails overnight"],
+    answer:1,
+    fb:["❌ Cowork and MCP tools handle integrations — the briefing is about your cognitive priorities.","✅ The morning briefing shifts you from reactive (inbox, notifications) to proactive (priorities, prep, decisions). That framing shapes your entire day.","❌ A to-do list is one output — the briefing's value is the structure and prioritisation around it.","❌ Email summarisation is a separate acceleration task — not the core purpose of the morning briefing."]
+  },
+  {
+    q:"Which of the five daily acceleration task categories consistently saves the most cumulative time per day?",
+    opts:["Repurposing content into new formats","Reading & summarising long documents","First-draft writing from bullet points","Scheduling and calendar management"],
+    answer:2,
+    fb:["❌ Repurposing saves 10–20 minutes per task — valuable but not the highest daily volume.","❌ Summarising saves 15–30 min/day and is high value — but writing touches more tasks each day for most professionals.","✅ First-draft writing touches the most tasks daily for most professionals — emails, updates, reports, proposals. At 20–40 minutes saved per day, it compounds fastest.","❌ Calendar management wasn't in the top 5 — Claude's acceleration value is highest in content and research tasks."]
+  },
+  {
+    q:"What does 'Active Iteration' look like when improving Claude outputs professionally?",
+    opts:["Accepting the first draft and lightly editing wording","Telling Claude exactly what missed the mark and requesting a targeted fix for that specific part","Starting a new conversation and asking the same prompt again","Switching to a different AI tool for revision"],
+    answer:1,
+    fb:["❌ Light surface editing is passive use — it doesn't leverage Claude's ability to revise at depth.","✅ Active iteration means critique → specific feedback → targeted fix. You identify exactly what's wrong and ask Claude to fix only that. The result improves with each pass.","❌ A new conversation loses all context and is slower, not faster.","❌ The problem is rarely the tool — it's the quality of the feedback given to it."]
+  },
+  {
+    q:"What is the 'Prompt Library Habit' and why does it matter?",
+    opts:["A Claude feature that saves prompts automatically","A personal document of your best working prompts, saved and reused by task type","A Cowork automation that generates prompts for you","A shared team repository managed by your admin"],
+    answer:1,
+    fb:["❌ Claude doesn't auto-save prompts — this is a habit you build yourself.","✅ A prompt library is a document you maintain. When a prompt works well, you save it. Over two weeks, you stop starting from scratch and your per-task time drops 60–70%.","❌ Cowork automates file and document tasks — not prompt generation.","❌ A prompt library can become a team asset, but it starts as a personal habit."]
+  },
+  {
+    q:"What is Cowork, and what makes it different from using Claude in the browser?",
+    opts:["A browser extension that improves Claude's web search","A desktop tool that lets Claude automate local file, task, and document workflows without code","A team chat integration for Claude","A paid API tier for enterprise Claude users"],
+    answer:1,
+    fb:["❌ Cowork operates at the desktop level — not in the browser.","✅ Cowork extends Claude to your local machine. It can organise files, fill templates, generate reports, and automate repetitive desktop tasks — described in plain English, no code required.","❌ Team integrations exist via MCP tools (Slack, etc.) — Cowork is a desktop automation tool.","❌ Cowork is a product, not a pricing tier."]
+  },
+  {
+    q:"What are the three layers of a full AI-powered personal workspace?",
+    opts:["Claude chat + browser extension + mobile app","Claude Projects (persistent context) + MCP tools (connected services) + Cowork (desktop automation)","Prompt library + custom instructions + API access","Daily briefing + iteration framework + Cowork automation"],
+    answer:1,
+    fb:["❌ These are access channels — not a workspace architecture.","✅ The three layers work together: Claude Projects stores your context permanently. MCP tools connect external services. Cowork handles your local desktop. Together they create an AI that knows you, connects to your tools, and handles repetitive work.","❌ These are productivity techniques — not the technical layers of a workspace.","❌ These are workflow habits — the architecture is about how the tools connect, not how you use them."]
+  },
+  {
+    q:"Why does sharing a single well-crafted prompt template with your team multiply value beyond individual use?",
+    opts:["Because it replaces the need for training","Because every team member using it saves time — the combined savings compound across the whole team","Because Claude performs better when used by teams","Because it creates a single source of truth for all communication"],
+    answer:1,
+    fb:["❌ Prompt templates supplement skills — they don't replace training.","✅ This is the manager's multiplier: five people each saving 30 minutes a day using one shared prompt template = 12.5 hours of recovered team capacity per week. Individual productivity is linear; team templates are multiplicative.","❌ Claude's performance is consistent — what changes is the team's collective use of good prompts.","❌ A source of truth for communication is a useful byproduct — but not the core value of team prompt templates."]
+  }
+];
+
+let _quizCorrect=0;
+function quizRender(idx){
+  const bodyEl=document.getElementById('qzBody');
+  qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot'+(i<idx?' done':i===idx?' curr':'');});
+  if(idx>=qData.length){
+    bodyEl.innerHTML=`<div class="q-final"><div class="q-big">${_quizCorrect}/${qData.length}</div><p style="font-weight:700;margin:8px 0;font-size:16px">${_quizCorrect>=6?'🎉 Excellent!':_quizCorrect>=4?'👍 Good work!':'📚 Review the module and retry!'}</p><p style="font-size:13px;color:var(--ink-soft)">${_quizCorrect} of ${qData.length} correct.</p><button class="btn btn-teal" style="margin-top:14px" onclick="initQuiz()">🔄 Retake</button></div>`;
+    qData.forEach((_,i)=>{const d=document.getElementById('qd'+i);if(d)d.className='q-dot done';});
+    return;
+  }
+  const q=qData[idx];
+  bodyEl.innerHTML=`<div class="q-text">${idx+1}. ${q.q}</div><div class="q-opts">${q.opts.map((o,i)=>`<div class="q-opt" onclick="ansQ(${idx},${i})">${o}</div>`).join('')}</div><div class="q-fb" id="qfb${idx}"></div><div class="q-nav"><span class="q-score">Score: ${_quizCorrect}/${idx}</span><button class="btn btn-teal" id="qnxt" style="display:none;padding:7px 16px" onclick="quizRender(${idx+1})">Next →</button></div>`;
+}
+function ansQ(qi,oi){
+  const qr=qData[qi];
+  document.querySelectorAll('.q-opt').forEach(o=>o.onclick=null);
+  const opts=document.querySelectorAll('.q-opt');
+  opts[oi].classList.add(oi===qr.answer?'correct':'wrong');
+  if(oi!==qr.answer)opts[qr.answer].classList.add('correct');
+  const fb=document.getElementById('qfb'+qi);
+  fb.className=`q-fb show ${oi===qr.answer?'fb-ok':'fb-no'}`;fb.textContent=qr.fb[oi];
+  if(oi===qr.answer)_quizCorrect++;
+  document.getElementById('qnxt').style.display='inline-flex';
+}
+function initQuiz(){
+  const dotsEl=document.getElementById('qzDots');
+  dotsEl.innerHTML=qData.map((_,i)=>`<div class="q-dot" id="qd${i}"></div>`).join('');
+  _quizCorrect=0;quizRender(0);
+}
+document.addEventListener('DOMContentLoaded',initQuiz);
+</script>
+</body>
+</html>
